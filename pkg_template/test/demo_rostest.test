@@ -1,0 +1,9 @@
+<launch>
+    <test
+        test-name="test_demo_rostest"
+        pkg="@@PACKAGE@@"
+        type="test_demo_rostest"
+        time-limit="120.0"
+        launch-prefix="$(optenv CCW_ENV_NODE_LAUNCH_PREFIX)"
+    />
+</launch>

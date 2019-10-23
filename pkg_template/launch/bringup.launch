@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <arg name="crash_action" default="$(optenv CCW_ENV_NODE_CRASH_ACTION respawn)" />
+
+    <node
+        pkg="@@PACKAGE@@"
+        name="@@PACKAGE@@"
+        type="@@PACKAGE@@"
+        output="screen"
+        required="$(eval True if arg('crash_action') == 'killall' else False)"
+        respawn="$(eval True if arg('crash_action') == 'respawn' else False)"
+        launch-prefix="$(optenv CCW_ENV_NODE_LAUNCH_PREFIX)"
+    />
+
+</launch>

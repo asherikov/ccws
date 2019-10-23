@@ -1,0 +1,12 @@
+<launch>
+    <arg name="parameter1" default="parameter1" />
+    <arg name="parameter2" default="parameter2" />
+
+    <test
+        test-name="test_demo_rostest_$(arg parameter1)_$(arg parameter2)"
+        pkg="@@PACKAGE@@"
+        type="test_demo_rostest"
+        time-limit="120.0"
+        launch-prefix="$(optenv CCW_ENV_NODE_LAUNCH_PREFIX)"
+    />
+</launch>
