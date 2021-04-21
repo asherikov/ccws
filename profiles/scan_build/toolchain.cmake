@@ -46,6 +46,11 @@ set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY},-cppcoreguidelines-macro-usage")
 # llvmlibc stuff
 set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY},-llvmlibc-*")
 
+# suppress issues with gtest/gmock macro, alternatively NOLINT can be used for each macro
+set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY},-hicpp-special-member-functions,-cppcoreguidelines-special-member-functions")
+set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY},-cppcoreguidelines-owning-memory")
+set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY},-cert-err58-cpp")
+
 
 set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY}" CACHE STRING "" FORCE)
 
