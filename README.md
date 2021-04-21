@@ -75,6 +75,10 @@ See `wsinstall_*` targets in `Makefile` for more info.
 Usage
 =====
 
+Demo workspace is available in a branch of this repository ->
+https://github.com/asherikov/colcon_workspace/tree/example_staticoma
+
+
 Initial setup
 -------------
 
