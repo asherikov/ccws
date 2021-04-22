@@ -18,11 +18,11 @@ source "./profiles/common/setup.bash"
 # shellcheck disable=SC2001
 EXCEPTIONS=$(echo ${CCW_STATIC_PATH_EXCEPTIONS} | sed "s/ / --exclude /g")
 
-#apt install clang-tools-9
+#apt install clang-tools-10
 CCW_BUILD_WRAPPER="\
-scan-build-9 \
---use-cc=/usr/bin/clang-9 \
---use-c++=/usr/bin/clang++-9 \
+scan-build-10 \
+--use-cc=/usr/bin/clang-10 \
+--use-c++=/usr/bin/clang++-10 \
 -o ${CCW_ARTIFACTS_DIR}/clang_static_analysis \
 --status-bugs \
 --exclude ${CCW_WORKSPACE_DIR}/build \

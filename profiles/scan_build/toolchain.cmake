@@ -2,13 +2,13 @@ set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 
-set(CMAKE_CXX_COMPILER /usr/share/clang/scan-build-9/libexec/c++-analyzer  CACHE STRING "" FORCE)
-set(CMAKE_C_COMPILER /usr/share/clang/scan-build-9/libexec/ccc-analyzer  CACHE STRING "" FORCE)
+set(CMAKE_CXX_COMPILER /usr/share/clang/scan-build-10/libexec/c++-analyzer  CACHE STRING "" FORCE)
+set(CMAKE_C_COMPILER /usr/share/clang/scan-build-10/libexec/ccc-analyzer  CACHE STRING "" FORCE)
 
 set(CCW_BUILD_PROFILE   "scan_build" CACHE STRING "" FORCE)
 
 
-find_program(CCW_CLANG_TIDY_EXECUTABLE NAMES clang-tidy clang-tidy-9 clang-tidy11 clang-tidy-8 REQUIRED)
+find_program(CCW_CLANG_TIDY_EXECUTABLE NAMES clang-tidy clang-tidy-10 clang-tidy-9 clang-tidy-8 REQUIRED)
 
 set(CCW_CLANG_TIDY "${CCW_CLANG_TIDY_EXECUTABLE};-warnings-as-errors=*;-checks=*")
 
@@ -60,3 +60,5 @@ include("${CMAKE_CURRENT_LIST_DIR}/../common/cxx_flags.cmake")
 # This profile uses clang compiler (set in setup.bash) and some of the warnings should be disabled, e.g.
 # -Wgnu-zero-variadic-macro-arguments -> gtest, https://github.com/google/googletest/issues/1419
 set(CCW_CXX_FLAGS "${CCW_CXX_FLAGS} -Werror=extra-tokens -Wno-delete-non-abstract-non-virtual-dtor -Wno-gnu-zero-variadic-macro-arguments" CACHE STRING "" FORCE)
+# fails on gtest
+set(CCW_CXX_FLAGS "${CCW_CXX_FLAGS} -Wno-deprecated-copy" CACHE STRING "" FORCE)

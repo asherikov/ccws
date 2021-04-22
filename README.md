@@ -67,8 +67,13 @@ See `wsinstall_*` targets in `Makefile` for more info.
 ### Optional
 - `doxygen`
 - statick checkers, see `install_static_checkers` target in `make/static_checks.mk`
-- `clang`, `scan_build` and `clang-tidy` for `scan_build` profile.
 - `ccache`
+
+
+### `scan_build` profile
+
+`clang`, `scan_build` and `clang-tidy` for `scan_build` profile:
+- apt install clang-tools-10 clang-tidy-10 clang-10
 
 
 
