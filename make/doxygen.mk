@@ -5,7 +5,8 @@ doxclean:
 
 doxall: doxclean
 	bash -c "${SETUP_SCRIPT} \
-        && colcon list \$${COLCON_LIST_ARGS} | xargs -I {} bash -c '${MAKE} dox PKG={} || exit 255' \
+        && colcon list \$${COLCON_LIST_ARGS} | xargs -I {} bash -c '${MAKE} dox PKG={}' || true \
+		&& colcon graph --dot | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCW_DOXYGEN_OUTPUT_DIR}/graph.svg \
         && cd \$${CCW_DOXYGEN_OUTPUT_DIR} \
         && cat \$${CCW_DOXYGEN_CONFIG_DIR}/index_header.html > \$${CCW_DOXYGEN_OUTPUT_DIR}/index.html \
 		&& find ./ -mindepth 2 -name 'index.html' | sed -e 's|\(.*\)|<li><a href=\"\1\">\1</a></li>|' >> index.html \
