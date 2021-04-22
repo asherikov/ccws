@@ -15,6 +15,7 @@ Features
 - Documentation generation for the whole workspace using `doxygen`, similar to
   https://github.com/mikepurvis/catkin_tools_document, but `doxygen`
   configuration and index html page are exposed and kept in the workspace.
+  Example -> https://asherikov.github.io/colcon_workspace/example_staticoma/index.html
 
 - Various static checks as in https://github.com/sscpac/statick, but with more
   flexibility (see `make/static_checks.mk`), in particular:
