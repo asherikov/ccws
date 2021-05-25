@@ -1,8 +1,8 @@
 include make/config.mk
 
 PROFILE?=reldebug
-EMAIL?=XXX_email_unset_XXX
-AUTHOR?=XXX_author_unset_XXX
+EMAIL?=$(shell git config --get user.email)
+AUTHOR?=$(shell git config --get user.name)
 
 WORKSPACE_DIR=$(shell pwd)
 
@@ -30,7 +30,7 @@ default: build
 ## Workspace targets
 ##
 
-wsinstall_ubuntu18:
+wsinstall_ubuntu:
 	apt install \
 		python3-colcon-ros \
 		python3-colcon-parallel-executor \
@@ -121,6 +121,7 @@ showtestresults: assert_PKG_arg_must_be_specified
 
 
 new: assert_PKG_arg_must_be_specified
+	mkdir -p src/
 	cp -R pkg_template src/${PKG}
 	mkdir -p src/${PKG}/include/${PKG}
 	cd src/${PKG}; git init
