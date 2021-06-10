@@ -37,6 +37,8 @@ wsinstall_ubuntu:
 		python3-colcon-package-selection \
 		python3-colcon-package-information
 	apt install python3-wstool
+	apt install build-essential
+	apt install clang-tools-10 clang-tidy-10
 
 
 # Reset & initialize workspace

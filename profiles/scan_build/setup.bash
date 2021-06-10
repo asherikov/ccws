@@ -7,9 +7,6 @@ set -o pipefail
 
 ##########################################################################################
 
-#CCW_ROS_DISTRO=`ls /opt/ros/`
-CCW_ROS_DISTRO="melodic"
-export CCW_ROS_DISTRO
 CCW_PROFILE="scan_build"
 export CCW_PROFILE
 
