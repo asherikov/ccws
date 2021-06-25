@@ -43,7 +43,7 @@ export CCW_DOXYGEN_WORKING_DIR
 COLCON_HOME="${CCW_WORKSPACE_DIR}/common/"
 export COLCON_HOME
 
-COLCON_BUILD_ARGS="--cmake-args -DCMAKE_TOOLCHAIN_FILE=${CCW_WORKSPACE_DIR}/profiles/${CCW_PROFILE}/toolchain.cmake"
+COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CCW_WORKSPACE_DIR}/profiles/${CCW_PROFILE}/toolchain.cmake"
 export COLCON_BUILD_ARGS
 
 COLCON_TEST_ARGS="--test-result-base log/${CCW_PROFILE}/testing"
@@ -79,9 +79,6 @@ export ROSCONSOLE_FORMAT
 
 #ROSCONSOLE_CONFIG_FILE=
 #export ROSCONSOLE_CONFIG_FILE
-
-CCW_ROS_DISTRO="noetic"
-export CCW_ROS_DISTRO
 
 MAKEFLAGS="-j${JOBS}"
 export MAKEFLAGS
