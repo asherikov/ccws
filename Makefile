@@ -93,6 +93,7 @@ build: assert_PKG_arg_must_be_specified
 		--log-base log/${PROFILE} \
 		--log-level DEBUG \
 		build \
+		--merge-install \
 		--build-base build/${PROFILE} \
 		--install-base install/${PROFILE} \
 		\$${COLCON_BUILD_ARGS} \
