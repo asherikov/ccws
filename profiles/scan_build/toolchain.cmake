@@ -1,11 +1,10 @@
-set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
+include("${CMAKE_CURRENT_LIST_DIR}/../common/cmake_flags.cmake")
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
-set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
+# disable optimization to increase compilation speed
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O0 -DNDEBUG" CACHE STRING "" FORCE)
 
 set(CMAKE_CXX_COMPILER /usr/share/clang/scan-build-10/libexec/c++-analyzer  CACHE STRING "" FORCE)
 set(CMAKE_C_COMPILER /usr/share/clang/scan-build-10/libexec/ccc-analyzer  CACHE STRING "" FORCE)
-
-set(CCW_BUILD_PROFILE   "scan_build" CACHE STRING "" FORCE)
 
 
 find_program(CCW_CLANG_TIDY_EXECUTABLE NAMES clang-tidy clang-tidy-10 clang-tidy-9 clang-tidy-8 REQUIRED)

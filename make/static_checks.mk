@@ -54,13 +54,15 @@ cpplint:
 
 
 flawfinder:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; find \$${CCW_WORKSPACE_DIR}/src -iname '*.cpp' -or -iname "*.h" \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		find \$${CCW_WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' \
 		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}
 
 
 yamllint:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; find \$${CCW_WORKSPACE_DIR}/src -iname '*.yaml' \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		find \$${CCW_WORKSPACE_DIR}/src -iname '*.yaml' \
 		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs --max-procs=${JOBS} -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d "{extends: default, \
@@ -77,7 +79,8 @@ yamllint:
                         empty-lines: {max: 5, max-end: 1}}}" {}
 
 shellcheck:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; find \$${CCW_WORKSPACE_DIR}/scripts \$${CCW_WORKSPACE_DIR}/src \$${CCW_WORKSPACE_DIR}/profiles -iname '*.sh' -or -iname "*.bash" \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		find \$${CCW_WORKSPACE_DIR}/scripts \$${CCW_WORKSPACE_DIR}/src \$${CCW_WORKSPACE_DIR}/profiles -iname '*.sh' -or -iname '*.bash' \
 		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs --max-procs=${JOBS} -I {} \
 		shellcheck -x {}

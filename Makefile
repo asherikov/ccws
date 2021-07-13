@@ -23,22 +23,13 @@ default: build
 
 # include after default targets to avoid shadowing them
 -include make/*.mk
+-include profiles/*/*.mk
 
 
 
 ##
 ## Workspace targets
 ##
-
-wsinstall_ubuntu:
-	apt install \
-		python3-colcon-ros \
-		python3-colcon-parallel-executor \
-		python3-colcon-package-selection \
-		python3-colcon-package-information
-	apt install python3-wstool
-	apt install build-essential
-	apt install clang-tools-10 clang-tidy-10
 
 
 # Reset & initialize workspace
@@ -68,7 +59,7 @@ wsupdate_pkgs:
 
 # Clean workspace
 wsclean:
-	find ./artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
+	find ${WORKSPACE_DIR}/artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
 	rm -Rf build*
 	rm -Rf devel*
 	rm -Rf install*
@@ -79,6 +70,9 @@ wsclean:
 # Purge workspace
 wspurge: wsclean
 	rm -Rf src
+
+wsdeprosinstall:
+	bash -c "colcon list --names-only --base-paths src/ | paste -d ' ' -s | xargs -I {} ${MAKE} deprosinstall PKG=\"{}\""
 
 
 ##
@@ -119,8 +113,8 @@ ctest: assert_PKG_arg_must_be_specified
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
-	colcon test-result --all --test-result-base ./build/${PROFILE}/${PKG}
-	#bash -c "${SETUP_SCRIPT}; catkin_test_results ./build/${PROFILE}/${PKG}"
+	colcon test-result --all --test-result-base ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}
+	#bash -c "${SETUP_SCRIPT}; catkin_test_results ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}"
 
 
 new: assert_PKG_arg_must_be_specified
@@ -132,6 +126,18 @@ new: assert_PKG_arg_must_be_specified
 	find src/${PKG} -type f | xargs sed -i "s/@@AUTHOR@@/${AUTHOR}/g"
 	find src/${PKG} -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
 	find src/${PKG} -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
+
+
+deprosinstall: assert_PKG_arg_must_be_specified
+	mkdir -p ${WORKSPACE_DIR}/build
+	bash -c "${SETUP_SCRIPT}; colcon \
+		info --packages-up-to ${PKG} \
+		| grep '\(build:\)\|\(run:\)' \
+		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \
+		| sort | uniq | paste -s -d ' ' \
+		| xargs  rosinstall_generator --tar --deps --rosdistro \$${CCW_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deprosinstall"
+	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deprosinstall
+
 
 
 ##

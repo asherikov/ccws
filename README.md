@@ -2,7 +2,9 @@ Introduction
 ============
 
 `colcon` (https://colcon.readthedocs.io/) template workspace for ROS
-development and testing.
+development and testing. This template integrates functionalities of
+traditional workspaces and CI pipelines.
+
 
 Features
 --------
@@ -33,6 +35,8 @@ Features
 - Based entirely on `make` and shell scripts. All scripts are kept in the
   workspace and easy to adjust for specific needs.
 
+- Crosscompilation support.
+
 
 Profiles
 --------
@@ -46,6 +50,7 @@ Profile configurations are located in `profiles`, currently availabale profiles 
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
+- `cross_raspberry_pi` -- crosscompilation for Raspberry Pi.
 
 All profiles use `ccache`, but it can be disabled in cmake toolchains.
 
@@ -118,6 +123,18 @@ Testing
 - `make ctest PKG=<pkg>` bypass colcon and run `ctest` directly.
 
 
+Crosscompilation (Raspberry Pi)
+-------------------------------
+1. install dependencies `make install PROFILE=cross_raspberry_pi`
+2. init workspace `make wsinit`
+3. clone your repos to `src`, e.g., `cd src; git clone https://github.com/asherikov/staticoma.git`
+4. add your repos to workspace `make wsscrape`
+5. add dependencies of your packages to the workspace `make wsdeprosinstall`
+6. fetch all `make wsupdate`
+7. mount sysroot with `make cross_raspberry_pi_init` (see `profiles/cross_raspberry_pi/targets.mk`)
+8. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
+9. unmount sysroot with `make cross_raspberry_pi_deinit`
+
 
 Related software
 ================
@@ -127,4 +144,4 @@ Projects with similar functionality:
 - https://github.com/git-afsantos/haros
 - https://github.com/DLu/roscompile
 - https://github.com/asherikov/catkin_workspace [deprecated]
-
+- https://github.com/ros-tooling/cross_compile/

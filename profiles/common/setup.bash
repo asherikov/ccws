@@ -16,9 +16,24 @@ export CCW_STATIC_PATH_EXCEPTIONS
 
 if [ ! -n "${CCW_ROS_DISTRO}" ];
 then
-    CCW_ROS_DISTRO=$(ls /opt/ros/)
-    export CCW_ROS_DISTRO
+    if [ -d "${CCW_SYSROOT}/opt/ros/" ];
+    then
+        CCW_ROS_DISTRO=$(ls "${CCW_SYSROOT}/opt/ros/")
+        export CCW_ROS_DISTRO
+    else
+        echo "Could not determine CCW_ROS_DISTRO"
+    fi
 fi
+
+CCW_ROS_ROOT="${CCW_SYSROOT}/opt/ros/${CCW_ROS_DISTRO}"
+export CCW_ROS_ROOT
+
+CCW_PROFILE_DIR="${CCW_WORKSPACE_DIR}/profiles/${CCW_PROFILE}"
+export CCW_PROFILE_DIR
+
+CCW_PROFILE_BUILD_DIR="${CCW_WORKSPACE_DIR}/build/${CCW_PROFILE}"
+export CCW_PROFILE_BUILD_DIR
+mkdir -p "${CCW_PROFILE_BUILD_DIR}"
 
 
 ##########################################################################################
@@ -35,6 +50,13 @@ export CCW_DOXYGEN_WORKING_DIR
 
 
 ##########################################################################################
+# ccache
+#
+# keep ccache in the workspace, this is handy when workspace is mounted inside dockers
+export CCACHE_DIR=${CCW_WORKSPACE_DIR}/.ccache
+
+
+##########################################################################################
 # colcon
 #
 #COLCON_DEFAULTS_FILE="${CCW_WORKSPACE_DIR}/${CCW_PROFILE}/colcon.yaml"
@@ -43,7 +65,7 @@ export CCW_DOXYGEN_WORKING_DIR
 COLCON_HOME="${CCW_WORKSPACE_DIR}/common/"
 export COLCON_HOME
 
-COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CCW_WORKSPACE_DIR}/profiles/${CCW_PROFILE}/toolchain.cmake"
+COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CCW_PROFILE_DIR}/toolchain.cmake"
 export COLCON_BUILD_ARGS
 
 COLCON_TEST_ARGS="--test-result-base log/${CCW_PROFILE}/testing"
@@ -56,11 +78,17 @@ export COLCON_LIST_ARGS
 ##########################################################################################
 # ROS
 #
-source "/opt/ros/${CCW_ROS_DISTRO}/setup.bash"
+
+# try sourcing preload scripts
+if [ -f "/opt/ros/${CCW_ROS_DISTRO}/setup.bash" ];
+then
+    source "/opt/ros/${CCW_ROS_DISTRO}/setup.bash"
+fi
 if [ -f "${CCW_WORKSPACE_SETUP}" ];
 then
     source "${CCW_WORKSPACE_SETUP}"
 fi
+
 
 ROS_HOME="${CCW_ARTIFACTS_DIR}"
 export ROS_HOME
@@ -69,6 +97,12 @@ ROS_LOG_DIR="${CCW_ARTIFACTS_DIR}/ros_log"
 export ROS_LOG_DIR
 
 # Disable Lisp & Javascript message and service generators
+#   gencpp - C++ ROS message and service generators.
+#   geneus - EusLisp ROS message and service generators.
+#   genlisp - Common-Lisp ROS message and service generators.
+#   genmsg - Standalone Python library for generating ROS message and service data structures for various languages.
+#   gennodejs - Javascript ROS message and service generators.
+#   genpy - Python ROS message and service generators.
 ROS_LANG_DISABLE="genlisp;geneus;gennodejs"
 export ROS_LANG_DISABLE
 
@@ -80,5 +114,9 @@ export ROSCONSOLE_FORMAT
 #ROSCONSOLE_CONFIG_FILE=
 #export ROSCONSOLE_CONFIG_FILE
 
+
+##########################################################################################
+# other
+#
 MAKEFLAGS="-j${JOBS}"
 export MAKEFLAGS

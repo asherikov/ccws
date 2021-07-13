@@ -1,0 +1,3 @@
+*.img
+sysroot
+cross-pi-gcc

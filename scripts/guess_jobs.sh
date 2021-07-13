@@ -2,7 +2,7 @@
 
 MEMORY_PER_JOB_MB=${1}
 
-JOBS_GUESS_MEMORY=$(($(grep MemAvailable < /proc/meminfo | grep -o '[0-9]*') / 1024 / ${MEMORY_PER_JOB_MB}))
+JOBS_GUESS_MEMORY=$(($(grep MemAvailable < /proc/meminfo | grep -o '[0-9]*') / 1024 / MEMORY_PER_JOB_MB))
 JOBS_GUESS_CPU=$(nproc)
 
 if [ 1 -ge "${JOBS_GUESS_MEMORY}" ]
