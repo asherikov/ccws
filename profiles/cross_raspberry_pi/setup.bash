@@ -13,7 +13,7 @@ export CCW_PROFILE
 source "./profiles/common/setup.bash"
 set -e
 
-CCW_SYSROOT="${CCW_WORKSPACE_DIR}/profiles/cross_raspberry_pi/sysroot"
+CCW_SYSROOT="${CCW_PROFILE_DIR}/sysroot"
 export CCW_SYSROOT
 mkdir -p "${CCW_SYSROOT}"
 
@@ -35,8 +35,12 @@ export CCW_TRIPLE CCW_TRIPLE_ARCH CCW_TRIPLE_SYS CCW_TRIPLE_ABI
 #
 CCW_COMPILER_ROOT=/opt/cross-pi-gcc/
 
-PATH=${CCW_COMPILER_ROOT}/bin:${PATH}
-LD_LIBRARY_PATH=${CCW_COMPILER_ROOT}/lib:${LD_LIBRARY_PATH}
+CXX=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-g++
+CC=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-gcc
+export CXX CC
+
+PATH=/host-rootfs/usr/bin:${CCW_PROFILE_DIR}/bin:/bin:${PATH}
+LD_LIBRARY_PATH=/host-rootfs/usr/lib:${LD_LIBRARY_PATH}
 
 export CCW_COMPILER_ROOT PATH LD_LIBRARY_PATH
 
@@ -48,3 +52,11 @@ PKG_CONFIG_SYSROOT_DIR=${CCW_SYSROOT}
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCW_SYSROOT}/usr/lib/pkgconfig:${CCW_SYSROOT}/usr/lib/${CCW_TRIPLE}/pkgconfig:${CCW_SYSROOT}/usr/share/pkgconfig"
 
 export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
+
+
+##########################################################################################
+# ROS
+#
+
+ROS_PYTHON_VERSION=3
+export ROS_PYTHON_VERSION

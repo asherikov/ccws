@@ -6,6 +6,7 @@
 # assuming that this preload is sourced from the root of the workspace
 CCW_WORKSPACE_DIR=$(pwd)
 CCW_WORKSPACE_SETUP="${CCW_WORKSPACE_DIR}/install/${CCW_PROFILE}/setup.sh"
+export CCW_WORKSPACE_DIR
 export CCW_WORKSPACE_SETUP
 
 CCW_ARTIFACTS_DIR="${CCW_WORKSPACE_DIR}/artifacts"
@@ -59,13 +60,18 @@ export CCACHE_DIR=${CCW_WORKSPACE_DIR}/.ccache
 ##########################################################################################
 # colcon
 #
+
+# not necessary?
+CMAKE_TOOLCHAIN_FILE=${CCW_PROFILE_DIR}/toolchain.cmake
+export CMAKE_TOOLCHAIN_FILE
+
 #COLCON_DEFAULTS_FILE="${CCW_WORKSPACE_DIR}/${CCW_PROFILE}/colcon.yaml"
 #export COLCON_DEFAULTS_FILE
 
 COLCON_HOME="${CCW_WORKSPACE_DIR}/common/"
 export COLCON_HOME
 
-COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CCW_PROFILE_DIR}/toolchain.cmake"
+COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
 export COLCON_BUILD_ARGS
 
 COLCON_TEST_ARGS="--test-result-base log/${CCW_PROFILE}/testing"

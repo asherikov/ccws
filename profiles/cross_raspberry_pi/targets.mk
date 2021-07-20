@@ -26,18 +26,20 @@ cross_raspberry_pi_fix_image:
 	-bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		cd \"\$${CCW_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
-		sudo chroot ./ apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
-		sudo chroot ./ apt clean; \
-		sudo chroot ./ apt update; \
-		sudo chroot ./ apt --yes upgrade; \
-		sudo chroot ./ apt clean; \
-		sudo chroot ./ apt install --yes --no-install-recommends \
-			librosconsole-bridge-dev libpoco-dev libpython3-dev \
-			libboost-filesystem-dev libboost-program-options-dev \
-			liblz4-dev libbz2-dev\
-			libgpgme-dev; \
-		sudo chroot ./ apt clean"
-	-${MAKE} sysroot_fix_abs_symlinks PROFILE=cross_raspberry_pi
+		sudo chroot ./ /bin/sh -c \
+			'apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
+			apt clean; \
+			apt update; \
+			apt --yes upgrade; \
+			apt clean; \
+			apt install --yes --no-install-recommends \
+				librosconsole-bridge-dev libpoco-dev libpython3-dev \
+				libboost-filesystem-dev libboost-program-options-dev \
+				liblz4-dev libbz2-dev\
+				libgpgme-dev \
+				libgmock-dev libtinyxml2-dev; \
+			apt clean'"
+	#${MAKE} sysroot_fix_abs_symlinks PROFILE=cross_raspberry_pi
 	${MAKE} cross_raspberry_pi_deinit
 
 
@@ -49,13 +51,18 @@ cross_raspberry_pi_clean:
 		rm -Rf *.img"
 
 cross_raspberry_pi_init: cross_raspberry_pi_deinit
-	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
+	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		cd \"\$${CCW_PROFILE_DIR}\"; \
 		CCW_SYSROOT_DEVICE=\$$(sudo losetup -PL --find --show ./system.img); \
-		sudo mount \"\$${CCW_SYSROOT_DEVICE}p2\" \"\$${CCW_SYSROOT}\"; \
-		sudo ln -s \$${CCW_PROFILE_DIR}/cross-pi-gcc /opt/cross-pi-gcc"
+		mount \"\$${CCW_SYSROOT_DEVICE}p2\" \"\$${CCW_SYSROOT}\"; \
+		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
+		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
+		mkdir -p \"\$${CCW_SYSROOT}/host-rootfs/\"; \
+		mount --bind \"\$${CCW_WORKSPACE_DIR}\" \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
+		mount --bind \"\$${CCW_PROFILE_DIR}/cross-pi-gcc\" \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
+		mount --bind / \"\$${CCW_SYSROOT}/host-rootfs/\" "
 
 cross_raspberry_pi_deinit:
-	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		sudo rm -Rf /opt/cross-pi-gcc || true; \
-		sudo umount \"\$${CCW_SYSROOT}\" || true"
+	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
+		rm -Rf /opt/cross-pi-gcc || true; \
+		umount --recursive \"\$${CCW_SYSROOT}\" || true"

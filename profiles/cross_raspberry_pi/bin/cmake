@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+echo ">>>>> CCW cmake wrapper >>>>>>"
+pwd
+echo "Command line: $@"
+proot \
+    --rootfs="${CCW_SYSROOT}" \
+    --cwd="$(pwd)" \
+    --bind="${CCW_WORKSPACE_DIR}" \
+    --bind="${CCW_PROFILE_DIR}/cross-pi-gcc":"${CCW_COMPILER_ROOT}" \
+    --qemu=qemu-arm-static /host-rootfs/usr/bin/cmake $@
+#    --qemu=qemu-arm-static /usr/bin/cmake $@
+#    --bind="/":"/host_root/" \
+#    /host_root/usr/bin/cmake
+echo "<<<<< CCW cmake wrapper <<<<<<"
