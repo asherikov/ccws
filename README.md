@@ -130,16 +130,18 @@ Crosscompilation (Raspberry Pi)
 3. clone your repos to `src`, e.g., `cd src; git clone https://github.com/asherikov/staticoma.git`
 4. add your repos to workspace `make wsscrape`
 5. add dependencies of your packages to the workspace `make wsdeprosinstall`
-6. fetch all `make wsupdate`
+6. fetch all packages `make wsupdate`
 7. mount sysroot with `make cross_raspberry_pi_init` (see `profiles/cross_raspberry_pi/targets.mk`)
 8. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
-9. unmount sysroot with `make cross_raspberry_pi_deinit`
+9. unmount sysroot when done with `make cross_raspberry_pi_deinit`
+
+See `doc/cross-compilation.md` for more details.
 
 
 Related software
 ================
 
-Projects with similar functionality:
+Related projects:
 - https://github.com/ros-industrial/industrial_ci
 - https://github.com/git-afsantos/haros
 - https://github.com/DLu/roscompile

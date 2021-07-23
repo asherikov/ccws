@@ -1,15 +1,27 @@
 #!/bin/sh
 set -e
-echo ">>>>> CCW cmake wrapper >>>>>>"
-pwd
-echo "Command line: $@"
+#echo ">>>>> CCW cmake wrapper >>>>>>"
+#pwd
+#echo "Command line: $@"
 proot \
     --rootfs="${CCW_SYSROOT}" \
     --cwd="$(pwd)" \
     --bind="${CCW_WORKSPACE_DIR}" \
     --bind="${CCW_PROFILE_DIR}/cross-pi-gcc":"${CCW_COMPILER_ROOT}" \
-    --qemu=qemu-arm-static /host-rootfs/usr/bin/cmake $@
-#    --qemu=qemu-arm-static /usr/bin/cmake $@
-#    --bind="/":"/host_root/" \
-#    /host_root/usr/bin/cmake
-echo "<<<<< CCW cmake wrapper <<<<<<"
+    --bind=/bin/true \
+    --bind=/bin/false \
+    --bind=/bin/pwd \
+    --bind=/bin/echo \
+    --bind=/bin/ls \
+    --bind=/bin/ln \
+    --bind=/bin/sh \
+    --bind=/bin/rm \
+    --bind=/bin/bash \
+    --bind=/bin/uname \
+    --bind=/bin/mktemp \
+    --bind=/usr/bin/env \
+    --bind=/usr/bin/perl \
+    --bind=/usr/bin/make \
+    --bind=/usr/bin/lsb-release \
+    --qemu=qemu-arm /host-rootfs/usr/bin/cmake $@
+#echo "<<<<< CCW cmake wrapper <<<<<<"

@@ -39,7 +39,7 @@ CXX=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-g++
 CC=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-gcc
 export CXX CC
 
-PATH=/host-rootfs/usr/bin:${CCW_PROFILE_DIR}/bin:/bin:${PATH}
+PATH=${CCW_COMPILER_ROOT}/bin/:/host-rootfs/usr/bin:${CCW_PROFILE_DIR}/bin:/bin:${PATH}
 LD_LIBRARY_PATH=/host-rootfs/usr/lib:${LD_LIBRARY_PATH}
 
 export CCW_COMPILER_ROOT PATH LD_LIBRARY_PATH
@@ -57,6 +57,5 @@ export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 ##########################################################################################
 # ROS
 #
-
 ROS_PYTHON_VERSION=3
 export ROS_PYTHON_VERSION

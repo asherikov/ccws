@@ -54,13 +54,13 @@ cross_raspberry_pi_init: cross_raspberry_pi_deinit
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		cd \"\$${CCW_PROFILE_DIR}\"; \
 		CCW_SYSROOT_DEVICE=\$$(sudo losetup -PL --find --show ./system.img); \
-		mount \"\$${CCW_SYSROOT_DEVICE}p2\" \"\$${CCW_SYSROOT}\"; \
-		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
-		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
-		mkdir -p \"\$${CCW_SYSROOT}/host-rootfs/\"; \
-		mount --bind \"\$${CCW_WORKSPACE_DIR}\" \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
-		mount --bind \"\$${CCW_PROFILE_DIR}/cross-pi-gcc\" \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
-		mount --bind / \"\$${CCW_SYSROOT}/host-rootfs/\" "
+		mount \"\$${CCW_SYSROOT_DEVICE}p2\" \"\$${CCW_SYSROOT}\" "
+#		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
+#		mkdir -p \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
+#		mkdir -p \"\$${CCW_SYSROOT}/host-rootfs/\"; \
+#		mount --bind \"\$${CCW_WORKSPACE_DIR}\" \"\$${CCW_SYSROOT}/\$${CCW_WORKSPACE_DIR}/\"; \
+#		mount --bind \"\$${CCW_PROFILE_DIR}/cross-pi-gcc\" \"\$${CCW_SYSROOT}/\$${CCW_COMPILER_ROOT}/\"; \
+#		mount --bind / \"\$${CCW_SYSROOT}/host-rootfs/\" "
 
 cross_raspberry_pi_deinit:
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
