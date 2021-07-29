@@ -27,14 +27,17 @@ set(CMAKE_LIBRARY_ARCHITECTURE "$ENV{CCW_TRIPLE}" CACHE STRING "" FORCE)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY CACHE STRING "" FORCE)
 set(CMAKE_TOOLCHAIN_FILE $ENV{CMAKE_TOOLCHAIN_FILE} CACHE STRING "" FORCE)
 
-set(CMAKE_FIND_ROOT_PATH "$ENV{CCW_COMPILER_ROOT};${CMAKE_INSTALL_PREFIX};${CMAKE_SYSROOT};$ENV{CCW_ROS_ROOT}" CACHE STRING "" FORCE)
-#set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER CACHE STRING "" FORCE)
+set(CMAKE_FIND_ROOT_PATH "$ENV{CCW_COMPILER_ROOT};${CMAKE_INSTALL_PREFIX};${CMAKE_SYSROOT}/usr/;$ENV{CCW_ROS_ROOT}" CACHE STRING "" FORCE)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY CACHE STRING "" FORCE)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY CACHE STRING "" FORCE)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY CACHE STRING "" FORCE)
 
-
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER CACHE STRING "" FORCE)
+# Normally this should be NEVER, but we have to use python from the target,
+# otherwise generated ROS scripts have wrong python paths, see
+# catkin/cmake/catkin_install_python.cmake. In order to avoid performance
+# decrease we bind mount host native python and other binaries (see setup
+# script).
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY CACHE STRING "" FORCE)
 
 
 ###############################################################################
@@ -55,12 +58,14 @@ include_directories(SYSTEM "/usr/include/c++/${CCW_GCC_VERSION}/")
 # ROS:
 # 1. -Wnarrowing -> issue in ros_comm/xmlrpcpp/test/test_base64.cpp
 # 2. -I/usr/include -> imported google test targets do not get toolchain for
-# some reason and cannot be built, CMAKE_CXX_FLAGS pass through somehow
-set(CCW_ROS_CXX_FLAGS "-Wno-narrowing -I/usr/include")
+# some reason and cannot be built, CMAKE_CXX_FLAGS pass through
+# 3. SIP_MODULE_NAME is needed for python_orocos_kdl, was defined in python2.7/sip.h
+set(CCW_ROS_CXX_FLAGS "-Wno-narrowing -I/usr/include -D'SIP_MODULE_NAME=\"sip\"'")
 
 # Eigen: disable alignment for simplicity
 # http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html
 set(CCW_EIGEN_CXX_FLAGS "-D'EIGEN_MAX_STATIC_ALIGN_BYTES=0'")
+
 
 # force flags to cmake cache
 string(FIND "${CMAKE_CXX_FLAGS}" "${CCW_ROS_CXX_FLAGS}" FIND_RESULT)
@@ -75,9 +80,12 @@ endif ()
 
 # ROS:
 # 1. missing link dependency in xmlrpcpp tests
-set(CCW_ROS_LINKER_FLAGS "-lpthread")
+# 2. explicit linking to atomic might be necessary
+set(CCW_ROS_LINKER_FLAGS "-lpthread -latomic")
 
 link_directories("/usr/lib/gcc/${CMAKE_LIBRARY_ARCHITECTURE}/${CCW_GCC_VERSION}")
+# in order to make our lives more interesting cmake eliminates this path, so we
+# have to set it explicitly with `-L` below
 link_directories("/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
 link_directories("/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
 
@@ -95,4 +103,24 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -Wl,-rpath-link,${CMAKE_INSTALL_PREFIX}/lib/ \
     -Wl,-rpath-link,$ENV{CCW_ROS_ROOT}/lib" CACHE STRING "" FORCE)
 
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-verbose" CACHE STRING "" FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-verbose -L/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/" CACHE STRING "" FORCE)
+
+
+###############################################################################
+# ROS / catkin
+###
+
+# too many issues: missing dependencies, etc
+set(CATKIN_ENABLE_TESTING   "OFF" CACHE STRING "" FORCE)
+set(CATKIN_SKIP_TESTING     "OFF" CACHE STRING "" FORCE)
+
+
+###############################################################################
+# other
+###
+
+# use protobuf compiler from the target to avoid version conflicts
+# not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
+#set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
+# Eigen is not found in the right place for some reason
+set(Eigen_ROOT_DIR "/usr/" CACHE STRING "" FORCE)

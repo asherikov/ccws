@@ -123,17 +123,24 @@ Testing
 - `make ctest PKG=<pkg>` bypass colcon and run `ctest` directly.
 
 
+Documentation
+-------------
+- `make doxall`, `firefox artifacts/doxygen/index.html`
+
+
 Crosscompilation (Raspberry Pi)
 -------------------------------
-1. install dependencies `make install PROFILE=cross_raspberry_pi`
+1. install profile dependencies with `make install PROFILE=cross_raspberry_pi`
 2. init workspace `make wsinit`
 3. clone your repos to `src`, e.g., `cd src; git clone https://github.com/asherikov/staticoma.git`
 4. add your repos to workspace `make wsscrape`
-5. add dependencies of your packages to the workspace `make wsdeprosinstall`
+5. add ROS dependencies of all your packages to the workspace `make wsdep_to_rosinstall`,
+   or a specific package `make dep_to_rosinstall PKG=<pkg>`
 6. fetch all packages `make wsupdate`
-7. mount sysroot with `make cross_raspberry_pi_init` (see `profiles/cross_raspberry_pi/targets.mk`)
-8. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
-9. unmount sysroot when done with `make cross_raspberry_pi_deinit`
+7. mount sysroot with `make cross_raspberry_pi_mount` (see `profiles/cross_raspberry_pi/targets.mk`)
+8. install system dependencies to the image `make cross_dep_install PKG=staticoma PROFILE=cross_raspberry_pi`
+9. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
+10. unmount sysroot when done with `make cross_raspberry_pi_umount`
 
 See `doc/cross-compilation.md` for more details.
 

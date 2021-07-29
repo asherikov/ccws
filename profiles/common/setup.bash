@@ -17,6 +17,7 @@ export CCW_STATIC_PATH_EXCEPTIONS
 
 if [ ! -n "${CCW_ROS_DISTRO}" ];
 then
+    # CCW_SYSROOT is empty by default
     if [ -d "${CCW_SYSROOT}/opt/ros/" ];
     then
         CCW_ROS_DISTRO=$(ls "${CCW_SYSROOT}/opt/ros/")
@@ -34,7 +35,6 @@ export CCW_PROFILE_DIR
 
 CCW_PROFILE_BUILD_DIR="${CCW_WORKSPACE_DIR}/build/${CCW_PROFILE}"
 export CCW_PROFILE_BUILD_DIR
-mkdir -p "${CCW_PROFILE_BUILD_DIR}"
 
 
 ##########################################################################################

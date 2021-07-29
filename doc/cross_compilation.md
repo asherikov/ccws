@@ -76,6 +76,12 @@ proot
 works pretty much out of the box. The performance is not fascinating though --
 2-3 times slower than native build.
 
+Both `cmake` and compiler calls must be performed inside `proot`, which is
+achieved by providing cmake alias script in profile bin directory. It is also
+possible to call `colcon` inside `proot` in the same way, but in this case
+`proot` becomes the performance bottleneck -- it seems to be limited by one CPU
+core.
+
 
 docker, systemd-nspawn
 ======================

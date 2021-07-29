@@ -19,7 +19,7 @@ export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB}
 
 default: build
 .DEFAULT:
-	bash -c "colcon list --names-only --base-paths src/ | grep $@ | paste -d ' ' -s | xargs -I {} ${MAKE} PKG=\"{}\""
+	bash -c "${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s | xargs -I {} ${MAKE} PKG=\"{}\""
 
 # include after default targets to avoid shadowing them
 -include make/*.mk
@@ -31,6 +31,8 @@ default: build
 ## Workspace targets
 ##
 
+wslist:
+	@colcon list --names-only --base-paths src/
 
 # Reset & initialize workspace
 wsinit: wspurge
@@ -71,8 +73,17 @@ wsclean:
 wspurge: wsclean
 	rm -Rf src
 
-wsdeprosinstall:
-	bash -c "colcon list --names-only --base-paths src/ | paste -d ' ' -s | xargs -I {} ${MAKE} deprosinstall PKG=\"{}\""
+
+wsdep_to_rosinstall:
+	rm -Rf ${WORKSPACE_DIR}/build/deplist
+	bash -c "${MAKE} --quiet wslist | xargs -I {} ${MAKE} deplist PKG=\"{}\""
+	rm -Rf ${WORKSPACE_DIR}/build/deplist/*.all	${WORKSPACE_DIR}/build/deplist/ccw.list
+	cat ${WORKSPACE_DIR}/build/deplist/* | sort | uniq > ${WORKSPACE_DIR}/build/deplist/ccw.deps.all
+	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccw.deps.all"
+
+
+wsprepare_build:
+	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCW_PROFILE_BUILD_DIR}\""
 
 
 ##
@@ -82,8 +93,9 @@ wsdeprosinstall:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
-build: assert_PKG_arg_must_be_specified
-	bash -c "${SETUP_SCRIPT}; \$${CCW_BUILD_WRAPPER} colcon \
+build: assert_PKG_arg_must_be_specified wsprepare_build
+	bash -c "${SETUP_SCRIPT}; \
+		\$${CCW_BUILD_WRAPPER} colcon \
 		--log-base log/${PROFILE} \
 		--log-level DEBUG \
 		build \
@@ -127,17 +139,28 @@ new: assert_PKG_arg_must_be_specified
 	find src/${PKG} -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
 	find src/${PKG} -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
 
+# `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
+info_with_deps: assert_PKG_arg_must_be_specified
+	colcon list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs colcon info --base-paths src/ --packages-select
 
-deprosinstall: assert_PKG_arg_must_be_specified
-	mkdir -p ${WORKSPACE_DIR}/build
-	bash -c "${SETUP_SCRIPT}; colcon \
-		info --packages-up-to ${PKG} \
+# generate list of dependencies which are not present in the workspace
+deplist: assert_PKG_arg_must_be_specified
+	mkdir -p ${WORKSPACE_DIR}/build/deplist
+	${MAKE} --quiet wslist | sort > ${WORKSPACE_DIR}/build/deplist/ccw.list
+	${MAKE} info_with_deps \
 		| grep '\(build:\)\|\(run:\)' \
 		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \
-		| sort | uniq | paste -s -d ' ' \
-		| xargs  rosinstall_generator --tar --deps --rosdistro \$${CCW_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deprosinstall"
-	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deprosinstall
+		| sort | uniq | grep -v '^$$' > ${WORKSPACE_DIR}/build/deplist/${PKG}.all
+	# remove packages that are already in the workspace
+	comm -13 ${WORKSPACE_DIR}/build/deplist/ccw.list ${WORKSPACE_DIR}/build/deplist/${PKG}.all > ${WORKSPACE_DIR}/build/deplist/${PKG}
 
+dep_to_rosinstall: deplist
+	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/${PKG}"
+
+rosinstall_extend:
+	bash -c "${SETUP_SCRIPT}; cat ${PKG_LIST} | paste -s -d ' ' \
+		| xargs rosinstall_generator --tar --deps --rosdistro \$${CCW_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
+	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall
 
 
 ##
