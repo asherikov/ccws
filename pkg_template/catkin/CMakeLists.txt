@@ -108,14 +108,14 @@ catkin_package(
 ###########
 
 ## --------------
-## CCW flags
+## CCWS flags
 ## --------------
-#if (CCW_CLANG_TIDY)
-#    set (CMAKE_CXX_CLANG_TIDY "${CCW_CLANG_TIDY}")
+#if (CCWS_CLANG_TIDY)
+#    set (CMAKE_CXX_CLANG_TIDY "${CCWS_CLANG_TIDY}")
 #endif()
-#if (CCW_CXX_FLAGS)
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCW_CXX_FLAGS}")
-#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CCW_LINKER_FLAGS}")
+#if (CCWS_CXX_FLAGS)
+#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_CXX_FLAGS}")
+#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CCWS_LINKER_FLAGS}")
 #endif()
 ## --------------
 

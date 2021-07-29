@@ -17,7 +17,7 @@ Features
 - Documentation generation for the whole workspace using `doxygen`, similar to
   https://github.com/mikepurvis/catkin_tools_document, but `doxygen`
   configuration and index html page are exposed and kept in the workspace.
-  Example -> https://asherikov.github.io/colcon_workspace/example_staticoma/index.html
+  Example -> https://asherikov.github.io/ccws/example_staticoma/index.html
 
 - Various static checks as in https://github.com/sscpac/statick, but with more
   flexibility (see `make/static_checks.mk`), in particular:
@@ -35,7 +35,7 @@ Features
 - Based entirely on `make` and shell scripts. All scripts are kept in the
   workspace and easy to adjust for specific needs.
 
-- Crosscompilation support.
+- Cross-compilation support.
 
 
 Profiles
@@ -87,7 +87,7 @@ Usage
 =====
 
 Demo workspace is available in a branch of this repository ->
-https://github.com/asherikov/colcon_workspace/tree/example_staticoma
+https://github.com/asherikov/ccws/tree/example_staticoma
 
 
 Initial setup

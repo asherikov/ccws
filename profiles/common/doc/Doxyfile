@@ -58,7 +58,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = "$(CCW_DOXYGEN_OUTPUT_DIR)/@@PKG@@"
+OUTPUT_DIRECTORY       = "$(CCWS_DOXYGEN_OUTPUT_DIR)/@@PKG@@"
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -693,7 +693,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = "$(CCW_DOXYGEN_CONFIG_DIR)/DoxygenLayout.xml"
+LAYOUT_FILE            = "$(CCWS_DOXYGEN_CONFIG_DIR)/DoxygenLayout.xml"
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -2130,13 +2130,13 @@ SKIP_FUNCTION_MACROS   = NO
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = "$(CCW_DOXYGEN_CONFIG_DIR)/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/"
+TAGFILES               = "$(CCWS_DOXYGEN_CONFIG_DIR)/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/"
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to
 # external documentation" for more information about the usage of tag files.
 
-GENERATE_TAGFILE       = "$(CCW_DOXYGEN_WORKING_DIR)/@@PKG@@/tags.xml"
+GENERATE_TAGFILE       = "$(CCWS_DOXYGEN_WORKING_DIR)/@@PKG@@/tags.xml"
 
 # If the ALLEXTERNALS tag is set to YES, all external class will be listed in
 # the class index. If set to NO, only the inherited external classes will be

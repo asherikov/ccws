@@ -13,16 +13,16 @@ cross_raspberry_pi_install: cross_raspberry_pi_clean
 		FILES="https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz \
 			http://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip"
 	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		cd \"\$${CCW_PROFILE_BUILD_DIR}\"; \
+		cd \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
 		tar -xf raspi-toolchain.tar.gz; \
 		unzip 2021-05-07-raspios-buster-armhf.zip; \
-		mv cross-pi-gcc \"\$${CCW_PROFILE_DIR}\"; \
-		mv 2021-05-07-raspios-buster-armhf.img \"\$${CCW_PROFILE_DIR}/system.img\""
+		mv cross-pi-gcc \"\$${CCWS_PROFILE_DIR}\"; \
+		mv 2021-05-07-raspios-buster-armhf.img \"\$${CCWS_PROFILE_DIR}/system.img\""
 	${MAKE} cross_raspberry_pi_mount
 	# 1. copy qemu in order to be able to do chroot
 	# 2. remove some heavy packages to get free space for ROS dependencies
 	-bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		cd \"\$${CCW_SYSROOT}\"; \
+		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
 		sudo chroot ./ /bin/sh -c \
 			'apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
@@ -34,20 +34,20 @@ cross_raspberry_pi_install: cross_raspberry_pi_clean
 
 cross_raspberry_pi_clean:
 	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		rm -Rf \"\$${CCW_PROFILE_BUILD_DIR}\""
+		rm -Rf \"\$${CCWS_PROFILE_BUILD_DIR}\""
 
 cross_raspberry_pi_mount: cross_raspberry_pi_umount
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		cd \"\$${CCW_PROFILE_DIR}\"; \
-		CCW_SYSROOT_DEVICE=\$$(sudo losetup -PL --find --show ./system.img); \
-		mount \"\$${CCW_SYSROOT_DEVICE}p2\" \"\$${CCW_SYSROOT}\" "
+		cd \"\$${CCWS_PROFILE_DIR}\"; \
+		CCWS_SYSROOT_DEVICE=\$$(sudo losetup -PL --find --show ./system.img); \
+		mount \"\$${CCWS_SYSROOT_DEVICE}p2\" \"\$${CCWS_SYSROOT}\" "
 
 cross_raspberry_pi_umount:
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		rm -Rf /opt/cross-pi-gcc || true; \
-		umount --recursive \"\$${CCW_SYSROOT}\" || true"
+		umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
 cross_raspberry_pi_purge: cross_raspberry_pi_umount
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		rm -Rf \"\$${CCW_PROFILE_DIR}/*.img; \
-		rm -Rf \"\$${CCW_PROFILE_DIR}/cross-pi-gcc"
+		rm -Rf \"\$${CCWS_PROFILE_DIR}/*.img; \
+		rm -Rf \"\$${CCWS_PROFILE_DIR}/cross-pi-gcc"

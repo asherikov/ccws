@@ -7,8 +7,8 @@ set -o pipefail
 
 ##########################################################################################
 
-CCW_PROFILE="thread_sanitizer"
-export CCW_PROFILE
+CCWS_PROFILE="thread_sanitizer"
+export CCWS_PROFILE
 
 source "./profiles/common/setup.bash"
 

@@ -29,7 +29,7 @@ cppcheck:
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; cppcheck \
-		\$${CCW_WORKSPACE_DIR}/src \
+		\$${CCWS_WORKSPACE_DIR}/src \
 		--relative-paths \
 		--quiet --verbose --force \
 		--template='[{file}:{line}]  {severity}  {id}  {message}' \
@@ -41,29 +41,29 @@ cppcheck:
 		--suppress=uninitMemberVar \
 		--suppress=syntaxError \
 		--suppress=useInitializationList \
-		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ / -i /g'` \
-	3>&1 1>&2 2>&3 | tee \$${CCW_ARTIFACTS_DIR}/cppcheck.err; \
-	test -s \$${CCW_ARTIFACTS_DIR}/cppcheck.err"
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ / -i /g'` \
+	3>&1 1>&2 2>&3 | tee \$${CCWS_ARTIFACTS_DIR}/cppcheck.err; \
+	test -s \$${CCWS_ARTIFACTS_DIR}/cppcheck.err"
 
 
 cpplint:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; cpplint \
-		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ / --exclude=/g'` \
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ / --exclude=/g'` \
 		--filter=-whitespace,-runtime/casting,-runtime/indentation_namespace,-readability/casting,-runtime/references,-readability/braces,-readability/namespace,-build/include_subdir,-build/header_guard,-build/include_order,-build/namespaces,-build/c++11,-readability/alt_tokens,-readability/todo,-build/include \
 		--quiet --recursive src"
 
 
 flawfinder:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCW_WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' \
-		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
+		find \$${CCWS_WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' \
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}
 
 
 yamllint:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCW_WORKSPACE_DIR}/src -iname '*.yaml' \
-		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
+		find \$${CCWS_WORKSPACE_DIR}/src -iname '*.yaml' \
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs --max-procs=${JOBS} -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d "{extends: default, \
                       rules: { \
@@ -80,8 +80,8 @@ yamllint:
 
 shellcheck:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCW_WORKSPACE_DIR}/scripts \$${CCW_WORKSPACE_DIR}/src \$${CCW_WORKSPACE_DIR}/profiles -iname '*.sh' -or -iname '*.bash' \
-		`echo \$${CCW_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
+		find \$${CCWS_WORKSPACE_DIR}/scripts \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/profiles -iname '*.sh' -or -iname '*.bash' \
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
 		| xargs --max-procs=${JOBS} -I {} \
 		shellcheck -x {}
 

@@ -7,46 +7,46 @@ set -o pipefail
 
 ##########################################################################################
 
-CCW_PROFILE="cross_raspberry_pi"
-export CCW_PROFILE
+CCWS_PROFILE="cross_raspberry_pi"
+export CCWS_PROFILE
 
 source "./profiles/common/setup.bash"
 set -e
 
-CCW_SYSROOT="${CCW_PROFILE_DIR}/sysroot"
-export CCW_SYSROOT
-mkdir -p "${CCW_SYSROOT}"
+CCWS_SYSROOT="${CCWS_PROFILE_DIR}/sysroot"
+export CCWS_SYSROOT
+mkdir -p "${CCWS_SYSROOT}"
 
 # host root in emulation
-CCW_HOST_ROOT=/host-rootfs/
-export CCW_HOST_ROOT
+CCWS_HOST_ROOT=/host-rootfs/
+export CCWS_HOST_ROOT
 
 
 ##########################################################################################
 # target triple
 #
-CCW_TRIPLE_ARCH=arm
-CCW_TRIPLE_SYS=linux
-CCW_TRIPLE_ABI=gnueabihf
+CCWS_TRIPLE_ARCH=arm
+CCWS_TRIPLE_SYS=linux
+CCWS_TRIPLE_ABI=gnueabihf
 
-CCW_TRIPLE=${CCW_TRIPLE_ARCH}-${CCW_TRIPLE_SYS}-${CCW_TRIPLE_ABI}
+CCWS_TRIPLE=${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}-${CCWS_TRIPLE_ABI}
 
-export CCW_TRIPLE CCW_TRIPLE_ARCH CCW_TRIPLE_SYS CCW_TRIPLE_ABI
+export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI
 
 
 ##########################################################################################
 # compiler paths
 #
-CCW_COMPILER_ROOT=/opt/cross-pi-gcc/
+CCWS_COMPILER_ROOT=/opt/cross-pi-gcc/
 
-CXX=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-g++
-CC=${CCW_COMPILER_ROOT}/bin/arm-linux-gnueabihf-gcc
+CXX=${CCWS_COMPILER_ROOT}/bin/arm-linux-gnueabihf-g++
+CC=${CCWS_COMPILER_ROOT}/bin/arm-linux-gnueabihf-gcc
 export CXX CC
 
-PATH=${CCW_COMPILER_ROOT}/bin/:${CCW_HOST_ROOT}/usr/bin:${CCW_PROFILE_DIR}/bin:/bin:${PATH}
-LD_LIBRARY_PATH=${CCW_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
+PATH=${CCWS_COMPILER_ROOT}/bin/:${CCWS_HOST_ROOT}/usr/bin:${CCWS_PROFILE_DIR}/bin:/bin:${PATH}
+LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
 
-export CCW_COMPILER_ROOT PATH LD_LIBRARY_PATH
+export CCWS_COMPILER_ROOT PATH LD_LIBRARY_PATH
 
 
 ##########################################################################################
@@ -54,10 +54,10 @@ export CCW_COMPILER_ROOT PATH LD_LIBRARY_PATH
 #
 
 # needed for non-proot crosscompilation
-#PKG_CONFIG_SYSROOT_DIR=${CCW_SYSROOT}
-#PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCW_SYSROOT}/usr/lib/pkgconfig:${CCW_SYSROOT}/usr/lib/${CCW_TRIPLE}/pkgconfig:${CCW_SYSROOT}/usr/share/pkgconfig"
+#PKG_CONFIG_SYSROOT_DIR=${CCWS_SYSROOT}
+#PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCWS_SYSROOT}/usr/lib/pkgconfig:${CCWS_SYSROOT}/usr/lib/${CCWS_TRIPLE}/pkgconfig:${CCWS_SYSROOT}/usr/share/pkgconfig"
 #PKG_CONFIG_SYSROOT_DIR=/
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCW_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
+PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCWS_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
 
 export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 
@@ -82,34 +82,34 @@ export ROS_PYTHON_VERSION
 # proot
 #
 
-CCW_PROOT_ARGS="--rootfs=${CCW_SYSROOT}"
+CCWS_PROOT_ARGS="--rootfs=${CCWS_SYSROOT}"
 # workspace and compiler
-CCW_PROOT_ARGS+=" --bind=${CCW_WORKSPACE_DIR}"
-CCW_PROOT_ARGS+=" --bind=${CCW_PROFILE_DIR}/cross-pi-gcc:${CCW_COMPILER_ROOT}"
+CCWS_PROOT_ARGS+=" --bind=${CCWS_WORKSPACE_DIR}"
+CCWS_PROOT_ARGS+=" --bind=${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}"
 # rosdep stuff
-CCW_PROOT_ARGS+=" --bind=${HOME}/.ros/rosdep/:${ROS_HOME}/rosdep"
-CCW_PROOT_ARGS+=" --bind=/etc/ros/rosdep/"
+CCWS_PROOT_ARGS+=" --bind=${HOME}/.ros/rosdep/:${ROS_HOME}/rosdep"
+CCWS_PROOT_ARGS+=" --bind=/etc/ros/rosdep/"
 # bind mounting of /bin/ breaks stuff for some reason
-CCW_PROOT_ARGS+=" --bind=/bin/true"
-CCW_PROOT_ARGS+=" --bind=/bin/false"
-CCW_PROOT_ARGS+=" --bind=/bin/pwd"
-CCW_PROOT_ARGS+=" --bind=/bin/echo"
-CCW_PROOT_ARGS+=" --bind=/bin/ls"
-CCW_PROOT_ARGS+=" --bind=/bin/ln"
-CCW_PROOT_ARGS+=" --bind=/bin/sh"
-CCW_PROOT_ARGS+=" --bind=/bin/rm"
-CCW_PROOT_ARGS+=" --bind=/bin/bash"
-CCW_PROOT_ARGS+=" --bind=/bin/uname"
-CCW_PROOT_ARGS+=" --bind=/bin/mktemp"
-CCW_PROOT_ARGS+=" --bind=/usr/bin/env"
-CCW_PROOT_ARGS+=" --bind=/usr/bin/perl"
-CCW_PROOT_ARGS+=" --bind=/usr/bin/make"
-CCW_PROOT_ARGS+=" --bind=/usr/bin/cmake"
+CCWS_PROOT_ARGS+=" --bind=/bin/true"
+CCWS_PROOT_ARGS+=" --bind=/bin/false"
+CCWS_PROOT_ARGS+=" --bind=/bin/pwd"
+CCWS_PROOT_ARGS+=" --bind=/bin/echo"
+CCWS_PROOT_ARGS+=" --bind=/bin/ls"
+CCWS_PROOT_ARGS+=" --bind=/bin/ln"
+CCWS_PROOT_ARGS+=" --bind=/bin/sh"
+CCWS_PROOT_ARGS+=" --bind=/bin/rm"
+CCWS_PROOT_ARGS+=" --bind=/bin/bash"
+CCWS_PROOT_ARGS+=" --bind=/bin/uname"
+CCWS_PROOT_ARGS+=" --bind=/bin/mktemp"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/env"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/perl"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/make"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/cmake"
 # python bindings
-CCW_PROOT_ARGS+=" --bind=/usr/bin/python"
-CCW_PROOT_ARGS+=" --bind=/usr/bin/python3"
-CCW_PROOT_ARGS+=" $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ')"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/python"
+CCWS_PROOT_ARGS+=" --bind=/usr/bin/python3"
+CCWS_PROOT_ARGS+=" $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ')"
 # qemu
-CCW_PROOT_ARGS+=" --qemu=qemu-${CCW_TRIPLE_ARCH}"
-export CCW_PROOT_ARGS
+CCWS_PROOT_ARGS+=" --qemu=qemu-${CCWS_TRIPLE_ARCH}"
+export CCWS_PROOT_ARGS
 

@@ -77,13 +77,13 @@ wspurge: wsclean
 wsdep_to_rosinstall:
 	rm -Rf ${WORKSPACE_DIR}/build/deplist
 	bash -c "${MAKE} --quiet wslist | xargs -I {} ${MAKE} deplist PKG=\"{}\""
-	rm -Rf ${WORKSPACE_DIR}/build/deplist/*.all	${WORKSPACE_DIR}/build/deplist/ccw.list
-	cat ${WORKSPACE_DIR}/build/deplist/* | sort | uniq > ${WORKSPACE_DIR}/build/deplist/ccw.deps.all
-	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccw.deps.all"
+	rm -Rf ${WORKSPACE_DIR}/build/deplist/*.all	${WORKSPACE_DIR}/build/deplist/ccws.list
+	cat ${WORKSPACE_DIR}/build/deplist/* | sort | uniq > ${WORKSPACE_DIR}/build/deplist/ccws.deps.all
+	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccws.deps.all"
 
 
 wsprepare_build:
-	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCW_PROFILE_BUILD_DIR}\""
+	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_PROFILE_BUILD_DIR}\""
 
 
 ##
@@ -95,7 +95,7 @@ assert_PKG_arg_must_be_specified:
 
 build: assert_PKG_arg_must_be_specified wsprepare_build
 	bash -c "${SETUP_SCRIPT}; \
-		\$${CCW_BUILD_WRAPPER} colcon \
+		\$${CCWS_BUILD_WRAPPER} colcon \
 		--log-base log/${PROFILE} \
 		--log-level DEBUG \
 		build \
@@ -120,7 +120,7 @@ test: assert_PKG_arg_must_be_specified
 ctest: assert_PKG_arg_must_be_specified
 	bash -c "${SETUP_SCRIPT}; \
 		cd build/${PROFILE}/${PKG}; \
-		time ctest --output-on-failure --output-log \$${CCW_ARTIFACTS_DIR}/ctest_${PKG}.log -j ${JOBS}"
+		time ctest --output-on-failure --output-log \$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log -j ${JOBS}"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified
@@ -131,7 +131,7 @@ showtestresults: assert_PKG_arg_must_be_specified
 
 new: assert_PKG_arg_must_be_specified
 	mkdir -p src/
-	cp -R pkg_template src/${PKG}
+	cp -R pkg_template/catkin src/${PKG}
 	mkdir -p src/${PKG}/include/${PKG}
 	cd src/${PKG}; git init
 	find src/${PKG} -type f | xargs sed -i "s/@@PACKAGE@@/${PKG}/g"
@@ -146,20 +146,20 @@ info_with_deps: assert_PKG_arg_must_be_specified
 # generate list of dependencies which are not present in the workspace
 deplist: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/deplist
-	${MAKE} --quiet wslist | sort > ${WORKSPACE_DIR}/build/deplist/ccw.list
+	${MAKE} --quiet wslist | sort > ${WORKSPACE_DIR}/build/deplist/ccws.list
 	${MAKE} info_with_deps \
 		| grep '\(build:\)\|\(run:\)' \
 		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \
 		| sort | uniq | grep -v '^$$' > ${WORKSPACE_DIR}/build/deplist/${PKG}.all
 	# remove packages that are already in the workspace
-	comm -13 ${WORKSPACE_DIR}/build/deplist/ccw.list ${WORKSPACE_DIR}/build/deplist/${PKG}.all > ${WORKSPACE_DIR}/build/deplist/${PKG}
+	comm -13 ${WORKSPACE_DIR}/build/deplist/ccws.list ${WORKSPACE_DIR}/build/deplist/${PKG}.all > ${WORKSPACE_DIR}/build/deplist/${PKG}
 
 dep_to_rosinstall: deplist
 	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/${PKG}"
 
 rosinstall_extend:
 	bash -c "${SETUP_SCRIPT}; cat ${PKG_LIST} | paste -s -d ' ' \
-		| xargs rosinstall_generator --tar --deps --rosdistro \$${CCW_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
+		| xargs rosinstall_generator --tar --deps --rosdistro \$${CCWS_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
 	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall
 
 

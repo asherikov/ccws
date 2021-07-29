@@ -1,13 +1,13 @@
 #!/bin/sh
 set -e
-#echo ">>>>> CCW cmake wrapper >>>>>>"
+#echo ">>>>> CCWS colcon wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
 proot \
-    --rootfs="${CCW_SYSROOT}" \
+    --rootfs="${CCWS_SYSROOT}" \
     --cwd="$(pwd)" \
-    --bind="${CCW_WORKSPACE_DIR}" \
-    --bind="${CCW_PROFILE_DIR}/cross-pi-gcc":"${CCW_COMPILER_ROOT}" \
+    --bind="${CCWS_WORKSPACE_DIR}" \
+    --bind="${CCWS_PROFILE_DIR}/cross-pi-gcc":"${CCWS_COMPILER_ROOT}" \
     --bind=/bin/true \
     --bind=/bin/false \
     --bind=/bin/pwd \
@@ -25,6 +25,4 @@ proot \
     --bind=/usr/bin/cmake \
     --bind=/dev \
     --qemu=qemu-arm /host-rootfs/usr/bin/python3 /host-rootfs/usr/bin/colcon $@
-#    --qemu=qemu-arm /host-rootfs/usr/bin/colcon --help
-#    --qemu=qemu-arm /host-rootfs/usr/bin/cmake $@
-#echo "<<<<< CCW cmake wrapper <<<<<<"
+#echo "<<<<< CCWS colcon wrapper <<<<<<"

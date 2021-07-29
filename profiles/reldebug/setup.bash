@@ -7,8 +7,8 @@ set -o pipefail
 
 ##########################################################################################
 
-CCW_PROFILE="reldebug"
-export CCW_PROFILE
+CCWS_PROFILE="reldebug"
+export CCWS_PROFILE
 
 source "./profiles/common/setup.bash"
 

@@ -3,17 +3,17 @@
 # cross compilation
 cross_sysroot_fix_abs_symlinks:
 	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCW_SYSROOT}\"; \
+		cd \"\$${CCWS_SYSROOT}\"; \
 		find ./usr -lname '/*' -printf 'sudo ln --relative --symbolic --force ./%l %p\n' | /bin/sh"
 
 cross_dep_install: deplist
 	bash -c "${SETUP_SCRIPT}; \
 		proot \
-			\$${CCW_PROOT_ARGS} \
-			--cwd=\"\$${CCW_WORKSPACE_DIR}\" \
-			\"\$${CCW_HOST_ROOT}/usr/bin/python\" \
-			\"\$${CCW_HOST_ROOT}/usr/bin/rosdep\" resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ')" \
+			\$${CCWS_PROOT_ARGS} \
+			--cwd=\"\$${CCWS_WORKSPACE_DIR}\" \
+			\"\$${CCWS_HOST_ROOT}/usr/bin/python\" \
+			\"\$${CCWS_HOST_ROOT}/usr/bin/rosdep\" resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ')" \
 		| grep -v "^#" | sed 's/ /\n/g' > "${WORKSPACE_DIR}/build/deplist/${PKG}.apt"
 	sudo bash -c "${SETUP_SCRIPT}; \
 		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.apt' \
-		| xargs chroot \"\$${CCW_SYSROOT}\" ${APT_INSTALL}"
+		| xargs chroot \"\$${CCWS_SYSROOT}\" ${APT_INSTALL}"

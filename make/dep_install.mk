@@ -23,5 +23,5 @@ install:
 
 download:
 	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCW_PROFILE_BUILD_DIR}\"; \
+		cd \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
 		wget --no-check-certificate ${FILES};"
