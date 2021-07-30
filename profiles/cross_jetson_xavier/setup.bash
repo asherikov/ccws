@@ -7,7 +7,7 @@ set -o pipefail
 
 ##########################################################################################
 
-CCWS_PROFILE="cross_raspberry_pi"
+CCWS_PROFILE="cross_jetson_xavier"
 export CCWS_PROFILE
 
 CCWS_SYSROOT="$(dirname ${BASH_SOURCE})/sysroot"
@@ -21,9 +21,9 @@ export CCWS_HOST_ROOT
 ##########################################################################################
 # target triple
 #
-CCWS_TRIPLE_ARCH=arm
+CCWS_TRIPLE_ARCH=aarch64
 CCWS_TRIPLE_SYS=linux
-CCWS_TRIPLE_ABI=gnueabihf
+CCWS_TRIPLE_ABI=gnu
 
 CCWS_TRIPLE=${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}-${CCWS_TRIPLE_ABI}
 
@@ -43,12 +43,11 @@ set -e
 ##########################################################################################
 # compiler paths
 #
-CCWS_COMPILER_ROOT=/opt/cross-pi-gcc/
-
 CCWS_GCC_VERSION=8
 
-CXX=${CCWS_COMPILER_ROOT}/bin/${CCWS_TRIPLE}-g++
-CC=${CCWS_COMPILER_ROOT}/bin/${CCWS_TRIPLE}-gcc
+CXX=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
+CC=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}
+
 export CXX CC
 
 PATH=${CCWS_COMPILER_ROOT}/bin/:${CCWS_HOST_ROOT}/usr/bin:${CCWS_PROOT_BIN}:/bin:${PATH}
@@ -73,8 +72,9 @@ export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 ##########################################################################################
 # ROS
 #
-ROS_PYTHON_VERSION=3
-export ROS_PYTHON_VERSION
+
+#ROS_PYTHON_VERSION=3
+#export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
@@ -87,6 +87,11 @@ export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
-# colcon
+# CUDA
 #
-CCWS_PROOT_ARGS=--bind="${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}"
+
+CCWS_CUDA_VERSION=10.2
+CUDA_INC_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}/
+CUDA_LIB_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}/
+export CCWS_CUDA_VERSION CUDA_INC_PATH CUDA_LIB_PATH
+

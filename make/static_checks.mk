@@ -3,11 +3,11 @@ STATIC_CHECKS_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/setup.bash
 
 install_static_checkers:
 	#pip3 install cpplint
-	apt install cppcheck
-	apt install flawfinder
-	apt install yamllint
-	apt install shellcheck
-	apt install python-catkin-lint
+	${APT_INSTALL} cppcheck
+	${APT_INSTALL} flawfinder
+	${APT_INSTALL} yamllint
+	${APT_INSTALL} shellcheck
+	${APT_INSTALL} python-catkin-lint
 
 
 static_check:

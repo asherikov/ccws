@@ -3,11 +3,12 @@
 
 ##########################################################################################
 
+CCWS_VENDOR_ID=ccws
+export CCWS_VENDOR_ID
+
 # assuming that this preload is sourced from the root of the workspace
 CCWS_WORKSPACE_DIR=$(pwd)
-CCWS_WORKSPACE_SETUP="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}/setup.sh"
 export CCWS_WORKSPACE_DIR
-export CCWS_WORKSPACE_SETUP
 
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
 export CCWS_ARTIFACTS_DIR
@@ -15,7 +16,7 @@ export CCWS_ARTIFACTS_DIR
 CCWS_STATIC_PATH_EXCEPTIONS=""
 export CCWS_STATIC_PATH_EXCEPTIONS
 
-if [ ! -n "${CCWS_ROS_DISTRO}" ];
+if [ -z "${CCWS_ROS_DISTRO}" ];
 then
     # CCWS_SYSROOT is empty by default
     if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
@@ -27,9 +28,6 @@ then
     fi
 fi
 
-CCWS_ROS_ROOT="${CCWS_SYSROOT}/opt/ros/${CCWS_ROS_DISTRO}"
-export CCWS_ROS_ROOT
-
 CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${CCWS_PROFILE}"
 export CCWS_PROFILE_DIR
 
@@ -37,17 +35,54 @@ CCWS_PROFILE_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${CCWS_PROFILE}"
 export CCWS_PROFILE_BUILD_DIR
 
 
+CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/profiles/common/proot_bin"
+export CCWS_PROOT_BIN
+
+
+##########################################################################################
+# installation path
+#
+
+INSTALL_PATH_PREFIX="${CCWS_WORKSPACE_DIR}/install/"
+
+# architecture is a part of target triple set by crosscompilation profiles
+if [ -z "${CCWS_TRIPLE_ARCH}" ];
+then
+    CCWS_TRIPLE_ARCH=$(uname -m)
+fi
+
+case "$PKG" in
+    *\ *)
+        # contains spaces = multiple packages provided
+        if [ -n "${CCWS_VENDOR_ID}" ]
+        then
+            INSTALL_PKG_PREFIX="${CCWS_VENDOR_ID}__"
+        fi
+        ;;
+    *)
+        INSTALL_PKG_PREFIX="${PKG}__"
+        ;;
+esac
+
+CCWS_BUILD_COMMIT=$(git show -s --format=%h)
+CCWS_BUILD_TIME=$(date '+%Y%m%d_%H%M')
+CCWS_BUILD_USER=$(whoami)
+
+CCWS_PROFILE_TARGET_INSTALL_DIR="/opt/${CCWS_VENDOR_ID}/${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}_${CCWS_BUILD_COMMIT}"
+CCWS_PROFILE_WORKING_INSTALL_DIR="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE_TARGET_INSTALL_DIR}"
+CCWS_WORKSPACE_SETUP="${CCWS_PROFILE_WORKING_INSTALL_DIR}/local_setup.sh"
+
+export CCWS_PROFILE_TARGET_INSTALL_DIR CCWS_PROFILE_WORKING_INSTALL_DIR CCWS_WORKSPACE_SETUP CCWS_BUILD_COMMIT CCWS_BUILD_TIME CCWS_BUILD_USER
+
+
 ##########################################################################################
 # doxygen
 #
 CCWS_DOXYGEN_OUTPUT_DIR="${CCWS_ARTIFACTS_DIR}/doxygen"
-export CCWS_DOXYGEN_OUTPUT_DIR
-
 CCWS_DOXYGEN_CONFIG_DIR="${CCWS_WORKSPACE_DIR}/profiles/common/doc"
-export CCWS_DOXYGEN_CONFIG_DIR
-
 CCWS_DOXYGEN_WORKING_DIR="${CCWS_WORKSPACE_DIR}/build/doxygen"
-export CCWS_DOXYGEN_WORKING_DIR
+
+export CCWS_DOXYGEN_OUTPUT_DIR CCWS_DOXYGEN_CONFIG_DIR CCWS_DOXYGEN_WORKING_DIR
 
 
 ##########################################################################################
@@ -69,16 +104,19 @@ export CMAKE_TOOLCHAIN_FILE
 #export COLCON_DEFAULTS_FILE
 
 COLCON_HOME="${CCWS_WORKSPACE_DIR}/common/"
-export COLCON_HOME
+if [ -z "${CCWS_USE_BIN_PKG_LAYOUT}" ]
+then
+    COLCON_INSTALL_BASE=${CCWS_PROFILE_WORKING_INSTALL_DIR};
+else
+    COLCON_INSTALL_BASE=${CCWS_PROFILE_TARGET_INSTALL_DIR};
+fi
 
-COLCON_BUILD_ARGS="--base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-export COLCON_BUILD_ARGS
-
-COLCON_TEST_ARGS="--test-result-base log/${CCWS_PROFILE}/testing"
-export COLCON_TEST_ARGS
-
+# --log-level DEBUG
+COLCON_BUILD_ARGS="--install-base ${COLCON_INSTALL_BASE} --base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+COLCON_TEST_ARGS="--install-base ${COLCON_INSTALL_BASE} --test-result-base log/${CCWS_PROFILE}/testing"
 COLCON_LIST_ARGS="--topological-order --names-only --base-paths src/"
-export COLCON_LIST_ARGS
+
+export COLCON_HOME COLCON_BUILD_ARGS COLCON_TEST_ARGS COLCON_LIST_ARGS
 
 
 ##########################################################################################

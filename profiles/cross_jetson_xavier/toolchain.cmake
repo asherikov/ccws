@@ -29,6 +29,8 @@ set(CMAKE_FIND_ROOT_PATH "$ENV{CCWS_COMPILER_ROOT};${CMAKE_INSTALL_PREFIX};${CMA
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY CACHE STRING "" FORCE)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY CACHE STRING "" FORCE)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY CACHE STRING "" FORCE)
+# CMAKE_FIND_ROOT_PATH is not enough?
+set(CMAKE_PREFIX_PATH "${CMAKE_FIND_ROOT_PATH}" CACHE STRING "" FORCE)
 
 # Normally this should be NEVER, but we have to use python from the target,
 # otherwise generated ROS scripts have wrong python paths, see
@@ -36,6 +38,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY CACHE STRING "" FORCE)
 # decrease we bind mount host native python and other binaries (see setup
 # script).
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY CACHE STRING "" FORCE)
+
+set(CMAKE_IMPORT_LIBRARY_PREFIX ${CMAKE_SYSROOT} CACHE STRING "" FORCE)
 
 
 ###############################################################################
@@ -60,15 +64,11 @@ include_directories(SYSTEM "/usr/include/c++/$ENV{CCWS_GCC_VERSION}/")
 # 3. SIP_MODULE_NAME is needed for python_orocos_kdl, was defined in python2.7/sip.h
 set(CCWS_ROS_CXX_FLAGS "-Wno-narrowing -I/usr/include -D'SIP_MODULE_NAME=\"sip\"'")
 
-# Eigen: disable alignment for simplicity
-# http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html
-set(CCWS_EIGEN_CXX_FLAGS "-D'EIGEN_MAX_STATIC_ALIGN_BYTES=0'")
-
 
 # force flags to cmake cache
 string(FIND "${CMAKE_CXX_FLAGS}" "${CCWS_ROS_CXX_FLAGS}" FIND_RESULT)
 if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_ROS_CXX_FLAGS} ${CCWS_EIGEN_CXX_FLAGS}" CACHE STRING "" FORCE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_ROS_CXX_FLAGS}" CACHE STRING "" FORCE)
 endif ()
 
 
@@ -115,15 +115,23 @@ set(CATKIN_SKIP_TESTING     "OFF" CACHE STRING "" FORCE)
 
 
 ###############################################################################
+# CUDA
+###
+
+set(CCWS_ENABLE_CUDA ON CACHE STRING "" FORCE)
+set(CMAKE_CUDA_COMPILER "$ENV{CCWS_HOST_ROOT}/usr/local/cuda-10.2/bin/nvcc" CACHE STRING "" FORCE)
+set(CMAKE_CUDA_COMPILER_FORCED ON CACHE STRING "" FORCE)
+set(CMAKE_CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}" CACHE STRING "" FORCE)
+set(CUDA_TOOLKIT_ROOT_DIR "$ENV{CCWS_HOST_ROOT}/usr/local/cuda-10.2/" CACHE STRING "" FORCE)
+
+
+###############################################################################
 # other
 ###
 
 # use protobuf compiler from the target to avoid version conflicts
 # not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
-
-# Eigen is not found in the right place for some reason
-set(Eigen_ROOT_DIR "/usr/" CACHE STRING "" FORCE)
 
 # FindBoost.cmake debug output
 set(Boost_DEBUG ON CACHE STRING "" FORCE)

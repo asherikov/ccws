@@ -50,7 +50,8 @@ Profile configurations are located in `profiles`, currently availabale profiles 
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
-- `cross_raspberry_pi` -- crosscompilation for Raspberry Pi.
+- `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
+- `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
 
 All profiles use `ccache`, but it can be disabled in cmake toolchains.
 
@@ -128,21 +129,44 @@ Documentation
 - `make doxall`, `firefox artifacts/doxygen/index.html`
 
 
-Crosscompilation (Raspberry Pi)
--------------------------------
+Cross-compilation (Raspberry Pi)
+--------------------------------
+
+Make sure that global dependencies are installed first (described above).
+
 1. install profile dependencies with `make install PROFILE=cross_raspberry_pi`
-2. init workspace `make wsinit`
+2. clone your repos to `src`, e.g., `cd src; git clone https://github.com/asherikov/staticoma.git`
+3. add your repos to the workspace `make wsscrape`
+4. add ROS dependencies of all your packages to the workspace `make wsdep_to_rosinstall`,
+   or a specific package `make dep_to_rosinstall PKG=<pkg>`
+5. fetch all packages `make wsupdate`
+6. mount sysroot with `make cross_raspberry_pi_mount` (see `profiles/cross_raspberry_pi/targets.mk`)
+7. install system dependencies to the image `make cross_dep_install PKG=staticoma PROFILE=cross_raspberry_pi`
+8. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
+9. unmount sysroot when done with `make cross_raspberry_pi_umount`
+
+See `doc/cross-compilation.md` for more details.
+
+
+Cross-compilation (Jetson Xavier)
+---------------------------------
+Make sure that global dependencies are installed first (described above).
+
+This profile requires Ubuntu 18.04, installs CUDA and some other NVIDIA stuff,
+you may want to do this in a docker. Currently works only for ROS melodic.
+
+1. Copy APP partition image to `profiles/cross_xavier_jetson/system.img`
+2. Install profile dependencies with `make install PROFILE=cross_jetson_xavier`
 3. clone your repos to `src`, e.g., `cd src; git clone https://github.com/asherikov/staticoma.git`
-4. add your repos to workspace `make wsscrape`
+4. add your repos to the workspace `make wsscrape`
 5. add ROS dependencies of all your packages to the workspace `make wsdep_to_rosinstall`,
    or a specific package `make dep_to_rosinstall PKG=<pkg>`
 6. fetch all packages `make wsupdate`
-7. mount sysroot with `make cross_raspberry_pi_mount` (see `profiles/cross_raspberry_pi/targets.mk`)
-8. install system dependencies to the image `make cross_dep_install PKG=staticoma PROFILE=cross_raspberry_pi`
-9. build packages, e.g. `make staticoma PROFILE=cross_raspberry_pi`
-10. unmount sysroot when done with `make cross_raspberry_pi_umount`
+7. mount sysroot with `make cross_jetson_xavier_mount` (see `profiles/cross_jetson_xavier/targets.mk`)
+8. install system dependencies to the image `make cross_dep_install PKG=staticoma PROFILE=cross_jetson_xavier`
+9. build packages, e.g. `make staticoma PROFILE=cross_jetson_xavier`
+10. unmount sysroot when done with `make cross_jetson_xavier_umount`
 
-See `doc/cross-compilation.md` for more details.
 
 
 Related software
@@ -154,3 +178,4 @@ Related projects:
 - https://github.com/DLu/roscompile
 - https://github.com/asherikov/catkin_workspace [deprecated]
 - https://github.com/ros-tooling/cross_compile/
+- https://github.com/mikepurvis/catkin_tools_document

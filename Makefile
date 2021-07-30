@@ -1,6 +1,5 @@
 include make/config.mk
 
-PROFILE?=reldebug
 EMAIL?=$(shell git config --get user.email)
 AUTHOR?=$(shell git config --get user.name)
 
@@ -51,7 +50,7 @@ wsscrape:
 
 # Update workspace & all packages
 wsupdate:
-	git pull
+	-git pull
 	${MAKE} wsupdate_pkgs
 
 # Update workspace & all packages
@@ -83,7 +82,13 @@ wsdep_to_rosinstall:
 
 
 wsprepare_build:
-	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_PROFILE_BUILD_DIR}\""
+	bash -c "${SETUP_SCRIPT}; \
+		mkdir -p \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
+		mkdir -p \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws\"; \
+		test -z \"\$${CCWS_USE_BIN_PKG_LAYOUT}\" || sudo ln -snf \"\$${CCWS_WORKSPACE_DIR}/install/opt/\$${CCWS_VENDOR_ID}\" \"/opt/\$${CCWS_VENDOR_ID}\";"
+
+wsclean_build:
+	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_PROFILE_BUILD_DIR}\""
 
 
 ##
@@ -94,24 +99,25 @@ assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
 build: assert_PKG_arg_must_be_specified wsprepare_build
-	bash -c "${SETUP_SCRIPT}; \
-		\$${CCWS_BUILD_WRAPPER} colcon \
+	bash -c "${SETUP_SCRIPT}  \
+		&& \$${CCWS_BUILD_WRAPPER} colcon \
 		--log-base log/${PROFILE} \
-		--log-level DEBUG \
 		build \
 		--merge-install \
 		--build-base build/${PROFILE} \
-		--install-base install/${PROFILE} \
 		\$${COLCON_BUILD_ARGS} \
 		--parallel-workers ${JOBS} \
-		--packages-up-to ${PKG}"
+		--packages-up-to ${PKG} \
+		&& ${MAKE} wsstatus > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/workspace_status.txt\" \
+		&& echo \"${PKG}\" > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/pkg.txt\" \
+		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/build_info.txt\" "
+
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
 	bash -c "${SETUP_SCRIPT}; \
 		colcon test \
 		--build-base build/${PROFILE} \
-		--install-base install/${PROFILE} \
 		\$${COLCON_TEST_ARGS} \
 		--parallel-workers ${JOBS} \
 		--packages-select ${PKG}"
@@ -159,9 +165,12 @@ dep_to_rosinstall: deplist
 
 rosinstall_extend:
 	bash -c "${SETUP_SCRIPT}; cat ${PKG_LIST} | paste -s -d ' ' \
-		| xargs rosinstall_generator --tar --deps --rosdistro \$${CCWS_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
+		| xargs rosinstall_generator --deps --rosdistro \$${CCWS_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
 	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall
 
+
+xxx:
+	env
 
 ##
 ## Other targets

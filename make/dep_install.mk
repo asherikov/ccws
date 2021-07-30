@@ -12,16 +12,18 @@ wsinstall_deb_common:
 
 wsinstall_ubuntu18: wsinstall_deb_common
 	${APT_INSTALL} clang-tools-10 clang-tidy-10
+	${APT_INSTALL} python-rosinstall-generator
 	${APT_INSTALL} python-rosdep
 
 wsinstall_ubuntu20: wsinstall_deb_common
 	${APT_INSTALL} clang-tools-10 clang-tidy-10
+	${APT_INSTALL} python3-rosinstall-generator
 	${APT_INSTALL} python3-rosdep
 
 install:
 	${MAKE} ${PROFILE}_install
 
-download:
+download: wsprepare_build
 	bash -c "${SETUP_SCRIPT}; \
 		cd \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
-		wget --no-check-certificate ${FILES};"
+		wget --timestamping --no-check-certificate ${FILES};"

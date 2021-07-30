@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e
-#echo ">>>>> CCWS cmake wrapper >>>>>>"
-#pwd
-#echo "Command line: $@"
-# shellcheck disable=SC2086
-proot ${CCWS_PROOT_ARGS} --cwd="$(pwd)" "${CCWS_HOST_ROOT}/usr/bin/cmake" "$@"
-#echo "<<<<< CCWS cmake wrapper <<<<<<"
-#exit 1
