@@ -94,9 +94,11 @@ https://github.com/asherikov/ccws/tree/example_staticoma
 Initial setup
 -------------
 
-- Edit `make/config.mk` to specify developer-dependent worskpace parameters.
-- Install dependencies using `wsinstall_*` targets or manually.
-- Clone pckages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
+- Edit `make/config.mk` and `profiles/common/config.bash` to specify
+  developer-dependent worskpace parameters.
+- Install dependencies using `wsinstall_*` targets or manually, see
+  `make/dep_install.mk` for available targets.
+- Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
 
 Compilation

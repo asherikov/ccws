@@ -85,7 +85,7 @@ wsprepare_build:
 	bash -c "${SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
 		mkdir -p \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws\"; \
-		test -z \"\$${CCWS_USE_BIN_PKG_LAYOUT}\" || sudo ln -snf \"\$${CCWS_WORKSPACE_DIR}/install/opt/\$${CCWS_VENDOR_ID}\" \"/opt/\$${CCWS_VENDOR_ID}\";"
+		test -z \"\$${CCWS_USE_BIN_PKG_LAYOUT}\" || sudo ln -snf \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/opt/\$${CCWS_VENDOR_ID}\" \"/opt/\$${CCWS_VENDOR_ID}\";"
 
 wsclean_build:
 	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_PROFILE_BUILD_DIR}\""
@@ -112,6 +112,15 @@ build: assert_PKG_arg_must_be_specified wsprepare_build
 		&& echo \"${PKG}\" > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/pkg.txt\" \
 		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/build_info.txt\" "
 
+deb:
+	bash -c "${SETUP_SCRIPT};  \
+		mkdir -p \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN\"; \
+		echo \"Package: \$${CCWS_PACKAGE_FULL_NAME_DEB}\"       >  \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
+		echo \"Version: \$${CCWS_BUILD_COMMIT}\"                >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
+		echo \"Architecture: \$${CCWS_DEB_ARCH}\"               >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
+		echo \"Maintainer: ${AUTHOR} <${EMAIL}>\"               >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
+		echo \"Description: \$${CCWS_VENDOR_ID} ${PKG}\"        >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
+		dpkg-deb --root-owner-group --build \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}\" \"install/\$${CCWS_PACKAGE_FULL_NAME}.deb\" "
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified

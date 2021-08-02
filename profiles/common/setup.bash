@@ -3,18 +3,15 @@
 
 ##########################################################################################
 
-CCWS_VENDOR_ID=ccws
-export CCWS_VENDOR_ID
-
 # assuming that this preload is sourced from the root of the workspace
 CCWS_WORKSPACE_DIR=$(pwd)
 export CCWS_WORKSPACE_DIR
 
+source ${CCWS_WORKSPACE_DIR}/profiles/common/config.bash
+
+
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
 export CCWS_ARTIFACTS_DIR
-
-CCWS_STATIC_PATH_EXCEPTIONS=""
-export CCWS_STATIC_PATH_EXCEPTIONS
 
 if [ -z "${CCWS_ROS_DISTRO}" ];
 then
@@ -39,40 +36,54 @@ CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/profiles/common/proot_bin"
 export CCWS_PROOT_BIN
 
 
+if [ -z "${CCWS_DEB_ARCH}" ]
+then
+    CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH}
+    export CCWS_DEB_ARCH
+fi
+
+
 ##########################################################################################
 # installation path
 #
-
-INSTALL_PATH_PREFIX="${CCWS_WORKSPACE_DIR}/install/"
-
-# architecture is a part of target triple set by crosscompilation profiles
-if [ -z "${CCWS_TRIPLE_ARCH}" ];
-then
-    CCWS_TRIPLE_ARCH=$(uname -m)
-fi
-
-case "$PKG" in
-    *\ *)
-        # contains spaces = multiple packages provided
-        if [ -n "${CCWS_VENDOR_ID}" ]
-        then
-            INSTALL_PKG_PREFIX="${CCWS_VENDOR_ID}__"
-        fi
-        ;;
-    *)
-        INSTALL_PKG_PREFIX="${PKG}__"
-        ;;
-esac
 
 CCWS_BUILD_COMMIT=$(git show -s --format=%h)
 CCWS_BUILD_TIME=$(date '+%Y%m%d_%H%M')
 CCWS_BUILD_USER=$(whoami)
 
-CCWS_PROFILE_TARGET_INSTALL_DIR="/opt/${CCWS_VENDOR_ID}/${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}_${CCWS_BUILD_COMMIT}"
-CCWS_PROFILE_WORKING_INSTALL_DIR="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE_TARGET_INSTALL_DIR}"
+if [ -z "${CCWS_USE_BIN_PKG_LAYOUT}" ]
+then
+    CCWS_PACKAGE_FULL_NAME=${PKG}
+    CCWS_PROFILE_WORKING_INSTALL_DIR="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
+    CCWS_PROFILE_TARGET_INSTALL_DIR="${CCWS_PROFILE_WORKING_INSTALL_DIR}"
+else
+    if [ -z "${CCWS_TRIPLE_ARCH}" ];
+    then
+        CCWS_TRIPLE_ARCH=$(uname -m)
+    fi
+
+    case "${PKG}" in
+        *\ *)
+            # contains spaces = multiple packages provided
+            if [ -n "${CCWS_VENDOR_ID}" ]
+            then
+                INSTALL_PKG_PREFIX="${CCWS_VENDOR_ID}__"
+            fi
+            ;;
+        *)
+            INSTALL_PKG_PREFIX="${PKG}__"
+            ;;
+    esac
+
+    CCWS_PACKAGE_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}_${CCWS_BUILD_COMMIT}
+    CCWS_PACKAGE_FULL_NAME_DEB=$(echo "${CCWS_PACKAGE_FULL_NAME}" | sed 's/_/-/g')
+    CCWS_PROFILE_TARGET_INSTALL_DIR="/opt/${CCWS_VENDOR_ID}/${CCWS_PACKAGE_FULL_NAME}"
+    CCWS_PROFILE_WORKING_INSTALL_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
+    CCWS_PROFILE_WORKING_INSTALL_DIR="${CCWS_PROFILE_WORKING_INSTALL_ROOT}/${CCWS_PROFILE_TARGET_INSTALL_DIR}"
+fi
 CCWS_WORKSPACE_SETUP="${CCWS_PROFILE_WORKING_INSTALL_DIR}/local_setup.sh"
 
-export CCWS_PROFILE_TARGET_INSTALL_DIR CCWS_PROFILE_WORKING_INSTALL_DIR CCWS_WORKSPACE_SETUP CCWS_BUILD_COMMIT CCWS_BUILD_TIME CCWS_BUILD_USER
+export CCWS_PACKAGE_FULL_NAME_DEB CCWS_PROFILE_TARGET_INSTALL_DIR CCWS_PROFILE_WORKING_INSTALL_DIR CCWS_WORKSPACE_SETUP CCWS_BUILD_COMMIT CCWS_BUILD_TIME CCWS_BUILD_USER
 
 
 ##########################################################################################
@@ -104,16 +115,10 @@ export CMAKE_TOOLCHAIN_FILE
 #export COLCON_DEFAULTS_FILE
 
 COLCON_HOME="${CCWS_WORKSPACE_DIR}/common/"
-if [ -z "${CCWS_USE_BIN_PKG_LAYOUT}" ]
-then
-    COLCON_INSTALL_BASE=${CCWS_PROFILE_WORKING_INSTALL_DIR};
-else
-    COLCON_INSTALL_BASE=${CCWS_PROFILE_TARGET_INSTALL_DIR};
-fi
 
 # --log-level DEBUG
-COLCON_BUILD_ARGS="--install-base ${COLCON_INSTALL_BASE} --base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-COLCON_TEST_ARGS="--install-base ${COLCON_INSTALL_BASE} --test-result-base log/${CCWS_PROFILE}/testing"
+COLCON_BUILD_ARGS="--install-base ${CCWS_PROFILE_TARGET_INSTALL_DIR} --base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+COLCON_TEST_ARGS="--install-base ${CCWS_PROFILE_TARGET_INSTALL_DIR} --test-result-base log/${CCWS_PROFILE}/testing"
 COLCON_LIST_ARGS="--topological-order --names-only --base-paths src/"
 
 export COLCON_HOME COLCON_BUILD_ARGS COLCON_TEST_ARGS COLCON_LIST_ARGS
