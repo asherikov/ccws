@@ -1,20 +1,15 @@
 #!/bin/bash
 set -e
-#echo ">>>>> CCWS cmake wrapper >>>>>>"
+#echo ">>>>> CCWS rosdep wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
 # shellcheck disable=SC2086
 proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
-    ${IFS# workspace and compiler} \
-    --bind="${CCWS_WORKSPACE_DIR}" \
     ${IFS# rosdep stuff} \
     --bind="${HOME}/.ros/rosdep/:${ROS_HOME}/rosdep" \
     --bind=/etc/ros/rosdep/ \
-    ${IFS# installation paths} \
-    --bind="${CCWS_INSTALL_DIR_HOST}:${CCWS_INSTALL_DIR_TARGET}" \
-    --bind=/lib/udev/rules.d \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \
     --bind=/bin/false \
@@ -29,17 +24,15 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/bin/mktemp \
     --bind=/usr/bin/env \
     --bind=/usr/bin/perl \
+    --bind=/usr/bin/cmake \
     --bind=/usr/bin/make \
     ${IFS# python bindings} \
     --bind=/usr/bin/python \
     --bind=/usr/bin/python3 \
     $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    ${IFS# cmake bindings} \
-    --bind=/usr/bin/cmake \
-    $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# qemu} \
     --qemu="qemu-${CCWS_TRIPLE_ARCH}" \
-    --cwd="$(pwd)" \
-    "/usr/bin/cmake" "$@"
-#echo "<<<<< CCWS cmake wrapper <<<<<<"
+    --cwd="${CCWS_WORKSPACE_DIR}" \
+    "${CCWS_HOST_ROOT}/usr/bin/python" "${CCWS_HOST_ROOT}/usr/bin/rosdep" "$@"
+#echo "<<<<< CCWS rosdep wrapper <<<<<<"
 #exit 1

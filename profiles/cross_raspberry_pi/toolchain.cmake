@@ -85,6 +85,7 @@ link_directories("/usr/lib/gcc/${CMAKE_LIBRARY_ARCHITECTURE}/$ENV{CCWS_GCC_VERSI
 # in order to make our lives more interesting cmake eliminates this path, so we
 # have to set it explicitly with `-L` below
 link_directories("/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
+link_directories("/usr/lib/")
 link_directories("/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
 
 
@@ -93,6 +94,7 @@ link_directories("/lib/${CMAKE_LIBRARY_ARCHITECTURE}/")
 #   fixes dependencies of `kdl_parser`: `class_loader`, `roslib`
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -L/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/ \
+    -L/usr/lib/ \
     -Wl,-verbose \
     ${CCWS_ROS_LINKER_FLAGS} \
     -Wl,-rpath-link,/lib/ \
@@ -102,7 +104,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
     -Wl,-rpath-link,${CMAKE_INSTALL_PREFIX}/lib/ \
     -Wl,-rpath-link,${CMAKE_SYSROOT}/opt/ros/$ENV{CCWS_ROS_DISTRO}/lib" CACHE STRING "" FORCE)
 
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-verbose -L/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/" CACHE STRING "" FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-verbose -L/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}/ -L/usr/lib/" CACHE STRING "" FORCE)
 
 
 ###############################################################################
@@ -121,9 +123,6 @@ set(CATKIN_SKIP_TESTING     "OFF" CACHE STRING "" FORCE)
 # use protobuf compiler from the target to avoid version conflicts
 # not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
-
-# Eigen is not found in the right place for some reason
-set(Eigen_ROOT_DIR "/usr/" CACHE STRING "" FORCE)
 
 # FindBoost.cmake debug output
 set(Boost_DEBUG ON CACHE STRING "" FORCE)

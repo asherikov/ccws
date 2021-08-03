@@ -6,10 +6,17 @@ AUTHOR?=$(shell git config --get user.name)
 WORKSPACE_DIR=$(shell pwd)
 
 SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
+DEB_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/deb.bash
 ARGS?=
 
 MEMORY_PER_JOB_MB?=1024
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
+
+export AUTHOR
+export EMAIL
+
+export AUTHOR
+export EMAIL
 
 
 ##
@@ -83,12 +90,11 @@ wsdep_to_rosinstall:
 
 wsprepare_build:
 	bash -c "${SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
-		mkdir -p \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws\"; \
-		test -z \"\$${CCWS_USE_BIN_PKG_LAYOUT}\" || sudo ln -snf \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/opt/\$${CCWS_VENDOR_ID}\" \"/opt/\$${CCWS_VENDOR_ID}\";"
+		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
+		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}/ccws/\"; "
 
 wsclean_build:
-	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_PROFILE_BUILD_DIR}\""
+	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
 
 ##
@@ -108,19 +114,32 @@ build: assert_PKG_arg_must_be_specified wsprepare_build
 		\$${COLCON_BUILD_ARGS} \
 		--parallel-workers ${JOBS} \
 		--packages-up-to ${PKG} \
-		&& ${MAKE} wsstatus > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/workspace_status.txt\" \
-		&& echo \"${PKG}\" > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/pkg.txt\" \
-		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_PROFILE_WORKING_INSTALL_DIR}/ccws/build_info.txt\" "
+		&& cp ${WORKSPACE_DIR}/scripts/colcon_setup.bash \"\$${CCWS_INSTALL_DIR_HOST}/setup.bash\" \
+		&& ${MAKE} wsstatus > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/workspace_status.txt\" \
+		&& echo \"${PKG}\" > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/pkg.txt\" \
+		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/build_info.txt\" "
+
+deb_native:
+	${MAKE} deb_mount
+	${MAKE} deb
+	${MAKE} deb_umount
+
+deb_mount: assert_PKG_arg_must_be_specified
+	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT}; \
+		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}\"; \
+		sudo mkdir -p \"\$${CCWS_INSTALL_DIR_TARGET}\"; \
+		sudo mount --bind \"\$${CCWS_INSTALL_DIR_HOST}\" \"\$${CCWS_INSTALL_DIR_TARGET}\" "
+
+deb_umount:
+	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT}; \
+		sudo umount --recursive \"\$${CCWS_INSTALL_DIR_TARGET}\" "
 
 deb:
-	bash -c "${SETUP_SCRIPT};  \
-		mkdir -p \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN\"; \
-		echo \"Package: \$${CCWS_PACKAGE_FULL_NAME_DEB}\"       >  \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
-		echo \"Version: \$${CCWS_BUILD_COMMIT}\"                >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
-		echo \"Architecture: \$${CCWS_DEB_ARCH}\"               >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
-		echo \"Maintainer: ${AUTHOR} <${EMAIL}>\"               >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
-		echo \"Description: \$${CCWS_VENDOR_ID} ${PKG}\"        >> \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}/DEBIAN/control\"; \
-		dpkg-deb --root-owner-group --build \"\$${CCWS_PROFILE_WORKING_INSTALL_ROOT}\" \"install/\$${CCWS_PACKAGE_FULL_NAME}.deb\" "
+	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT};  \
+		${MAKE} build; \
+		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
+		echo \"\$${CCWS_DEB_CONTROL}\"  >  \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
+		dpkg-deb --root-owner-group --build \"\$${CCWS_INSTALL_DIR_HOST_ROOT}\" \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
@@ -177,9 +196,6 @@ rosinstall_extend:
 		| xargs rosinstall_generator --deps --rosdistro \$${CCWS_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
 	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall
 
-
-xxx:
-	env
 
 ##
 ## Other targets

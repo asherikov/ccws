@@ -34,10 +34,8 @@ export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI
 # setup common
 #
 
-CCWS_USE_BIN_PKG_LAYOUT="yes"
-
+source "./profiles/common/deb.bash"
 source "./profiles/common/setup.bash"
-set -e
 
 
 ##########################################################################################
@@ -73,8 +71,8 @@ export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 ##########################################################################################
 # ROS
 #
-ROS_PYTHON_VERSION=3
-export ROS_PYTHON_VERSION
+#ROS_PYTHON_VERSION=3
+#export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
@@ -87,6 +85,7 @@ export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
-# colcon
+# proot
 #
 CCWS_PROOT_ARGS=--bind="${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}"
+export CCWS_PROOT_ARGS
