@@ -92,3 +92,9 @@ CUDA_INC_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-$
 CUDA_LIB_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}/
 export CCWS_CUDA_VERSION CUDA_INC_PATH CUDA_LIB_PATH
 
+
+##########################################################################################
+# proot
+#
+CCWS_PROOT_ARGS=--qemu="qemu-${CCWS_TRIPLE_ARCH}"
+export CCWS_PROOT_ARGS

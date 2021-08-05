@@ -218,14 +218,10 @@ This approach has a number of advantages:
 ### Building packages
 
 In order to get all paths right in ROS cmake files we have to install to the
-host root, we avoid this using bind mounts, which are automatic in
-cross-compilation profiles, but need to be performed explicitly in the case of
-'native' builds, e.g.
-- `make deb_mount PKG=staticoma PROFILE=reldebug`
-- `make deb PKG=staticoma PROFILE=reldebug`
-- `make deb_umount PKG=staticoma PROFILE=reldebug`
-- or simply `make deb_native PKG=staticoma PROFILE=reldebug`
+host root, we avoid this using proot similarly to cross-compilation profiles.
 
+Profile build data should be cleared (e.g., with `make wsclean`) before
+building binary package, unless you are rebuilding the same package.
 
 TODO:
 - We dont need cmake paths to be correct in a superpackage unless some other

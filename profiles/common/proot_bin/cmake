@@ -5,13 +5,11 @@ set -e
 #echo "Command line: $@"
 # shellcheck disable=SC2086
 proot --rootfs="${CCWS_SYSROOT}" \
+    --cwd="$(pwd)" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# workspace and compiler} \
     --bind="${CCWS_WORKSPACE_DIR}" \
-    ${IFS# rosdep stuff} \
-    --bind="${HOME}/.ros/rosdep/:${ROS_HOME}/rosdep" \
-    --bind=/etc/ros/rosdep/ \
     ${IFS# installation paths} \
     --bind="${CCWS_INSTALL_DIR_HOST}:${CCWS_INSTALL_DIR_TARGET}" \
     --bind=/lib/udev/rules.d \
@@ -37,9 +35,6 @@ proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \
     $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    ${IFS# qemu} \
-    --qemu="qemu-${CCWS_TRIPLE_ARCH}" \
-    --cwd="$(pwd)" \
     "/usr/bin/cmake" "$@"
 #echo "<<<<< CCWS cmake wrapper <<<<<<"
 #exit 1

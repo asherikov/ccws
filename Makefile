@@ -135,30 +135,28 @@ rosdep: deplist
 		rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ') \
 		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > \"${WORKSPACE_DIR}/build/deplist/${PKG}.deb\" "
 
-deb_native:
-	${MAKE} deb_mount
-	${MAKE} deb
-	${MAKE} deb_umount
+deb_build: rosdep version_hash
+	bash -c "${DEB_SETUP_SCRIPT}; ${MAKE} build"
 
-deb_mount: assert_PKG_arg_must_be_specified
-	${MAKE} version_hash
+deb_pack: assert_PKG_arg_must_be_specified
 	bash -c "${DEB_SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}\"; \
-		sudo mkdir -p \"\$${CCWS_INSTALL_DIR_TARGET}\"; \
-		sudo mount --bind \"\$${CCWS_INSTALL_DIR_HOST}\" \"\$${CCWS_INSTALL_DIR_TARGET}\" "
-
-deb_umount:
-	bash -c "${DEB_SETUP_SCRIPT}; \
-		sudo umount --recursive \"\$${CCWS_INSTALL_DIR_TARGET}\" "
-
-deb: rosdep version_hash
-	bash -c "${DEB_SETUP_SCRIPT}; \
-		${MAKE} build; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
+		chmod -R g-w \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" ; \
+		find \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" -iname '*.pyc' | xargs --no-run-if-empty rm; \
 		echo \"\$${CCWS_DEB_CONTROL}\"                                    >  \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
 		echo -n 'Depends: '                                               >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
 		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' | paste -s -d ',' >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
 		dpkg-deb --root-owner-group --build \"\$${CCWS_INSTALL_DIR_HOST_ROOT}\" \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
+
+# see https://lintian.debian.org/tags/
+deb_lint: assert_PKG_arg_must_be_specified
+	bash -c "${DEB_SETUP_SCRIPT}; \
+	lintian \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
+
+deb:
+	${MAKE} deb_build
+	${MAKE} deb_pack
+
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified

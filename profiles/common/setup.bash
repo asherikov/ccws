@@ -62,16 +62,6 @@ else
         CCWS_TRIPLE_ARCH=$(uname -m)
     fi
 
-    # binary package architecture
-    case "${CCWS_TRIPLE_ARCH}" in
-        # fixes 'package architecture (aarch64) does not match system (arm64)', deb
-        # architecture naming conventions are different
-        aarch64) CCWS_DEB_ARCH=arm64;;
-        x86_64) CCWS_DEB_ARCH=amd64;;
-
-        *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
-    esac
-
     # package name
     case "${PKG}" in
         *\ *)
@@ -86,20 +76,13 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_DEB_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}${VERSION}
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}${VERSION}
 
     CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_HOST_ROOT}/${CCWS_INSTALL_DIR_TARGET}"
 
-    CCWS_DEB_CONTROL="\
-Package: $(echo "${CCWS_PKG_FULL_NAME}" | sed 's/_/-/g')
-Version: $(echo "${CCWS_BUILD_TIME}${VERSION}" | sed 's/_/-/g')
-Architecture: ${CCWS_DEB_ARCH}
-Maintainer: ${AUTHOR} <${EMAIL}>
-Description: ${CCWS_VENDOR_ID} ${PKG}"
-
-    export CCWS_DEB_CONTROL CCWS_INSTALL_DIR_HOST_ROOT
+    export CCWS_INSTALL_DIR_HOST_ROOT
 fi
 CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_HOST}/setup.bash"
 

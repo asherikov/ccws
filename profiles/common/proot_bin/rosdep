@@ -5,6 +5,7 @@ set -e
 #echo "Command line: $@"
 # shellcheck disable=SC2086
 proot --rootfs="${CCWS_SYSROOT}" \
+    --cwd="${CCWS_WORKSPACE_DIR}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# rosdep stuff} \
@@ -30,9 +31,6 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/python \
     --bind=/usr/bin/python3 \
     $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    ${IFS# qemu} \
-    --qemu="qemu-${CCWS_TRIPLE_ARCH}" \
-    --cwd="${CCWS_WORKSPACE_DIR}" \
     "${CCWS_HOST_ROOT}/usr/bin/python" "${CCWS_HOST_ROOT}/usr/bin/rosdep" "$@"
 #echo "<<<<< CCWS rosdep wrapper <<<<<<"
 #exit 1
