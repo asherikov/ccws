@@ -12,30 +12,39 @@ cross_raspberry_pi_install: cross_raspberry_pi_clean cross_install_common_host_d
 		FILES="https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz \
 				http://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip"
 	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		cd \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
+		cd \"\$${CCWS_BUILD_DIR}\"; \
 		tar -xf raspi-toolchain.tar.gz; \
-		unzip 2021-05-07-raspios-buster-armhf.zip; \
+		unzip -o 2021-05-07-raspios-buster-armhf.zip; \
 		mv cross-pi-gcc \"\$${CCWS_PROFILE_DIR}\"; \
 		mv 2021-05-07-raspios-buster-armhf.img \"\$${CCWS_PROFILE_DIR}/system.img\""
+	${MAKE} cross_raspberry_pi_apt_init
+
+cross_raspberry_pi_apt_init:
 	# 1. copy qemu in order to be able to do chroot
-	# 2. remove some heavy packages to get free space for ROS dependencies
+	# 2. add ROS apt sources in order to avoid weird package conflicts,
+	#    e.g., lack of catkin_pkg_modules in upstream repos.
+	#    https://github.com/ros-infrastructure/catkin_pkg/issues/298
+	#    http://wiki.ros.org/UpstreamPackages
+	#    apt-cache showpkg python-catkin-pkg
+	# 3. remove some heavy packages to get free space for ROS dependencies
 	${MAKE} cross_raspberry_pi_mount
 	-bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
-		sudo chroot ./ /bin/sh -c \
-			'apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
+       	curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
+	        | sudo chroot ./ apt-key add -; \
+    	sudo chroot ./ /bin/sh -c \"\
+            echo 'deb http://packages.ros.org/ros/ubuntu' > /tmp/ros-latest.list; \
+            lsb_release -sc                               >> /tmp/ros-latest.list; \
+            echo 'main'                                   >> /tmp/ros-latest.list; \
+            cat /tmp/ros-latest.list | paste -s -d ' ' > /etc/apt/sources.list.d/ros-latest.list; \
+            rm  /tmp/ros-latest.list; \
+			apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
 			apt clean; \
 			apt update; \
 			apt --yes upgrade; \
-			apt clean'"
+			apt clean\" "
 	${MAKE} cross_raspberry_pi_umount
-
-cross_raspberry_pi_mount2: cross_raspberry_pi_umount
-	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		cd \"\$${CCWS_PROFILE_DIR}\"; \
-		CCWS_SYSROOT_DEVICE=\$$(${CROSS_SETUP_LOOP_DEV}); \
-		mount \"\$${CCWS_SYSROOT_DEVICE}p2\" \"\$${CCWS_SYSROOT}\" "
 
 cross_raspberry_pi_mount: cross_raspberry_pi_umount
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
@@ -46,6 +55,6 @@ cross_raspberry_pi_umount:
 	${MAKE} cross_umount PROFILE=cross_raspberry_pi
 
 cross_raspberry_pi_purge: cross_raspberry_pi_umount
-	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
-		rm -Rf \"\$${CCWS_PROFILE_DIR}/*.img; \
-		rm -Rf \"\$${CCWS_PROFILE_DIR}/cross-pi-gcc"
+	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
+		rm -Rf \"\$${CCWS_PROFILE_DIR}/system.img\"; \
+		rm -Rf \"\$${CCWS_PROFILE_DIR}/cross-pi-gcc\" "

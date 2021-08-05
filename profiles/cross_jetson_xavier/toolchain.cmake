@@ -134,5 +134,5 @@ set(CUDA_TOOLKIT_ROOT_DIR "$ENV{CCWS_HOST_ROOT}/usr/local/cuda-10.2/" CACHE STRI
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
 
 # FindBoost.cmake debug output
-set(Boost_DEBUG ON CACHE STRING "" FORCE)
+#set(Boost_DEBUG ON CACHE STRING "" FORCE)
 

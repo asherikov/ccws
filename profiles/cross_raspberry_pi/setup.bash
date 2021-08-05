@@ -34,7 +34,6 @@ export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI
 # setup common
 #
 
-source "./profiles/common/deb.bash"
 source "./profiles/common/setup.bash"
 
 

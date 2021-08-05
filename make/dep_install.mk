@@ -8,22 +8,28 @@ wsinstall_deb_common:
 		python3-colcon-package-information
 	${APT_INSTALL} python3-wstool
 	${APT_INSTALL} build-essential
-	${APT_INSTALL} wget
+	${APT_INSTALL} wget curl
 
-wsinstall_ubuntu18: wsinstall_deb_common
-	${APT_INSTALL} clang-tools-10 clang-tidy-10
-	${APT_INSTALL} python-rosinstall-generator
-	${APT_INSTALL} python-rosdep
+#ubuntu18
+wsinstall_bionic: wsinstall_deb_common
+	${APT_INSTALL} \
+		clang-tools-10 clang-tidy-10 \
+		python-rosinstall-generator \
+		python-rosdep \
+		python-rospkg \
 
-wsinstall_ubuntu20: wsinstall_deb_common
-	${APT_INSTALL} clang-tools-10 clang-tidy-10
-	${APT_INSTALL} python3-rosinstall-generator
-	${APT_INSTALL} python3-rosdep
+#ubuntu20
+wsinstall_focal: wsinstall_deb_common
+	${APT_INSTALL} \
+		clang-tools-10 clang-tidy-10 \
+		python3-rosinstall-generator \
+		python3-rosdep \
+		python3-rospkg
 
 install:
 	${MAKE} ${PROFILE}_install
 
 download: wsprepare_build
 	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCWS_PROFILE_BUILD_DIR}\"; \
+		cd \"\$${CCWS_BUILD_DIR}\"; \
 		wget --timestamping --no-check-certificate ${FILES};"

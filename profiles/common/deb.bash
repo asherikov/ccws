@@ -6,3 +6,6 @@ set -o pipefail
 
 CCWS_DEB_ENABLE="yes"
 export CCWS_DEB_ENABLE
+
+
+source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash

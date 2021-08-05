@@ -8,7 +8,7 @@ proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# rosdep stuff} \
-    --bind="${HOME}/.ros/rosdep/:${ROS_HOME}/rosdep" \
+    --bind="${ROS_HOME}/rosdep/:${ROS_HOME}/rosdep" \
     --bind=/etc/ros/rosdep/ \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \

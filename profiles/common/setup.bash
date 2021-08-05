@@ -40,10 +40,9 @@ export CCWS_PROOT_BIN
 # installation path
 #
 
-CCWS_BUILD_COMMIT=$(git show -s --format=%h)
 CCWS_BUILD_TIME=$(date '+%Y%m%d_%H%M')
 CCWS_BUILD_USER=$(whoami)
-export CCWS_BUILD_COMMIT CCWS_BUILD_TIME CCWS_BUILD_USER
+export CCWS_BUILD_TIME CCWS_BUILD_USER
 
 
 if [ -z "${CCWS_DEB_ENABLE}" ]
@@ -53,6 +52,11 @@ then
     CCWS_INSTALL_DIR_HOST="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
     CCWS_INSTALL_DIR_TARGET="${CCWS_INSTALL_DIR_HOST}"
 else
+    if [ -f "${WORKSPACE_DIR}/build/version_hash/${PKG}" ]
+    then
+        VERSION="_$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
+    fi
+
     if [ -z "${CCWS_TRIPLE_ARCH}" ];
     then
         CCWS_TRIPLE_ARCH=$(uname -m)
@@ -82,7 +86,7 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_DEB_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}_${CCWS_BUILD_COMMIT}
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_DEB_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}${VERSION}
 
     CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
@@ -90,14 +94,14 @@ else
 
     CCWS_DEB_CONTROL="\
 Package: $(echo "${CCWS_PKG_FULL_NAME}" | sed 's/_/-/g')
-Version: $(echo "${CCWS_BUILD_TIME}_${CCWS_BUILD_COMMIT}" | sed 's/_/-/g')
+Version: $(echo "${CCWS_BUILD_TIME}${VERSION}" | sed 's/_/-/g')
 Architecture: ${CCWS_DEB_ARCH}
 Maintainer: ${AUTHOR} <${EMAIL}>
 Description: ${CCWS_VENDOR_ID} ${PKG}"
 
     export CCWS_DEB_CONTROL CCWS_INSTALL_DIR_HOST_ROOT
 fi
-CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_HOST}/local_setup.sh"
+CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_HOST}/setup.bash"
 
 export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_TARGET CCWS_INSTALL_DIR_HOST CCWS_WORKSPACE_SETUP
 

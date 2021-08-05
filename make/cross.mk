@@ -8,12 +8,9 @@ cross_sysroot_fix_abs_symlinks:
 		cd \"\$${CCWS_SYSROOT}\"; \
 		find ./usr -lname '/*' -printf 'sudo ln --relative --symbolic --force ./%l %p\n' | /bin/sh"
 
-cross_dep_install: deplist
-	bash -c "${SETUP_SCRIPT}; \
-		proot_rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ')" \
-		| grep -v "^#" | sed 's/ /\n/g' > "${WORKSPACE_DIR}/build/deplist/${PKG}.apt"
+cross_dep_install: rosdep
 	sudo bash -c "${SETUP_SCRIPT}; \
-		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.apt' \
+		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' \
 		| xargs chroot \"\$${CCWS_SYSROOT}\" ${APT_INSTALL}"
 
 # internal target, should be called with initialized environment
@@ -31,4 +28,5 @@ cross_umount:
 	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
 cross_install_common_host_deps:
-	${APT_INSTALL} qemu-user-static python3-rospkg
+	${MAKE} wsinstall_${OS_DISTRO}
+	${APT_INSTALL} qemu-user-static

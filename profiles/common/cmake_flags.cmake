@@ -14,6 +14,11 @@ set(CMAKE_CXX_COMPILER_WORKS    TRUE    CACHE BOOL "" FORCE)
 # structure, cmake -- target directory structure, in general they do not match
 set(CMAKE_INSTALL_PREFIX        $ENV{CCWS_INSTALL_DIR_TARGET} CACHE STRING "" FORCE)
 
+# some packages expect CATKIN_DEVEL_PREFIX to be set when compiling in 'catkin'
+# environment, colcon skips devel phase and does not set it
+# https://github.com/colcon/colcon-ros/issues/119
+set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORCE)
+
 
 ###############################################################################
 # cmake debug

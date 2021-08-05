@@ -4,6 +4,7 @@ EMAIL?=$(shell git config --get user.email)
 AUTHOR?=$(shell git config --get user.name)
 
 WORKSPACE_DIR=$(shell pwd)
+OS_DISTRO=$(shell lsb_release -cs)
 
 SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
 DEB_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/deb.bash
@@ -14,9 +15,8 @@ export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB}
 
 export AUTHOR
 export EMAIL
-
-export AUTHOR
-export EMAIL
+export PROFILE
+export WORKSPACE_DIR
 
 
 ##
@@ -119,26 +119,45 @@ build: assert_PKG_arg_must_be_specified wsprepare_build
 		&& echo \"${PKG}\" > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/pkg.txt\" \
 		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/build_info.txt\" "
 
+
+version_hash: assert_PKG_arg_must_be_specified
+	mkdir -p ${WORKSPACE_DIR}/build/version_hash
+	${MAKE} info_with_deps \
+		| grep path | sed 's/path: //' | sort \
+		| xargs -I {} /bin/sh -c 'cd {}; git show -s --format=%h' > ${WORKSPACE_DIR}/build/version_hash/${PKG}
+	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}
+	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
+
+rosdep: deplist
+	bash -c "${SETUP_SCRIPT}; \
+		mkdir -p \"\$${ROS_HOME}/rosdep\"; \
+		rosdep update; \
+		rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ') \
+		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > \"${WORKSPACE_DIR}/build/deplist/${PKG}.deb\" "
+
 deb_native:
 	${MAKE} deb_mount
 	${MAKE} deb
 	${MAKE} deb_umount
 
 deb_mount: assert_PKG_arg_must_be_specified
-	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT}; \
+	${MAKE} version_hash
+	bash -c "${DEB_SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}\"; \
 		sudo mkdir -p \"\$${CCWS_INSTALL_DIR_TARGET}\"; \
 		sudo mount --bind \"\$${CCWS_INSTALL_DIR_HOST}\" \"\$${CCWS_INSTALL_DIR_TARGET}\" "
 
 deb_umount:
-	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT}; \
+	bash -c "${DEB_SETUP_SCRIPT}; \
 		sudo umount --recursive \"\$${CCWS_INSTALL_DIR_TARGET}\" "
 
-deb:
-	bash -c "${DEB_SETUP_SCRIPT}; ${SETUP_SCRIPT};  \
+deb: rosdep version_hash
+	bash -c "${DEB_SETUP_SCRIPT}; \
 		${MAKE} build; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
-		echo \"\$${CCWS_DEB_CONTROL}\"  >  \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
+		echo \"\$${CCWS_DEB_CONTROL}\"                                    >  \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
+		echo -n 'Depends: '                                               >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
+		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' | paste -s -d ',' >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
 		dpkg-deb --root-owner-group --build \"\$${CCWS_INSTALL_DIR_HOST_ROOT}\" \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
@@ -175,7 +194,7 @@ new: assert_PKG_arg_must_be_specified
 
 # `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
 info_with_deps: assert_PKG_arg_must_be_specified
-	colcon list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs colcon info --base-paths src/ --packages-select
+	@colcon list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs colcon info --base-paths src/ --packages-select
 
 # generate list of dependencies which are not present in the workspace
 deplist: assert_PKG_arg_must_be_specified
