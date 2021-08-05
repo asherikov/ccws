@@ -124,9 +124,9 @@ version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
 	${MAKE} info_with_deps \
 		| grep path | sed 's/path: //' | sort \
-		| xargs -I {} /bin/sh -c 'cd {}; git show -s --format=%h' > ${WORKSPACE_DIR}/build/version_hash/${PKG}
-	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}
-	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
+		| xargs -I {} /bin/sh -c 'cd {}; git show -s --format=%h' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
+	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
+	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
 
 rosdep: deplist
 	bash -c "${SETUP_SCRIPT}; \

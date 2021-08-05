@@ -54,7 +54,7 @@ then
 else
     if [ -f "${WORKSPACE_DIR}/build/version_hash/${PKG}" ]
     then
-        VERSION="_$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
+        VERSION="__$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
     fi
 
     if [ -z "${CCWS_TRIPLE_ARCH}" ];
@@ -76,7 +76,7 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__${CCWS_BUILD_USER}${VERSION}
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}${VERSION}
 
     CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
