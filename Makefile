@@ -6,6 +6,8 @@ AUTHOR?=$(shell git config --get user.name)
 WORKSPACE_DIR=$(shell pwd)
 OS_DISTRO=$(shell lsb_release -cs)
 
+COLCON_LOGLESS=colcon --log-base /dev/null
+
 SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
 DEB_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/deb.bash
 ARGS?=
@@ -25,11 +27,11 @@ export WORKSPACE_DIR
 
 default: build
 .DEFAULT:
-	bash -c "${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s | xargs -I {} ${MAKE} PKG=\"{}\""
+	bash -c "${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s | xargs --no-run-if-empty -I {} ${MAKE} PKG=\"{}\""
 
 # include after default targets to avoid shadowing them
--include make/*.mk
 -include profiles/*/*.mk
+-include make/*.mk
 
 
 
@@ -38,12 +40,15 @@ default: build
 ##
 
 wslist:
-	@colcon list --names-only --base-paths src/
+	@${COLCON_LOGLESS} list --names-only --base-paths src/
 
 # Reset & initialize workspace
 wsinit: wspurge
 	mkdir -p src
 	cd src; wstool init
+	cd src; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
+	-cd src; wstool scrape -y
+	${MAKE} wsupdate
 
 # Status packages in the workspace
 wsstatus:
@@ -65,24 +70,9 @@ wsupdate_pkgs:
 	cd src; wstool update -j${JOBS} --continue-on-error
 
 
-# Clean workspace
-wsclean:
-	find ${WORKSPACE_DIR}/artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
-	rm -Rf build*
-	rm -Rf devel*
-	rm -Rf install*
-	rm -Rf log*
-	rm -Rf src/.rosinstall.bak
-
-
-# Purge workspace
-wspurge: wsclean
-	rm -Rf src
-
-
 wsdep_to_rosinstall:
 	rm -Rf ${WORKSPACE_DIR}/build/deplist
-	bash -c "${MAKE} --quiet wslist | xargs -I {} ${MAKE} deplist PKG=\"{}\""
+	bash -c "${MAKE} --no-print-directory --quiet wslist | xargs -I {} ${MAKE} deplist PKG=\"{}\""
 	rm -Rf ${WORKSPACE_DIR}/build/deplist/*.all	${WORKSPACE_DIR}/build/deplist/ccws.list
 	cat ${WORKSPACE_DIR}/build/deplist/* | sort | uniq > ${WORKSPACE_DIR}/build/deplist/ccws.deps.all
 	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccws.deps.all"
@@ -92,9 +82,6 @@ wsprepare_build:
 	bash -c "${SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}/ccws/\"; "
-
-wsclean_build:
-	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
 
 ##
@@ -122,7 +109,7 @@ build: assert_PKG_arg_must_be_specified wsprepare_build
 
 version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
-	${MAKE} info_with_deps \
+	${MAKE} --quiet info_with_deps \
 		| grep path | sed 's/path: //' | sort \
 		| xargs -I {} /bin/sh -c 'cd {}; git show -s --format=%h' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
@@ -192,13 +179,13 @@ new: assert_PKG_arg_must_be_specified
 
 # `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
 info_with_deps: assert_PKG_arg_must_be_specified
-	@colcon list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs colcon info --base-paths src/ --packages-select
+	@${COLCON_LOGLESS} list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs ${COLCON_LOGLESS} info --base-paths src/ --packages-select
 
 # generate list of dependencies which are not present in the workspace
 deplist: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/deplist
 	${MAKE} --quiet wslist | sort > ${WORKSPACE_DIR}/build/deplist/ccws.list
-	${MAKE} info_with_deps \
+	${MAKE} --quiet info_with_deps \
 		| grep '\(build:\)\|\(run:\)' \
 		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \
 		| sort | uniq | grep -v '^$$' > ${WORKSPACE_DIR}/build/deplist/${PKG}.all

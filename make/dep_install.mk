@@ -7,27 +7,30 @@ wsinstall_deb_common:
 		python3-colcon-package-selection \
 		python3-colcon-package-information
 	${APT_INSTALL} python3-wstool
-	${APT_INSTALL} build-essential
-	${APT_INSTALL} wget curl
+	${APT_INSTALL} build-essential ccache doxygen
+	${APT_INSTALL} wget
 
 #ubuntu18
 wsinstall_bionic: wsinstall_deb_common
 	${APT_INSTALL} \
-		clang-tools-10 clang-tidy-10 \
 		python-rosinstall-generator \
 		python-rosdep \
-		python-rospkg \
+		python-rospkg
 
 #ubuntu20
 wsinstall_focal: wsinstall_deb_common
 	${APT_INSTALL} \
-		clang-tools-10 clang-tidy-10 \
 		python3-rosinstall-generator \
 		python3-rosdep \
 		python3-rospkg
 
 install:
+	${MAKE} wsinstall_${OS_DISTRO}
 	${MAKE} ${PROFILE}_install
+
+%_install:
+	# placeholder target, dont call this target manually
+	test -d "${WORKSPACE_DIR}/profiles/$*"
 
 download: wsprepare_build
 	bash -c "${SETUP_SCRIPT}; \

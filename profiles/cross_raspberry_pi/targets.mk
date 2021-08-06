@@ -1,7 +1,9 @@
 # this way there is no need to specify profile explicitly -- it is implied by target names
 SETUP_SCRIPT_cross_raspberry_pi=source ${WORKSPACE_DIR}/profiles/cross_raspberry_pi/setup.bash
 
-cross_raspberry_pi_install: cross_raspberry_pi_clean cross_install_common_host_deps
+cross_raspberry_pi_install: cross_install_common_host_deps
+
+cross_raspberry_pi_fetch: cross_raspberry_pi_clean
 	# gcc -> https://github.com/Pro/raspi-toolchain/
 	# raspios -> http://downloads.raspberrypi.org/
 	# the only reason we don't use lite image is that it doesn't have enough
@@ -27,11 +29,11 @@ cross_raspberry_pi_apt_init:
 	#    http://wiki.ros.org/UpstreamPackages
 	#    apt-cache showpkg python-catkin-pkg
 	# 3. remove some heavy packages to get free space for ROS dependencies
-	${MAKE} cross_raspberry_pi_mount
+	${MAKE} cross_mount PROFILE=cross_raspberry_pi
 	-bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
-       	curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
+       	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
 	        | sudo chroot ./ apt-key add -; \
     	sudo chroot ./ /bin/sh -c \"\
             echo 'deb http://packages.ros.org/ros/ubuntu' > /tmp/ros-latest.list; \
@@ -44,17 +46,16 @@ cross_raspberry_pi_apt_init:
 			apt update; \
 			apt --yes upgrade; \
 			apt clean\" "
-	${MAKE} cross_raspberry_pi_umount
+	${MAKE} cross_umount PROFILE=cross_raspberry_pi
 
-cross_raspberry_pi_mount: cross_raspberry_pi_umount
+cross_raspberry_pi_mount:
+	${MAKE} cross_umount PROFILE=cross_raspberry_pi
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		DEVICE=\$$(${CROSS_SETUP_LOOP_DEV}); \
 		${MAKE} cross_sysroot_mount DEVICE=\$${DEVICE}p2; "
 
-cross_raspberry_pi_umount:
+cross_raspberry_pi_purge:
 	${MAKE} cross_umount PROFILE=cross_raspberry_pi
-
-cross_raspberry_pi_purge: cross_raspberry_pi_umount
 	bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		rm -Rf \"\$${CCWS_PROFILE_DIR}/system.img\"; \
 		rm -Rf \"\$${CCWS_PROFILE_DIR}/cross-pi-gcc\" "

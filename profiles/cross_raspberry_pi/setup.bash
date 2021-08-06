@@ -86,5 +86,6 @@ export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 ##########################################################################################
 # proot
 #
-CCWS_PROOT_ARGS=--bind="${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}" --qemu="qemu-${CCWS_TRIPLE_ARCH}"
+CCWS_PROOT_ARGS=" --bind=${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}"
+CCWS_PROOT_ARGS+=" --qemu=qemu-${CCWS_TRIPLE_ARCH}"
 export CCWS_PROOT_ARGS

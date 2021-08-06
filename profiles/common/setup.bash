@@ -15,13 +15,19 @@ export CCWS_ARTIFACTS_DIR
 
 if [ -z "${CCWS_ROS_DISTRO}" ];
 then
-    # CCWS_SYSROOT is empty by default
-    if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
+    if [ -n "${ROS_DISTRO}" ];
     then
-        CCWS_ROS_DISTRO=$(ls "${CCWS_SYSROOT}/opt/ros/")
+        CCWS_ROS_DISTRO=${ROS_DISTRO}
         export CCWS_ROS_DISTRO
     else
-        echo "Could not determine CCWS_ROS_DISTRO" >&2
+        # CCWS_SYSROOT is empty by default
+        if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
+        then
+            CCWS_ROS_DISTRO=$(ls "${CCWS_SYSROOT}/opt/ros/" | sort | tail -n 1 | sed 's=/==g')
+            export CCWS_ROS_DISTRO
+        else
+            echo "Could not determine CCWS_ROS_DISTRO" >&2
+        fi
     fi
 fi
 
