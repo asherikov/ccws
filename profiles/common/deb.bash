@@ -22,9 +22,16 @@ case "${CCWS_TRIPLE_ARCH}" in
 esac
 
 
+DEB_VERSION=${CCWS_BUILD_TIME}
+if [ -f "${WORKSPACE_DIR}/build/version_hash/${PKG}" ]
+then
+    DEB_VERSION="${DEB_VERSION}_$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
+fi
+
+
 CCWS_DEB_CONTROL="\
 Package: $(echo "${CCWS_PKG_FULL_NAME}" | sed 's/_/-/g')
-Version: $(echo "${CCWS_BUILD_TIME}${VERSION}" | sed 's/_/-/g')
+Version: $(echo "${DEB_VERSION}" | sed 's/_/-/g')
 Architecture: ${CCWS_DEB_ARCH}
 Maintainer: ${AUTHOR} <${EMAIL}>
 Description: ${CCWS_VENDOR_ID} ${PKG}"

@@ -19,6 +19,7 @@ export AUTHOR
 export EMAIL
 export PROFILE
 export WORKSPACE_DIR
+export VERSION
 
 
 ##
@@ -111,7 +112,7 @@ version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
 	${MAKE} --quiet info_with_deps \
 		| grep path | sed 's/path: //' | sort \
-		| xargs -I {} /bin/sh -c 'cd {}; git show -s --format=%h' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
+		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
 

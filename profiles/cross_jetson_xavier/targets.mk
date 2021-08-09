@@ -7,14 +7,9 @@ cross_jetson_xavier_install: cross_install_common_host_deps
 	sudo apt update
 	${APT_INSTALL} \
 		g++-8-aarch64-linux-gnu cuda-nvcc-10-2
-	${MAKE} download PROFILE=cross_jetson_xavier \
-		FILES="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.0.130-1_amd64.deb"
-	bash -c "${SETUP_SCRIPT_cross_jetson_xavier}; \
-		cd \"\$${CCWS_BUILD_DIR}\"; \
-		sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb"
 	# 1. copy qemu in order to be able to do chroot
 	# 2. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
-	#    apt-cache policy libopencv-dev
+	#    see `apt-cache policy libopencv-dev`
 	${MAKE} cross_mount PROFILE=cross_jetson_xavier
 	-bash -c "${SETUP_SCRIPT_cross_jetson_xavier}; \
 		cd \"\$${CCWS_SYSROOT}\"; \

@@ -193,9 +193,8 @@ Here `<profile>` stands for `cross_raspberry_pi` or `cross_xavier_jetson`.
 Cross-compilation make targets can be found in `make/cross.mk` and
 `profiles/<profile>/targets.mk`
 
-Note on `cross_xavier_jetson`: This profile requires Ubuntu 18.04, installs
-CUDA and some other NVIDIA stuff, you may want to do this in a docker.
-Currently works only for ROS melodic.
+Note on `cross_xavier_jetson`: This profile requires Ubuntu 18.04 / ROS melodic
+and installs `nvcc`, you may want to do this in a docker.
 
 
 1. Install profile dependencies with `make install PROFILE=<profile>`

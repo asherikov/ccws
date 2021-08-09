@@ -122,7 +122,7 @@ set(CCWS_ENABLE_CUDA ON CACHE STRING "" FORCE)
 set(CMAKE_CUDA_COMPILER "$ENV{CCWS_HOST_ROOT}/usr/local/cuda-10.2/bin/nvcc" CACHE STRING "" FORCE)
 set(CMAKE_CUDA_COMPILER_FORCED ON CACHE STRING "" FORCE)
 set(CMAKE_CUDA_HOST_COMPILER "${CMAKE_CXX_COMPILER}" CACHE STRING "" FORCE)
-set(CUDA_TOOLKIT_ROOT_DIR "$ENV{CCWS_HOST_ROOT}/usr/local/cuda-10.2/" CACHE STRING "" FORCE)
+set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda-10.2/" CACHE STRING "" FORCE)
 
 
 ###############################################################################

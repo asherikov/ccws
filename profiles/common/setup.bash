@@ -58,11 +58,6 @@ then
     CCWS_INSTALL_DIR_HOST="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
     CCWS_INSTALL_DIR_TARGET="${CCWS_INSTALL_DIR_HOST}"
 else
-    if [ -f "${WORKSPACE_DIR}/build/version_hash/${PKG}" ]
-    then
-        VERSION="__$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
-    fi
-
     if [ -z "${CCWS_TRIPLE_ARCH}" ];
     then
         CCWS_TRIPLE_ARCH=$(uname -m)
@@ -82,7 +77,7 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}${VERSION}
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__$(echo ${VERSION} | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
     CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
@@ -109,7 +104,9 @@ export CCWS_DOXYGEN_OUTPUT_DIR CCWS_DOXYGEN_CONFIG_DIR CCWS_DOXYGEN_WORKING_DIR
 # ccache
 #
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
-export CCACHE_DIR=${CCWS_WORKSPACE_DIR}/.ccache
+CCACHE_DIR=${CCWS_WORKSPACE_DIR}/.ccache
+CCACHE_BASEDIR="/opt/${CCWS_VENDOR_ID}"
+export CCACHE_DIR CCACHE_BASEDIR
 
 
 ##########################################################################################
