@@ -116,14 +116,19 @@ version_hash: assert_PKG_arg_must_be_specified
 	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
 
-rosdep: deplist
+rosdep_init:
 	bash -c "${SETUP_SCRIPT}; \
-		mkdir -p \"\$${ROS_HOME}/rosdep\"; \
-		rosdep update; \
+		mkdir -p \"\$${CCWS_PROFILE_DIR}/rosdep\"; \
+		mkdir -p \"\$${ROS_HOME}\"; \
+		ln --symbolic --force --no-target-directory \"\$${CCWS_PROFILE_DIR}/rosdep\" \"\$${ROS_HOME}/rosdep\" "
+
+rosdep_resolve: rosdep_init deplist
+	bash -c "${SETUP_SCRIPT}; \
+		test -d \"\$${ROS_HOME}/rosdep/sources.cache/\" || rosdep update; \
 		rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ') \
 		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > \"${WORKSPACE_DIR}/build/deplist/${PKG}.deb\" "
 
-deb_build: rosdep version_hash
+deb_build: rosdep_resolve version_hash
 	bash -c "${DEB_SETUP_SCRIPT}; ${MAKE} build"
 
 deb_pack: assert_PKG_arg_must_be_specified
@@ -158,8 +163,9 @@ test: assert_PKG_arg_must_be_specified
 
 ctest: assert_PKG_arg_must_be_specified
 	bash -c "${SETUP_SCRIPT}; \
+		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}\"; \
 		cd build/${PROFILE}/${PKG}; \
-		time ctest --output-on-failure --output-log \$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log -j ${JOBS}"
+		time ctest --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}/ctest_${PKG}.log\" -j ${JOBS}"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified
@@ -209,4 +215,4 @@ rosinstall_extend:
 help:
 	@grep -v "^	" Makefile | grep -v "^ " | grep -v "^$$" | grep -v "^\."
 
-.PHONY: build clean test rosdep install
+.PHONY: build clean test install

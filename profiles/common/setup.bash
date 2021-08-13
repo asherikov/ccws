@@ -145,11 +145,9 @@ then
 fi
 
 
-ROS_HOME="${CCWS_ARTIFACTS_DIR}"
-export ROS_HOME
-
-ROS_LOG_DIR="${CCWS_ARTIFACTS_DIR}/ros_log"
-export ROS_LOG_DIR
+ROS_HOME="${CCWS_ARTIFACTS_DIR}/${CCWS_PROFILE}"
+ROS_LOG_DIR="${ROS_HOME}/ros_log"
+export ROS_HOME ROS_LOG_DIR
 
 # Disable Lisp & Javascript message and service generators
 #   gencpp - C++ ROS message and service generators.

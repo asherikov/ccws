@@ -189,11 +189,11 @@ building binary package, unless you are rebuilding the same package.
 Cross-compilation
 -----------------
 
-Here `<profile>` stands for `cross_raspberry_pi` or `cross_xavier_jetson`.
+Here `<profile>` stands for `cross_raspberry_pi` or `cross_jetson_xavier`.
 Cross-compilation make targets can be found in `make/cross.mk` and
 `profiles/<profile>/targets.mk`
 
-Note on `cross_xavier_jetson`: This profile requires Ubuntu 18.04 / ROS melodic
+Note on `cross_jetson_xavier`: This profile requires Ubuntu 18.04 / ROS melodic
 and installs `nvcc`, you may want to do this in a docker.
 
 
@@ -201,8 +201,8 @@ and installs `nvcc`, you may want to do this in a docker.
 2. Obtain system image:
     - `cross_raspberry_pi` -- use `make fetch PROFILE=cross_raspberry_pi` to
       download and prepare standard image;
-    - `cross_xavier_jetson` -- copy APP partition image to
-      `profiles/cross_xavier_jetson/system.img`.
+    - `cross_jetson_xavier` -- copy APP partition image to
+      `profiles/cross_jetson_xavier/system.img`.
 3. Initialize source repositories:
     - make wsinit REPOS="https://github.com/asherikov/staticoma.git"
     - [when building all ROS packages] add ROS dependencies of all your

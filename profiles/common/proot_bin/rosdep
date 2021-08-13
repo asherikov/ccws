@@ -4,12 +4,12 @@ set -e
 #pwd
 #echo "Command line: $@"
 # shellcheck disable=SC2086
-proot --rootfs="${CCWS_SYSROOT}" \
+# -R: rosdep requires random device, network access, etc
+proot -R "${CCWS_SYSROOT}" \
     --cwd="${CCWS_WORKSPACE_DIR}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# rosdep stuff} \
-    --bind="${ROS_HOME}/rosdep/:${ROS_HOME}/rosdep" \
     --bind=/etc/ros/rosdep/ \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \
