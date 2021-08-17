@@ -124,6 +124,3 @@ set(CATKIN_SKIP_TESTING     "OFF" CACHE STRING "" FORCE)
 # not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
 
-# FindBoost.cmake debug output
-#set(Boost_DEBUG ON CACHE STRING "" FORCE)
-

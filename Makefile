@@ -93,16 +93,16 @@ assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
 build: assert_PKG_arg_must_be_specified wsprepare_build
-	bash -c "${SETUP_SCRIPT}  \
+	time bash -c "${SETUP_SCRIPT}  \
 		&& \$${CCWS_BUILD_WRAPPER} colcon \
-		--log-base log/${PROFILE} \
+		--log-base build/log/${PROFILE} \
 		build \
 		--merge-install \
 		--build-base build/${PROFILE} \
 		\$${COLCON_BUILD_ARGS} \
 		--parallel-workers ${JOBS} \
 		--packages-up-to ${PKG} \
-		&& cp ${WORKSPACE_DIR}/scripts/colcon_setup.bash \"\$${CCWS_INSTALL_DIR_HOST}/setup.bash\" \
+		&& cp ${WORKSPACE_DIR}/scripts/install/setup.bash \"\$${CCWS_INSTALL_DIR_HOST}/\" \
 		&& ${MAKE} wsstatus > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/workspace_status.txt\" \
 		&& echo \"${PKG}\" > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/pkg.txt\" \
 		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/build_info.txt\" "
@@ -132,7 +132,7 @@ deb_build: rosdep_resolve version_hash
 	bash -c "${DEB_SETUP_SCRIPT}; ${MAKE} build"
 
 deb_pack: assert_PKG_arg_must_be_specified
-	bash -c "${DEB_SETUP_SCRIPT}; \
+	time bash -c "${DEB_SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
 		chmod -R g-w \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" ; \
 		find \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" -iname '*.pyc' | xargs --no-run-if-empty rm; \

@@ -7,7 +7,7 @@ set -o pipefail
 
 ##########################################################################################
 
-CCWS_PROFILE="cross_jetson_xavier"
+CCWS_PROFILE="cross_jetson_nano"
 export CCWS_PROFILE
 
 CCWS_SYSROOT="$(dirname ${BASH_SOURCE})/sysroot"

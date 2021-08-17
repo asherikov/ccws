@@ -51,7 +51,7 @@ export CXX CC
 PATH=${CCWS_COMPILER_ROOT}/bin/:${CCWS_HOST_ROOT}/usr/bin:${CCWS_PROOT_BIN}:/bin:${PATH}
 LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
 
-export CCWS_COMPILER_ROOT PATH LD_LIBRARY_PATH
+export PATH LD_LIBRARY_PATH
 
 
 ##########################################################################################

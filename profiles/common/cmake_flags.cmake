@@ -25,3 +25,8 @@ set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORC
 ###
 
 #set(CMAKE_FIND_DEBUG_MODE ON)
+
+# Find*.cmake debug output
+#set(Boost_DEBUG ON CACHE STRING "" FORCE)
+set(Protobuf_DEBUG ON CACHE STRING "" FORCE)
+

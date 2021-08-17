@@ -38,7 +38,7 @@ CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${CCWS_PROFILE}"
 export CCWS_BUILD_DIR
 
 
-CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/profiles/common/proot_bin"
+CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/scripts/proot"
 export CCWS_PROOT_BIN
 
 

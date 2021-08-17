@@ -8,6 +8,8 @@ export ROSCONSOLE_FORMAT
 ROS_HOSTNAME=localhost
 export ROS_HOSTNAME
 
-# may be useful
-#PYTHONDONTWRITEBYTECODE=1
-#export PYTHONDONTWRITEBYTECODE
+# TODO prevents generation of *.pyc files, which are not removed when package
+# is uninstalled, a more appropriate thing to do is to add prerm script to
+# debian package
+PYTHONDONTWRITEBYTECODE=1
+export PYTHONDONTWRITEBYTECODE

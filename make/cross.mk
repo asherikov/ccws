@@ -18,6 +18,7 @@ cross_dep_install:
 
 # internal target, should be called with initialized environment
 cross_sysroot_mount:
+	mkdir -p "$${CCWS_SYSROOT}"
 	mount "${DEVICE}" "$${CCWS_SYSROOT}"
 	mount --bind /etc/resolv.conf "$${CCWS_SYSROOT}/etc/resolv.conf"
 	mount --bind /dev "$${CCWS_SYSROOT}/dev"
