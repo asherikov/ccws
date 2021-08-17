@@ -173,3 +173,5 @@ export ROSCONSOLE_FORMAT
 #
 MAKEFLAGS="-j${JOBS}"
 export MAKEFLAGS
+
+umask u=rwx,g=rx,o=rx

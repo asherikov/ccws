@@ -136,9 +136,9 @@ deb_pack: assert_PKG_arg_must_be_specified
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
 		chmod -R g-w \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" ; \
 		find \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" -iname '*.pyc' | xargs --no-run-if-empty rm; \
-		echo \"\$${CCWS_DEB_CONTROL}\"                                    >  \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
-		echo -n 'Depends: '                                               >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
-		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' | paste -s -d ',' >> \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN/control\"; \
+		${WORKSPACE_DIR}/scripts/deb/control.sh; \
+		${WORKSPACE_DIR}/scripts/deb/preinst.sh; \
+		${WORKSPACE_DIR}/scripts/deb/postinst.sh; \
 		dpkg-deb --root-owner-group --build \"\$${CCWS_INSTALL_DIR_HOST_ROOT}\" \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
 
 # see https://lintian.debian.org/tags/
