@@ -44,26 +44,18 @@ CCWS_GCC_VERSION=8
 
 CXX=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
 CC=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}
-
 export CXX CC
 
-PATH=${CCWS_HOST_ROOT}/usr/bin:${CCWS_PROOT_BIN}:/bin:${PATH}
-LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
-
-export PATH LD_LIBRARY_PATH
+PATH=${CCWS_PROOT_BIN}:/bin:${PATH}
+export PATH
 
 
 ##########################################################################################
 # system package search parameters
 #
 
-# needed for non-proot crosscompilation
-#PKG_CONFIG_SYSROOT_DIR=${CCWS_SYSROOT}
-#PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCWS_SYSROOT}/usr/lib/pkgconfig:${CCWS_SYSROOT}/usr/lib/${CCWS_TRIPLE}/pkgconfig:${CCWS_SYSROOT}/usr/share/pkgconfig"
-#PKG_CONFIG_SYSROOT_DIR=/
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCWS_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
-
-export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
+export PKG_CONFIG_PATH
 
 
 ##########################################################################################
@@ -91,10 +83,3 @@ CCWS_CUDA_VERSION=10.2
 CUDA_INC_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}/
 CUDA_LIB_PATH=/usr/local/cuda-${CCWS_CUDA_VERSION}/targets/${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}/
 export CCWS_CUDA_VERSION CUDA_INC_PATH CUDA_LIB_PATH
-
-
-##########################################################################################
-# proot
-#
-CCWS_PROOT_ARGS=--qemu="qemu-${CCWS_TRIPLE_ARCH}"
-export CCWS_PROOT_ARGS

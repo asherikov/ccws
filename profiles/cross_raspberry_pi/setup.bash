@@ -40,18 +40,19 @@ source "./profiles/common/setup.bash"
 ##########################################################################################
 # compiler paths
 #
-CCWS_COMPILER_ROOT=/opt/cross-pi-gcc/
+CCWS_COMPILER_ROOT_HOST=${CCWS_PROFILE_DIR}/cross-pi-gcc
+CCWS_COMPILER_ROOT_TARGET=/opt/cross-pi-gcc/
+
+export CCWS_COMPILER_ROOT_HOST CCWS_COMPILER_ROOT_TARGET
 
 CCWS_GCC_VERSION=8
 
-CXX=${CCWS_COMPILER_ROOT}/bin/${CCWS_TRIPLE}-g++
-CC=${CCWS_COMPILER_ROOT}/bin/${CCWS_TRIPLE}-gcc
+CXX=${CCWS_COMPILER_ROOT_TARGET}/bin/${CCWS_TRIPLE}-g++
+CC=${CCWS_COMPILER_ROOT_TARGET}/bin/${CCWS_TRIPLE}-gcc
 export CXX CC
 
-PATH=${CCWS_COMPILER_ROOT}/bin/:${CCWS_HOST_ROOT}/usr/bin:${CCWS_PROOT_BIN}:/bin:${PATH}
-LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
-
-export PATH LD_LIBRARY_PATH
+PATH=${CCWS_PROOT_BIN}:/bin:${PATH}
+export PATH
 
 
 ##########################################################################################
@@ -64,7 +65,7 @@ export PATH LD_LIBRARY_PATH
 #PKG_CONFIG_SYSROOT_DIR=/
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCWS_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
 
-export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
+export PKG_CONFIG_PATH
 
 
 ##########################################################################################
@@ -81,11 +82,3 @@ export PKG_CONFIG_SYSROOT_DIR PKG_CONFIG_PATH
 # skip tests
 #COLCON_BUILD_ARGS="${COLCON_BUILD_ARGS} --catkin-skip-building-tests"
 #export COLCON_BUILD_ARGS
-
-
-##########################################################################################
-# proot
-#
-CCWS_PROOT_ARGS=" --bind=${CCWS_PROFILE_DIR}/cross-pi-gcc:${CCWS_COMPILER_ROOT}"
-CCWS_PROOT_ARGS+=" --qemu=qemu-${CCWS_TRIPLE_ARCH}"
-export CCWS_PROOT_ARGS

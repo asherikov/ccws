@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+source ${CCWS_PROOT_BIN}/common.bash
+
 #echo ">>>>> CCWS cmake wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
