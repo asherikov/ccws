@@ -1,5 +1,4 @@
-STATIC_CHECKS_INCLUDED=true
-STATIC_CHECKS_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/setup.bash
+STATIC_CHECKS_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/static_checks/setup.bash
 
 install_static_checkers:
 	#pip3 install cpplint
@@ -78,13 +77,14 @@ yamllint:
                         comments-indentation: disable, \
                         empty-lines: {max: 5, max-end: 1}}}" {}
 
+
 shellcheck:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCWS_WORKSPACE_DIR}/scripts \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/profiles -iname '*.sh' -or -iname '*.bash' \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
+		( find \$${CCWS_WORKSPACE_DIR}/profiles -maxdepth 2 -iname '*.sh' -or -iname '*.bash' && \
+			find \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' ) \
+		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'` \
 		| xargs --max-procs=${JOBS} -I {} \
-		shellcheck -x {}
-
+		shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {} "
 
 
 CATKIN_LINT_COMMON_IGNORES=--ignore package_path_name \

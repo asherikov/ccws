@@ -1,5 +1,4 @@
 #!/bin/bash -x
-# shellcheck disable=SC1090
 
 # fail on error
 set -e
@@ -10,10 +9,9 @@ set -o pipefail
 CCWS_PROFILE="scan_build"
 export CCWS_PROFILE
 
-source "./profiles/common/setup.bash"
+source "./profiles/static_checks/setup.bash"
 
-# shellcheck disable=SC2001
-EXCEPTIONS=$(echo ${CCWS_STATIC_PATH_EXCEPTIONS} | sed "s/ / --exclude /g")
+EXCEPTIONS=$(echo "${CCWS_STATIC_PATH_EXCEPTIONS}" | sed "s/ / --exclude /g")
 
 #apt install clang-tools-10
 CCWS_BUILD_WRAPPER="\

@@ -8,12 +8,12 @@ CCWS_DEB_ENABLE="yes"
 export CCWS_DEB_ENABLE
 
 
-source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
+source "${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash"
 
 CCWS_DEB_VERSION=${CCWS_BUILD_TIME}
 if [ -f "${WORKSPACE_DIR}/build/version_hash/${PKG}" ]
 then
-    CCWS_DEB_VERSION="${CCWS_DEB_VERSION}_$(cat ${WORKSPACE_DIR}/build/version_hash/${PKG})"
+    CCWS_DEB_VERSION=${CCWS_DEB_VERSION}_$(cat "${WORKSPACE_DIR}/build/version_hash/${PKG}")
 fi
 CCWS_DEB_VERSION=$(echo "${CCWS_DEB_VERSION}" | sed 's/_/-/g')
 

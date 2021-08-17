@@ -17,6 +17,6 @@ Version: ${CCWS_DEB_VERSION}
 Architecture: ${CCWS_DEB_ARCH}
 Maintainer: ${AUTHOR} <${EMAIL}>
 Description: ${CCWS_VENDOR_ID} ${PKG}
-Depends: $(cat "${WORKSPACE_DIR}/build/deplist/${PKG}.deb" | paste -s -d ',')
+Depends: $(paste -s -d ',' < "${WORKSPACE_DIR}/build/deplist/${PKG}.deb")
 EOF
 

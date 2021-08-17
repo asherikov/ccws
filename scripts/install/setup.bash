@@ -1,6 +1,6 @@
 #!/bin/bash
-COLCON_CURRENT_PREFIX=$(dirname ${BASH_SOURCE})
-source ${COLCON_CURRENT_PREFIX}/local_setup.sh
+COLCON_CURRENT_PREFIX=$(dirname "${BASH_SOURCE[0]}")
+source "${COLCON_CURRENT_PREFIX}/local_setup.sh"
 
 ROSCONSOLE_FORMAT='[${severity}] [${time}] [${node}]: ${message}'
 export ROSCONSOLE_FORMAT

@@ -1,5 +1,4 @@
 #!/bin/bash -x
-# shellcheck disable=SC1090
 
 # fail on error
 set -e
@@ -10,7 +9,7 @@ set -o pipefail
 CCWS_PROFILE="cross_jetson_xavier"
 export CCWS_PROFILE
 
-CCWS_SYSROOT="$(dirname ${BASH_SOURCE})/sysroot"
+CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
 export CCWS_SYSROOT
 
 # host root in emulation

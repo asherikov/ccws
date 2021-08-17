@@ -1,5 +1,4 @@
 #!/bin/bash -x
-# shellcheck disable=SC1090
 
 # fail on error
 set -e

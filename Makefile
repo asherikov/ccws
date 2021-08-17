@@ -41,7 +41,7 @@ default: build
 ##
 
 wslist:
-	@${COLCON_LOGLESS} list --names-only --base-paths src/
+	@${COLCON_LOGLESS} list --topological-order --names-only --base-paths src/
 
 # Reset & initialize workspace
 wsinit: wspurge

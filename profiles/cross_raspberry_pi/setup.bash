@@ -1,5 +1,4 @@
 #!/bin/bash -x
-# shellcheck disable=SC1090
 
 # fail on error
 set -e
@@ -10,7 +9,7 @@ set -o pipefail
 CCWS_PROFILE="cross_raspberry_pi"
 export CCWS_PROFILE
 
-CCWS_SYSROOT="$(dirname ${BASH_SOURCE})/sysroot"
+CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
 export CCWS_SYSROOT
 
 # host root in emulation
@@ -46,6 +45,7 @@ CCWS_COMPILER_ROOT_TARGET=/opt/cross-pi-gcc/
 export CCWS_COMPILER_ROOT_HOST CCWS_COMPILER_ROOT_TARGET
 
 CCWS_GCC_VERSION=8
+export CCWS_GCC_VERSION
 
 CXX=${CCWS_COMPILER_ROOT_TARGET}/bin/${CCWS_TRIPLE}-g++
 CC=${CCWS_COMPILER_ROOT_TARGET}/bin/${CCWS_TRIPLE}-gcc

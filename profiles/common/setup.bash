@@ -1,13 +1,11 @@
 #!/bin/bash -x
-# shellcheck disable=SC1090
-
 ##########################################################################################
 
 # assuming that this preload is sourced from the root of the workspace
 CCWS_WORKSPACE_DIR=$(pwd)
 export CCWS_WORKSPACE_DIR
 
-source ${CCWS_WORKSPACE_DIR}/profiles/common/config.bash
+source "${CCWS_WORKSPACE_DIR}/profiles/common/config.bash"
 
 
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
@@ -23,7 +21,7 @@ then
         # CCWS_SYSROOT is empty by default
         if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
         then
-            CCWS_ROS_DISTRO=$(ls "${CCWS_SYSROOT}/opt/ros/" | sort | tail -n 1 | sed 's=/==g')
+            CCWS_ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs -0 basename | sort | tail -n 1 | sed 's=/==g')
             export CCWS_ROS_DISTRO
         else
             echo "Could not determine CCWS_ROS_DISTRO" >&2
@@ -77,7 +75,7 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__$(echo ${VERSION} | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
     CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
@@ -88,16 +86,6 @@ fi
 CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_HOST}/setup.bash"
 
 export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_TARGET CCWS_INSTALL_DIR_HOST CCWS_WORKSPACE_SETUP
-
-
-##########################################################################################
-# doxygen
-#
-CCWS_DOXYGEN_OUTPUT_DIR="${CCWS_ARTIFACTS_DIR}/doxygen"
-CCWS_DOXYGEN_CONFIG_DIR="${CCWS_WORKSPACE_DIR}/profiles/common/doc"
-CCWS_DOXYGEN_WORKING_DIR="${CCWS_WORKSPACE_DIR}/build/doxygen"
-
-export CCWS_DOXYGEN_OUTPUT_DIR CCWS_DOXYGEN_CONFIG_DIR CCWS_DOXYGEN_WORKING_DIR
 
 
 ##########################################################################################
@@ -159,8 +147,6 @@ export ROS_HOME ROS_LOG_DIR
 ROS_LANG_DISABLE="genlisp;geneus;gennodejs"
 export ROS_LANG_DISABLE
 
-# Expressions don't expand in single quotes, use double quotes for that.
-# shellcheck disable=SC2016
 ROSCONSOLE_FORMAT='[${severity}] [${time}] [${node}]: ${message}'
 export ROSCONSOLE_FORMAT
 
