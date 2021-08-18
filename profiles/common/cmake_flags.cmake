@@ -3,7 +3,9 @@ set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
 set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 
-set(CCWS_BUILD_PROFILE   "$ENV{CCWS_PROFILE}"     CACHE STRING "" FORCE)
+set(CCWS_BUILD_PROFILE   "$ENV{CCWS_PROFILE}"   CACHE STRING "" FORCE)
+# controls testing of CCWS-aware packages
+set(CCWS_ENABLE_TESTING  ON                     CACHE STRING "" FORCE)
 
 # skip some cmake checks
 # TODO https://github.com/cristianadam/cmake-checks-cache

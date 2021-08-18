@@ -113,7 +113,7 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-verbose -L/usr/
 
 # too many issues: missing dependencies, etc
 set(CATKIN_ENABLE_TESTING   "OFF" CACHE STRING "" FORCE)
-set(CATKIN_SKIP_TESTING     "OFF" CACHE STRING "" FORCE)
+set(CATKIN_SKIP_TESTING     "ON"  CACHE STRING "" FORCE)
 
 
 ###############################################################################

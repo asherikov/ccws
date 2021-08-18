@@ -8,6 +8,13 @@ export CCWS_WORKSPACE_DIR
 source "${CCWS_WORKSPACE_DIR}/profiles/common/config.bash"
 
 
+if [ -n "${CCWS_SYSROOT}" ]
+then
+    CCWS_CHROOT="chroot ${CCWS_SYSROOT}"
+    export CCWS_CHROOT
+fi
+
+
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
 export CCWS_ARTIFACTS_DIR
 
@@ -59,6 +66,7 @@ else
     if [ -z "${CCWS_TRIPLE_ARCH}" ];
     then
         CCWS_TRIPLE_ARCH=$(uname -m)
+        export CCWS_TRIPLE_ARCH
     fi
 
     # package name
@@ -105,17 +113,12 @@ export CCACHE_DIR CCACHE_BASEDIR
 CMAKE_TOOLCHAIN_FILE=${CCWS_PROFILE_DIR}/toolchain.cmake
 export CMAKE_TOOLCHAIN_FILE
 
-#COLCON_DEFAULTS_FILE="${CCWS_WORKSPACE_DIR}/${CCWS_PROFILE}/colcon.yaml"
+# does not seem to work
+#COLCON_DEFAULTS_FILE="${CCWS_WORKSPACE_DIR}/profiles/common/colcon/defaults.yaml"
 #export COLCON_DEFAULTS_FILE
 
-COLCON_HOME="${CCWS_WORKSPACE_DIR}/common/"
-
-# --log-level DEBUG
-COLCON_BUILD_ARGS="--install-base ${CCWS_INSTALL_DIR_HOST} --base-paths src/ --cmake-args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
-COLCON_TEST_ARGS="--install-base ${CCWS_INSTALL_DIR_HOST} --test-result-base log/${CCWS_PROFILE}/testing"
-COLCON_LIST_ARGS="--topological-order --names-only --base-paths src/"
-
-export COLCON_HOME COLCON_BUILD_ARGS COLCON_TEST_ARGS COLCON_LIST_ARGS
+COLCON_HOME="${CCWS_WORKSPACE_DIR}/profiles/common/colcon"
+export COLCON_HOME
 
 
 ##########################################################################################

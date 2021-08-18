@@ -209,7 +209,8 @@ include_directories(
 #----------------------------------------------
 # Uncomment to enable tests.
 #----------------------------------------------
-#if(CATKIN_ENABLE_TESTING)
+# It is recommended to introduce vendor specific testing flag for finer control.
+#if(CATKIN_ENABLE_TESTING OR CCWS_ENABLE_TESTING)
 #    if (NOT TARGET gmock)
 #        find_package(GMock REQUIRED)
 #    endif()

@@ -8,14 +8,6 @@ cross_sysroot_fix_abs_symlinks:
 		cd \"\$${CCWS_SYSROOT}\"; \
 		find ./usr -lname '/*' -printf 'sudo ln --relative --symbolic --force ./%l %p\n' | /bin/sh"
 
-cross_dep_install:
-	${MAKE} cross_mount
-	${MAKE} rosdep
-	-sudo bash -c "${SETUP_SCRIPT}; \
-		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' \
-		| xargs chroot \"\$${CCWS_SYSROOT}\" ${APT_INSTALL}"
-	${MAKE} cross_umount
-
 # internal target, should be called with initialized environment
 cross_sysroot_mount:
 	mkdir -p "$${CCWS_SYSROOT}"
@@ -31,12 +23,5 @@ cross_umount:
 	# should not fail, may be called on unmounted root
 	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
-cross_install_common_host_deps:
-	${APT_INSTALL} qemu-user-static
-
-cross_fetch:
-	${MAKE} ${PROFILE}_fetch
-
-%_fetch:
-	# placeholder target, dont call use manually
-	test -d "${WORKSPACE_DIR}/profiles/$*"
+cross_common_host_install:
+	sudo ${APT_INSTALL} qemu-user-static

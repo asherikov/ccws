@@ -22,10 +22,9 @@ Features
 - Documentation generation for the whole workspace using `doxygen`, similar to
   https://github.com/mikepurvis/catkin_tools_document, but `doxygen`
   configuration and index html page are exposed and kept in the workspace.
-  Example -> https://asherikov.github.io/ccws/example_staticoma/index.html
 
 - Various static checks as in https://github.com/sscpac/statick, but with more
-  flexibility (see `make/static_checks.mk`), in particular:
+  flexibility (see `profiles/statick_checks/targets.mk`), in particular:
     - `cppcheck`
     - `catkin_lint` https://github.com/fkie/catkin_lint
     - `yamllint`
@@ -59,6 +58,8 @@ Profile configurations are located in `profiles`, currently availabale profiles 
   sanitizers.
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
+- `static_checkers` -- static checkers and their configuration.
+- `doxygen` -- doxygen + configuration.
 
 All profiles use `ccache`, but it can be disabled in cmake toolchains.
 
@@ -69,7 +70,7 @@ build profiles.
 Dependencies
 ------------
 
-Dependencies can be installed using `make install PROFILE=<profile>`, which is
+Dependencies can be installed using `make host_install PROFILE=<profile>`, which is
 going to install some of the following:
 
 
@@ -80,21 +81,15 @@ going to install some of the following:
 - `cmake`
 
 Some packages are not strictly required, but installed by default:
-- `doxygen`
 - `ccache`
 - `wget`
-
-
-### Static checks
-- static checkers, see `install_static_checkers` target in `make/static_checks.mk`
 
 
 
 Usage
 =====
 
-Demo workspace is available in a branch of this repository ->
-https://github.com/asherikov/ccws/tree/example_staticoma
+See `.ccws/test_main.mk` for command usage hints.
 
 
 Initial setup
@@ -102,7 +97,7 @@ Initial setup
 
 - Edit `make/config.mk` and `profiles/common/config.bash` to specify
   developer-dependent worskpace parameters.
-- Install dependencies using `make install PROFILE=<profile>` targets.
+- Install dependencies using `make host_install PROFILE=<profile>` targets.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
 
@@ -197,10 +192,10 @@ Note on `cross_jetson_xavier`: This profile requires Ubuntu 18.04 / ROS melodic
 and installs `nvcc`, you may want to do this in a docker.
 
 
-1. Install profile dependencies with `make install PROFILE=<profile>`
+1. Install profile dependencies with `make host_install PROFILE=<profile>`
 2. Obtain system image:
-    - `cross_raspberry_pi` -- use `make fetch PROFILE=cross_raspberry_pi` to
-      download and prepare standard image;
+    - `cross_raspberry_pi` -- `host_install` target automatically downloads
+      standard image;
     - `cross_jetson_xavier` -- copy APP partition image to
       `profiles/cross_jetson_xavier/system.img`.
 3. Initialize source repositories:
@@ -211,7 +206,7 @@ and installs `nvcc`, you may want to do this in a docker.
       `make dep_to_rosinstall PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
-   image: `make cross_dep_install PKG=staticoma PROFILE=<profile>`
+   image: `make target_install PKG=staticoma PROFILE=<profile>`
 5. Compile packages:
     - mount sysroot with `make cross_mount PROFILE=<profile>`
     - build packages, e.g. `make staticoma PROFILE=<profile>` or build and

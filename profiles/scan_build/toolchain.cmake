@@ -7,7 +7,7 @@ set(CMAKE_CXX_COMPILER /usr/share/clang/scan-build-10/libexec/c++-analyzer  CACH
 set(CMAKE_C_COMPILER /usr/share/clang/scan-build-10/libexec/ccc-analyzer  CACHE STRING "" FORCE)
 
 
-find_program(CCWS_CLANG_TIDY_EXECUTABLE NAMES clang-tidy clang-tidy-10 clang-tidy-9 clang-tidy-8 REQUIRED)
+find_program(CCWS_CLANG_TIDY_EXECUTABLE NAMES clang-tidy-10 clang-tidy-9 clang-tidy-8 REQUIRED)
 
 set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY_EXECUTABLE};-warnings-as-errors=*;-checks=*")
 

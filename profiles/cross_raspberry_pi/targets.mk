@@ -1,9 +1,7 @@
 # this way there is no need to specify profile explicitly -- it is implied by target names
 SETUP_SCRIPT_cross_raspberry_pi=source ${WORKSPACE_DIR}/profiles/cross_raspberry_pi/setup.bash
 
-cross_raspberry_pi_install: cross_install_common_host_deps
-
-cross_raspberry_pi_fetch: cross_raspberry_pi_clean
+cross_raspberry_pi_host_install: cross_common_host_install cross_raspberry_pi_clean
 	# gcc -> https://github.com/Pro/raspi-toolchain/
 	# raspios -> http://downloads.raspberrypi.org/
 	# the only reason we don't use lite image is that it doesn't have enough
@@ -19,9 +17,8 @@ cross_raspberry_pi_fetch: cross_raspberry_pi_clean
 		unzip -o 2021-05-07-raspios-buster-armhf.zip; \
 		mv cross-pi-gcc \"\$${CCWS_PROFILE_DIR}\"; \
 		mv 2021-05-07-raspios-buster-armhf.img \"\$${CCWS_PROFILE_DIR}/system.img\""
-	${MAKE} cross_raspberry_pi_apt_init
 
-cross_raspberry_pi_apt_init:
+cross_raspberry_pi_target_install:
 	# 1. copy qemu in order to be able to do chroot
 	# 2. add ROS apt sources in order to avoid weird package conflicts,
 	#    e.g., lack of catkin_pkg_modules in upstream repos.
@@ -46,6 +43,7 @@ cross_raspberry_pi_apt_init:
 			apt update; \
 			apt --yes upgrade; \
 			apt clean\" "
+	-${MAKE} rosdep_install PROFILE=cross_raspberry_pi
 	${MAKE} cross_umount PROFILE=cross_raspberry_pi
 
 cross_raspberry_pi_mount:

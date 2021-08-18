@@ -2,11 +2,12 @@
 SETUP_SCRIPT_cross_jetson_nano=source ${WORKSPACE_DIR}/profiles/cross_jetson_nano/setup.bash
 
 # assuming ubuntu 18.04
-cross_jetson_nano_install: cross_install_common_host_deps
+cross_jetson_nano_host_install: cross_common_host_install
 	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
 	sudo apt update
-	${APT_INSTALL} \
-		g++-8-aarch64-linux-gnu cuda-nvcc-10-2
+	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
+
+cross_jetson_nano_target_install:
 	# 1. copy qemu in order to be able to do chroot
 	# 2. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
 	#    see `apt-cache policy libopencv-dev`
@@ -23,6 +24,7 @@ cross_jetson_nano_install: cross_install_common_host_deps
 			${APT_INSTALL} ca-certificates; \
 			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
 			apt clean; '"
+	-${MAKE} rosdep_install PROFILE=cross_jetson_nano
 	${MAKE} cross_umount PROFILE=cross_jetson_nano
 
 cross_jetson_nano_mount:

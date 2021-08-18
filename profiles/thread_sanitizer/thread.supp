@@ -1,0 +1,5 @@
+# lock-order-inversion (potential deadlock)  Cycle in lock order graph
+deadlock:log4cxx::helpers::synchronized::synchronized
+
+deadlock:libtsan.so.0
+race:libtsan.so.0

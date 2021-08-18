@@ -6,7 +6,11 @@ AUTHOR?=$(shell git config --get user.name)
 WORKSPACE_DIR=$(shell pwd)
 OS_DISTRO=$(shell lsb_release -cs)
 
-COLCON_LOGLESS=colcon --log-base /dev/null
+CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
+CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
+CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
+CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
+
 
 SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
 DEB_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/deb.bash
@@ -41,7 +45,7 @@ default: build
 ##
 
 wslist:
-	@${COLCON_LOGLESS} list --topological-order --names-only --base-paths src/
+	@${CMD_PKG_NAME_LIST}
 
 # Reset & initialize workspace
 wsinit: wspurge
@@ -73,7 +77,7 @@ wsupdate_pkgs:
 
 wsdep_to_rosinstall:
 	rm -Rf ${WORKSPACE_DIR}/build/deplist
-	bash -c "${MAKE} --no-print-directory --quiet wslist | xargs -I {} ${MAKE} deplist PKG=\"{}\""
+	bash -c "${CMD_PKG_NAME_LIST} | xargs -I {} ${MAKE} deplist PKG=\"{}\""
 	rm -Rf ${WORKSPACE_DIR}/build/deplist/*.all	${WORKSPACE_DIR}/build/deplist/ccws.list
 	cat ${WORKSPACE_DIR}/build/deplist/* | sort | uniq > ${WORKSPACE_DIR}/build/deplist/ccws.deps.all
 	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccws.deps.all"
@@ -84,6 +88,24 @@ wsprepare_build:
 		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
 		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}/ccws/\"; "
 
+# generic test target, it is recommended to use more specific targets below
+wstest_generic:
+	${CMD_PKG_NAME_LIST} | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
+
+# stops on first error
+wstest_faststop:
+	${MAKE} wstest_generic TEST_TARGET=test EXIT_STATUS=255
+
+# stops on first error
+wsctest_faststop:
+	${MAKE} wstest_generic TEST_TARGET=ctest EXIT_STATUS=255
+
+wstest:
+	${MAKE} --quiet wstest_generic TEST_TARGET=test EXIT_STATUS=1
+
+wsctest:
+	${MAKE} --quiet wstest_generic TEST_TARGET=ctest EXIT_STATUS=1
+
 
 ##
 ## Package targets
@@ -92,15 +114,18 @@ wsprepare_build:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
+# --log-level DEBUG
 build: assert_PKG_arg_must_be_specified wsprepare_build
 	time bash -c "${SETUP_SCRIPT}  \
 		&& \$${CCWS_BUILD_WRAPPER} colcon \
 		--log-base build/log/${PROFILE} \
+		--log-level DEBUG \
 		build \
 		--merge-install \
+		--base-paths ${WORKSPACE_DIR}/src/ \
 		--build-base build/${PROFILE} \
-		\$${COLCON_BUILD_ARGS} \
-		--parallel-workers ${JOBS} \
+		--install-base \"\$${CCWS_INSTALL_DIR_HOST}\" \
+		--cmake-args -DCMAKE_TOOLCHAIN_FILE=\"\$${CMAKE_TOOLCHAIN_FILE}\" \
 		--packages-up-to ${PKG} \
 		&& cp ${WORKSPACE_DIR}/scripts/install/setup.bash \"\$${CCWS_INSTALL_DIR_HOST}/\" \
 		&& ${MAKE} wsstatus > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/workspace_status.txt\" \
@@ -128,6 +153,11 @@ rosdep_resolve: rosdep_init deplist
 		rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ') \
 		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > \"${WORKSPACE_DIR}/build/deplist/${PKG}.deb\" "
 
+rosdep_install: rosdep_resolve
+	bash -c "${SETUP_SCRIPT}; \
+		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' \
+		| xargs sudo \$${CCWS_CHROOT} ${APT_INSTALL}"
+
 deb_build: rosdep_resolve version_hash
 	bash -c "${DEB_SETUP_SCRIPT}; ${MAKE} build"
 
@@ -150,14 +180,21 @@ deb:
 	${MAKE} deb_build
 	${MAKE} deb_pack
 
+tesxt:
+	bash -c "${SETUP_SCRIPT}; echo \$${COLCON_HOME}"
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
 	bash -c "${SETUP_SCRIPT}; \
-		colcon test \
+		colcon \
+		--log-base build/log/${PROFILE} \
+		test \
+		--merge-install \
+		--ctest-args --output-on-failure -j ${JOBS} \
 		--build-base build/${PROFILE} \
-		\$${COLCON_TEST_ARGS} \
-		--parallel-workers ${JOBS} \
+		--install-base \"\$${CCWS_INSTALL_DIR_HOST}\" \
+		--base-paths ${WORKSPACE_DIR}/src/ \
+		--test-result-base build/log/${PROFILE}/testing \
 		--packages-select ${PKG}"
 	${MAKE} showtestresults
 
@@ -170,7 +207,7 @@ ctest: assert_PKG_arg_must_be_specified
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
-	colcon test-result --all --test-result-base ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}
+	colcon --log-base /dev/null test-result --all --test-result-base ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}
 	#bash -c "${SETUP_SCRIPT}; catkin_test_results ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}"
 
 
@@ -186,12 +223,12 @@ new: assert_PKG_arg_must_be_specified
 
 # `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
 info_with_deps: assert_PKG_arg_must_be_specified
-	@${COLCON_LOGLESS} list --names-only --base-paths src/ --packages-up-to ${PKG} | xargs ${COLCON_LOGLESS} info --base-paths src/ --packages-select
+	@${CMD_PKG_NAME_LIST} --packages-up-to ${PKG} | xargs ${CMD_PKG_INFO} --packages-select
 
 # generate list of dependencies which are not present in the workspace
 deplist: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/deplist
-	${MAKE} --quiet wslist | sort > ${WORKSPACE_DIR}/build/deplist/ccws.list
+	${CMD_PKG_NAME_LIST} | sort > ${WORKSPACE_DIR}/build/deplist/ccws.list
 	${MAKE} --quiet info_with_deps \
 		| grep '\(build:\)\|\(run:\)' \
 		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \

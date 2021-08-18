@@ -1,15 +1,24 @@
 STATIC_CHECKS_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/static_checks/setup.bash
 
-install_static_checkers:
+static_checks_host_install:
 	#pip3 install cpplint
-	${APT_INSTALL} cppcheck
-	${APT_INSTALL} flawfinder
-	${APT_INSTALL} yamllint
-	${APT_INSTALL} shellcheck
+	sudo ${APT_INSTALL} \
+		cppcheck \
+		flawfinder \
+		yamllint \
+		shellcheck
+	sudo ${MAKE} static_checks_host_install_${OS_DISTRO}
+
+#ubuntu18
+static_checks_host_install_bionic:
 	${APT_INSTALL} python-catkin-lint
 
+#ubuntu20
+static_checks_host_install_focal:
+	${APT_INSTALL} python3-catkin-lint
 
-static_check:
+
+static_checks:
 	${MAKE} cppcheck
 	${MAKE} catkin_lint
 	${MAKE} yamllint

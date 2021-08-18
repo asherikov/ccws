@@ -1,0 +1,16 @@
+# probably false posititives, cannot do much about them
+
+# std::vector<  class_loader::ClassLoader*,
+#               std::allocator<class_loader::ClassLoader*> >::_M_realloc_insert<class_loader::ClassLoader* const&>(
+#                   __gnu_cxx::__normal_iterator<class_loader::ClassLoader**, std::vector<class_loader::ClassLoader*, std::allocator<class_loader::ClassLoader*> > >,
+#                   class_loader::ClassLoader* const&)
+leak:libclass_loader.so
+
+# std::__cxx11::basic_string<   char,
+#                               std::char_traits<char>,
+#                               std::allocator<char> >::_M_assign(
+#                                   std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+leak:libstdc++.so.6
+
+# operator new(unsigned long)
+leak:libasan.so.4

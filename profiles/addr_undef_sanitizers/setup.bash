@@ -12,4 +12,12 @@ export CCWS_PROFILE
 source "./profiles/common/setup.bash"
 
 ##########################################################################################
-set +e
+
+# undefined
+UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${CCWS_PROFILE_DIR}/undefined.supp
+export UBSAN_OPTIONS
+
+# leaks
+LSAN_OPTIONS=suppressions=${CCWS_PROFILE_DIR}/leak.supp
+export LSAN_OPTIONS
+
