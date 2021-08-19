@@ -36,44 +36,58 @@ cppcheck:
 	#
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; cppcheck \
-		\$${CCWS_WORKSPACE_DIR}/src \
-		--relative-paths \
-		--quiet --verbose --force \
-		--template='[{file}:{line}]  {severity}  {id}  {message}' \
-		--language=c++ --std=c++11 \
-		--enable=warning \
-		--enable=style \
-		--enable=performance \
-		--enable=portability \
-		--suppress=uninitMemberVar \
-		--suppress=syntaxError \
-		--suppress=useInitializationList \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ / -i /g'` \
-	3>&1 1>&2 2>&3 | tee \$${CCWS_ARTIFACTS_DIR}/cppcheck.err; \
-	test -s \$${CCWS_ARTIFACTS_DIR}/cppcheck.err"
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
+		cppcheck \
+			\$${CCWS_WORKSPACE_DIR}/src \
+			--relative-paths \
+			--quiet --verbose --force \
+			--template='[{file}:{line}]  {severity}  {id}  {message}' \
+			--language=c++ --std=c++11 \
+			--enable=warning \
+			--enable=style \
+			--enable=performance \
+			--enable=portability \
+			--suppress=uninitMemberVar \
+			--suppress=syntaxError \
+			--suppress=useInitializationList \
+			\$${EXCEPTIONS} \
+			3>&1 1>&2 2>&3 | tee \$${CCWS_ARTIFACTS_DIR}/cppcheck.err; \
+		test ! -s \$${CCWS_ARTIFACTS_DIR}/cppcheck.err || exit 1"
 
 
 cpplint:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; cpplint \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ / --exclude=/g'` \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude=/g'); \
+		cpplint \
+		\$${EXCEPTIONS} \
 		--filter=-whitespace,-runtime/casting,-runtime/indentation_namespace,-readability/casting,-runtime/references,-readability/braces,-readability/namespace,-build/include_subdir,-build/header_guard,-build/include_order,-build/namespaces,-build/c++11,-readability/alt_tokens,-readability/todo,-build/include \
 		--quiet --recursive src"
 
 
-flawfinder:
+# internal target
+static_checks_generic_dir_filter:
+	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
+	echo -n "cat ${WORKSPACE_DIR}/build/${TARGET}/input" > ${WORKSPACE_DIR}/build/${TARGET}/filter
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCWS_WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
-		| xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}
+		echo ${CCWS_STATIC_DIR_EXCEPTIONS} | sed 's= \([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
+
+
+flawfinder:
+	${MAKE} static_checks_generic_dir_filter TARGET=$@
+	find ${WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' > ${WORKSPACE_DIR}/build/$@/input
+	bash -c " \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
+		cat ${WORKSPACE_DIR}/build/shellcheck/input.filtered | xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
 
 
 yamllint:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		find \$${CCWS_WORKSPACE_DIR}/src -iname '*.yaml' \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'`" \
-		| xargs --max-procs=${JOBS} -I {} \
-		env LC_ALL=C.UTF-8 yamllint -d "{extends: default, \
+	${MAKE} static_checks_generic_dir_filter TARGET=$@
+	find ${WORKSPACE_DIR}/src -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
+	bash -c " \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
+		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} \
+		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
                       rules: { \
                         colons: {max-spaces-before: 0, max-spaces-after: -1}, \
                         commas: disable, \
@@ -84,16 +98,17 @@ yamllint:
                         trailing-spaces: disable, \
                         new-line-at-end-of-file: disable, \
                         comments-indentation: disable, \
-                        empty-lines: {max: 5, max-end: 1}}}" {}
+                        empty-lines: {max: 5, max-end: 1}}}\" {}"
 
 
 shellcheck:
+	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		( find \$${CCWS_WORKSPACE_DIR}/profiles -maxdepth 2 -iname '*.sh' -or -iname '*.bash' && \
 			find \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' ) \
-		`echo \$${CCWS_STATIC_PATH_EXCEPTIONS} | sed 's/ \([[:graph:]]*\)/ | grep -v \"\1\" /g'` \
-		| xargs --max-procs=${JOBS} -I {} \
-		shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {} "
+			> ${WORKSPACE_DIR}/build/$@/input; \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
+		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 
 
 CATKIN_LINT_COMMON_IGNORES=--ignore package_path_name \

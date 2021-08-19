@@ -1,7 +1,7 @@
 DOXYGEN_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/doxygen/setup.bash
 
 doxygen_host_install:
-	sudo ${APT_INSTALL} doxygen
+	sudo ${APT_INSTALL} doxygen graphviz
 
 doxclean:
 	bash -c "${DOXYGEN_SETUP_SCRIPT} \

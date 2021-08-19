@@ -5,20 +5,13 @@ test:
 	${MAKE} purge
 	${MAKE} host_install
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
+	# noop, just checking
 	${MAKE} target_install PKG=staticoma
 	# test various build profiles
-	${MAKE} staticoma
-	${MAKE} wstest
-	${MAKE} wsctest
-	${MAKE} staticoma PROFILE=addr_undef_sanitizers
-	${MAKE} wstest PROFILE=addr_undef_sanitizers
-	${MAKE} wsctest PROFILE=addr_undef_sanitizers
-	${MAKE} staticoma PROFILE=thread_sanitizer
-	${MAKE} wstest PROFILE=thread_sanitizer
-	${MAKE} wsctest PROFILE=thread_sanitizer
-	${MAKE} staticoma PROFILE=scan_build
-	${MAKE} wstest PROFILE=scan_build
-	${MAKE} wsctest PROFILE=scan_build
+	${MAKE} build_with_profile PROFILE=reldebug
+	${MAKE} build_with_profile PROFILE=addr_undef_sanitizers
+	${MAKE} build_with_profile PROFILE=thread_sanitizer
+	${MAKE} build_with_profile PROFILE=scan_build
 	# static checks & documentation
 	${MAKE} host_install PROFILE=static_checks
 	${MAKE} static_checks
@@ -31,3 +24,8 @@ test:
 	${MAKE} wsdep_to_rosinstall
 	${MAKE} wsupdate
 	${MAKE} deb PKG=staticoma
+
+build_with_profile:
+	${MAKE} staticoma
+	${MAKE} wstest
+	${MAKE} wsctest

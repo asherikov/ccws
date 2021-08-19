@@ -19,8 +19,11 @@ source "./profiles/common/setup.bash"
 # global exceptions
 #
 
-CCWS_STATIC_PATH_EXCEPTIONS=""
-export CCWS_STATIC_PATH_EXCEPTIONS
+CCWS_SOURCE_DIR="${CCWS_WORKSPACE_DIR}/src"
+
+# popl.hpp
+CCWS_STATIC_DIR_EXCEPTIONS=":${CCWS_SOURCE_DIR}/staticoma/src/"
+export CCWS_STATIC_DIR_EXCEPTIONS
 
 
 ##########################################################################################

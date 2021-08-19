@@ -119,7 +119,6 @@ build: assert_PKG_arg_must_be_specified wsprepare_build
 	time bash -c "${SETUP_SCRIPT}  \
 		&& \$${CCWS_BUILD_WRAPPER} colcon \
 		--log-base build/log/${PROFILE} \
-		--log-level DEBUG \
 		build \
 		--merge-install \
 		--base-paths ${WORKSPACE_DIR}/src/ \
@@ -230,8 +229,8 @@ deplist: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/deplist
 	${CMD_PKG_NAME_LIST} | sort > ${WORKSPACE_DIR}/build/deplist/ccws.list
 	${MAKE} --quiet info_with_deps \
-		| grep '\(build:\)\|\(run:\)' \
-		| sed -e 's/build://' -e 's/run://' -e 's/ /\n/g' \
+		| grep '\(build:\)\|\(run:\)\|\(test:\)' \
+		| sed -e 's/build://' -e 's/run://' -e 's/test://' -e 's/ /\n/g' \
 		| sort | uniq | grep -v '^$$' > ${WORKSPACE_DIR}/build/deplist/${PKG}.all
 	# remove packages that are already in the workspace
 	comm -13 ${WORKSPACE_DIR}/build/deplist/ccws.list ${WORKSPACE_DIR}/build/deplist/${PKG}.all > ${WORKSPACE_DIR}/build/deplist/${PKG}

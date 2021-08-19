@@ -1,3 +1,15 @@
+<table>
+  <tr>
+    <th>CI status</th>
+    <td align="center">
+        <a href="https://github.com/asherikov/ccws/actions?query=workflow%3A.github%2Fworkflows%2Fmaster.yml+branch%3Amaster">
+        <img src="https://github.com/asherikov/ccws/workflows/.github/workflows/master.yml/badge.svg?branch=master" alt="Build Status">
+        </a>
+    </td>
+  </tr>
+</table>
+
+
 Introduction
 ============
 
@@ -19,36 +31,38 @@ Features
   conflict with each other and can be used simultaneously without using
   separate clones of the workspace and packages.
 
-- Documentation generation for the whole workspace using `doxygen`, similar to
-  https://github.com/mikepurvis/catkin_tools_document, but `doxygen`
-  configuration and index html page are exposed and kept in the workspace.
+- A number of features implemented via build profiles:
+    - Cross compilation to several common platforms.
 
-- Various static checks as in https://github.com/sscpac/statick, but with more
-  flexibility (see `profiles/statick_checks/targets.mk`), in particular:
-    - `cppcheck`
-    - `catkin_lint` https://github.com/fkie/catkin_lint
-    - `yamllint`
-    - `shellcheck`
-    - `clang-tidy` and `scan_build` via build profile, see below.
+    - Documentation generation for the whole workspace or selected packages
+      using `doxygen`, similar to https://github.com/mikepurvis/catkin_tools_document.
+
+    - Linting with `clang-tidy` and `scan_build`.
+
+    - Various static checks as in https://github.com/sscpac/statick, in
+      particular:
+        - `cppcheck`
+        - `catkin_lint` https://github.com/fkie/catkin_lint
+        - `yamllint`
+        - `shellcheck`
+
+- Binary debian package generation.
 
 - Package template which demonstrates how to use some of the features.
 
 - The number of parallel jobs can be selected based on available RAM instead of
   CPU cores, since RAM is more likely to be the limiting factor.
 
-- Based entirely on `make` and shell scripts. All scripts are kept in the
-  workspace and easy to adjust for specific needs.
-
-- Cross-compilation support.
-
-- Binary debian package generation.
+- Based entirely on `make` and shell scripts. All scripts and configurations
+  are kept in the workspace and easy to adjust for specific needs.
 
 
 Profiles
 --------
 
-Profile configurations are located in `profiles`, currently availabale profiles are
-- `reldebug` -- default profile, default compiler, cmake build type is
+Profile configurations are located in `profiles`, `common` subdirectory
+contains default parameters, which can be overriden by specific profiles:
+- [default] `reldebug` -- default compiler, cmake build type is
   `RelWithDebInfo`
 - `scan_build` -- static checks with `scan_build` and `clang-tidy`.
   `clang-tidy` parameters are defined in cmake toolchain and must be enabled in
@@ -56,32 +70,23 @@ Profile configurations are located in `profiles`, currently availabale profiles 
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
+- `static_checkers` -- static checkers and their configuration.
+- `doxygen` -- doxygen and its configuration.
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
-- `static_checkers` -- static checkers and their configuration.
-- `doxygen` -- doxygen + configuration.
-
-All profiles use `ccache`, but it can be disabled in cmake toolchains.
-
-`common` subdirectory contains default parameters, which may be overriden by
-build profiles.
+- `cross_jetson_nano` -- cross-compilation for Jetson Nano.
 
 
 Dependencies
 ------------
 
 Dependencies can be installed using `make host_install PROFILE=<profile>`, which is
-going to install some of the following:
-
-
-### Required
+going to install the following tools and profile specific dependencies:
 - `colcon`
-- `wstool` -- it provides much more advanced features than `vcstool` which does
-  not maintain package states locally.
+- `wstool` -- much more suitable for `CCWS` workflow than `vcstool` which does
+  not maintain repository states.
 - `cmake`
-
-Some packages are not strictly required, but installed by default:
-- `ccache`
+- `ccache` -- can be disabled in cmake toolchains
 - `wget`
 
 
@@ -96,8 +101,9 @@ Initial setup
 -------------
 
 - Edit `make/config.mk` and `profiles/common/config.bash` to specify
-  developer-dependent worskpace parameters.
-- Install dependencies using `make host_install PROFILE=<profile>` targets.
+  developer-dependent workspace parameters.
+- Install dependencies using `make host_install PROFILE=<profile>` targets,
+  cross compilation profiles would require some extra steps as described below.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
 
@@ -117,14 +123,15 @@ Running
 
 - Source `setup.bash <profile>` to be able to use packages. Setup scripts
   generated by `colcon` can also be used directly, e.g.,
-  `install/<profile>/local_setup.sh`, but in this case some of CCWS
+  `install/<profile>/local_setup.sh`, but in this case some of `CCWS`
   functionality won't be available.
 
 
 Testing
 -------
-- `make test PKG=<pkg>` test with `colcon`.
-- `make ctest PKG=<pkg>` bypass colcon and run `ctest` directly.
+- `make test PKG=<pkg>` test with `colcon`, or `make wstest` to test all.
+- `make ctest PKG=<pkg>` bypass `colcon` and run `ctest` directly or `make
+  wsctest` to test all.
 
 
 Documentation
@@ -155,8 +162,8 @@ This approach has a number of advantages:
       happen).
 
 - This approach allows for somewhat sloppier package management compared to ROS
-  when it comes to tags, versions, etc, e.g., there is no need to maintain
-  release repos for all packages.
+  when it comes to tags, versions, git submodules, etc, e.g., there is no need
+  to maintain release repos for all packages.
 
 - Debian 'superpackages' are easier to manage than both standalone packages and
   docker containers, e.g. they can be generated by developers from their
@@ -169,6 +176,9 @@ This approach has a number of advantages:
     - Straightforward access to hardware.
 
     - Easy installation of system services, udev rules, configs, etc.
+
+- Modification of `CCWS` global version set in `make/config.mk` allows to
+  generate packages that can be installed in parallel.
 
 
 ### Building packages
@@ -184,22 +194,23 @@ building binary package, unless you are rebuilding the same package.
 Cross-compilation
 -----------------
 
-Here `<profile>` stands for `cross_raspberry_pi` or `cross_jetson_xavier`.
-Cross-compilation make targets can be found in `make/cross.mk` and
-`profiles/<profile>/targets.mk`
+Here `<profile>` stands for `cross_raspberry_pi`, `cross_jetson_xavier`,
+`cross_jetson_nano`. Cross-compilation make targets can be found in
+`make/cross.mk` and `profiles/<profile>/targets.mk`
 
-Note on `cross_jetson_xavier`: This profile requires Ubuntu 18.04 / ROS melodic
-and installs `nvcc`, you may want to do this in a docker.
-
+Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
+Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
+container.
 
 1. Install profile dependencies with `make host_install PROFILE=<profile>`
 2. Obtain system image:
     - `cross_raspberry_pi` -- `host_install` target automatically downloads
       standard image;
-    - `cross_jetson_xavier` -- copy APP partition image to
-      `profiles/cross_jetson_xavier/system.img`.
+    - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
+      these images automatically, you have to manualy copy system partition
+      image to `profiles/cross_jetson_xavier/system.img`.
 3. Initialize source repositories:
-    - make wsinit REPOS="https://github.com/asherikov/staticoma.git"
+    - `make wsinit REPOS="https://github.com/asherikov/staticoma.git"`
     - [when building all ROS packages] add ROS dependencies of all your
       packages to the workspace `make wsdep_to_rosinstall ROS_DISTRO=melodic`,
       or a specific package
@@ -213,17 +224,16 @@ and installs `nvcc`, you may want to do this in a docker.
       generate deb package `make deb PKG=staticoma PROFILE=<profile>`
     - unmount sysroot when done with `make cross_umount PROFILE=<profile>`
 
-See `doc/cross-compilation.md` for more technical details.
+See `doc/cross-compilation.md` for more technical details and
+`.ccws/test_cross.mk` for examples.
 
 
 
 Related software
 ================
 
-Related projects:
 - https://github.com/ros-industrial/industrial_ci
 - https://github.com/git-afsantos/haros
 - https://github.com/DLu/roscompile
-- https://github.com/asherikov/catkin_workspace [deprecated]
 - https://github.com/ros-tooling/cross_compile/
-- https://github.com/mikepurvis/catkin_tools_document
+- https://github.com/asherikov/catkin_workspace [deprecated]
