@@ -12,4 +12,3 @@ export CCWS_PROFILE
 source "./profiles/common/setup.bash"
 
 ##########################################################################################
-set +e

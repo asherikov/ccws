@@ -16,35 +16,62 @@ fi
 
 
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
-export CCWS_ARTIFACTS_DIR
+CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${CCWS_PROFILE}"
+CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${CCWS_PROFILE}"
+export CCWS_ARTIFACTS_DIR CCWS_PROFILE_DIR CCWS_BUILD_DIR
 
+CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/scripts/proot"
+export CCWS_PROOT_BIN
+
+
+##########################################################################################
+# Host OS
+#
+if [ -z "${CCWS_SYSROOT}" ]
+then
+    OS_DISTRO_HOST=${OS_DISTRO_BUILD}
+    export OS_DISTRO_HOST
+fi
+##########################################################################################
+
+
+##########################################################################################
+# ROS version
+#
 if [ -z "${CCWS_ROS_DISTRO}" ];
 then
     if [ -n "${ROS_DISTRO}" ];
     then
         CCWS_ROS_DISTRO=${ROS_DISTRO}
-        export CCWS_ROS_DISTRO
     else
-        # CCWS_SYSROOT is empty by default
+        # check installed ROS
+        # CCWS_SYSROOT is empty in native builds and nonempty builds, so we are checking the host
         if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
         then
-            CCWS_ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs -0 basename | sort | tail -n 1 | sed 's=/==g')
-            export CCWS_ROS_DISTRO
-        else
-            echo "Could not determine CCWS_ROS_DISTRO" >&2
+            CCWS_ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs --no-run-if-empty -0 basename | sort | tail -n 1 | sed 's=/==g')
+        fi
+
+        # pick default based on the OS version
+        # ROS1 is preferred, override manually if necessary
+        if [ -z "${CCWS_ROS_DISTRO}" ];
+        then
+            case "${OS_DISTRO_HOST}" in
+                bionic)
+                    CCWS_ROS_DISTRO=melodic;;
+                focal)
+                    CCWS_ROS_DISTRO=noetic;;
+            esac
         fi
     fi
 fi
-
-CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${CCWS_PROFILE}"
-export CCWS_PROFILE_DIR
-
-CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${CCWS_PROFILE}"
-export CCWS_BUILD_DIR
-
-
-CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/scripts/proot"
-export CCWS_PROOT_BIN
+if [ -z "${CCWS_ROS_DISTRO}" ]
+then
+    echo "Could not determine CCWS_ROS_DISTRO" >&2
+else
+    ROS_DISTRO=${CCWS_ROS_DISTRO}
+    export ROS_DISTRO CCWS_ROS_DISTRO
+fi
+##########################################################################################
 
 
 ##########################################################################################
@@ -59,9 +86,9 @@ export CCWS_BUILD_TIME CCWS_BUILD_USER
 if [ -z "${CCWS_DEB_ENABLE}" ]
 then
     CCWS_PKG_FULL_NAME=${PKG}
-    # CCWS_INSTALL_DIR_HOST = CCWS_INSTALL_DIR_TARGET
-    CCWS_INSTALL_DIR_HOST="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
-    CCWS_INSTALL_DIR_TARGET="${CCWS_INSTALL_DIR_HOST}"
+    # CCWS_INSTALL_DIR_BUILD = CCWS_INSTALL_DIR_HOST
+    CCWS_INSTALL_DIR_BUILD="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
+    CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_BUILD}"
 else
     if [ -z "${CCWS_TRIPLE_ARCH}" ];
     then
@@ -85,15 +112,15 @@ else
 
     CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
-    CCWS_INSTALL_DIR_TARGET="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
-    CCWS_INSTALL_DIR_HOST_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
-    CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_HOST_ROOT}/${CCWS_INSTALL_DIR_TARGET}"
+    CCWS_INSTALL_DIR_HOST="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
+    CCWS_INSTALL_DIR_BUILD_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
+    CCWS_INSTALL_DIR_BUILD="${CCWS_INSTALL_DIR_BUILD_ROOT}/${CCWS_INSTALL_DIR_HOST}"
 
-    export CCWS_INSTALL_DIR_HOST_ROOT
+    export CCWS_INSTALL_DIR_BUILD_ROOT
 fi
-CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_HOST}/setup.bash"
+CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_BUILD}/setup.bash"
 
-export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_TARGET CCWS_INSTALL_DIR_HOST CCWS_WORKSPACE_SETUP
+export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD CCWS_WORKSPACE_SETUP
 
 
 ##########################################################################################

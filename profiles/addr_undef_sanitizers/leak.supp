@@ -13,4 +13,4 @@ leak:libclass_loader.so
 leak:libstdc++.so.6
 
 # operator new(unsigned long)
-leak:libasan.so.4
+leak:libasan.so

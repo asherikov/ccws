@@ -1,10 +1,13 @@
 include make/config.mk
 
-EMAIL?=$(shell git config --get user.email)
-AUTHOR?=$(shell git config --get user.name)
+export EMAIL?=$(shell git config --get user.email)
+export AUTHOR?=$(shell git config --get user.name)
+export PROFILE
+export VERSION
+export ROS_DISTRO
 
-WORKSPACE_DIR=$(shell pwd)
-OS_DISTRO=$(shell lsb_release -cs)
+export WORKSPACE_DIR=$(shell pwd)
+export OS_DISTRO_BUILD=$(shell lsb_release -cs)
 
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
@@ -13,17 +16,10 @@ CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
 
 
 SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
-DEB_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/common/deb.bash
 ARGS?=
 
 MEMORY_PER_JOB_MB?=1024
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
-
-export AUTHOR
-export EMAIL
-export PROFILE
-export WORKSPACE_DIR
-export VERSION
 
 
 ##
@@ -43,6 +39,9 @@ default: build
 ##
 ## Workspace targets
 ##
+
+wswraptarget:
+	time bash -c "${SETUP_SCRIPT}; ${MAKE} ${TARGET}"
 
 wslist:
 	@${CMD_PKG_NAME_LIST}
@@ -83,11 +82,6 @@ wsdep_to_rosinstall:
 	${MAKE} rosinstall_extend PKG_LIST="${WORKSPACE_DIR}/build/deplist/ccws.deps.all"
 
 
-wsprepare_build:
-	bash -c "${SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
-		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST}/ccws/\"; "
-
 # generic test target, it is recommended to use more specific targets below
 wstest_generic:
 	${CMD_PKG_NAME_LIST} | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
@@ -114,91 +108,41 @@ wsctest:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
+build:
+	${MAKE} wswraptarget TARGET=private_build
+
 # --log-level DEBUG
-build: assert_PKG_arg_must_be_specified wsprepare_build
-	time bash -c "${SETUP_SCRIPT}  \
-		&& \$${CCWS_BUILD_WRAPPER} colcon \
+private_build: assert_PKG_arg_must_be_specified wsprepare_build
+	mkdir -p "${CCWS_BUILD_DIR}"
+	${CCWS_BUILD_WRAPPER} colcon \
 		--log-base build/log/${PROFILE} \
 		build \
 		--merge-install \
 		--base-paths ${WORKSPACE_DIR}/src/ \
 		--build-base build/${PROFILE} \
-		--install-base \"\$${CCWS_INSTALL_DIR_HOST}\" \
-		--cmake-args -DCMAKE_TOOLCHAIN_FILE=\"\$${CMAKE_TOOLCHAIN_FILE}\" \
+		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
+		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
 		--packages-up-to ${PKG} \
-		&& cp ${WORKSPACE_DIR}/scripts/install/setup.bash \"\$${CCWS_INSTALL_DIR_HOST}/\" \
-		&& ${MAKE} wsstatus > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/workspace_status.txt\" \
-		&& echo \"${PKG}\" > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/pkg.txt\" \
-		&& echo \$${CCWS_BUILD_USER} \$${CCWS_BUILD_TIME} > \"\$${CCWS_INSTALL_DIR_HOST}/ccws/build_info.txt\" "
+		&& cp ${WORKSPACE_DIR}/scripts/install/setup.bash "${CCWS_INSTALL_DIR_BUILD}/"
 
-
-version_hash: assert_PKG_arg_must_be_specified
-	mkdir -p ${WORKSPACE_DIR}/build/version_hash
-	${MAKE} --quiet info_with_deps \
-		| grep path | sed 's/path: //' | sort \
-		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
-	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
-	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
-
-rosdep_init:
-	bash -c "${SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_PROFILE_DIR}/rosdep\"; \
-		mkdir -p \"\$${ROS_HOME}\"; \
-		ln --symbolic --force --no-target-directory \"\$${CCWS_PROFILE_DIR}/rosdep\" \"\$${ROS_HOME}/rosdep\" "
-
-rosdep_resolve: rosdep_init deplist
-	bash -c "${SETUP_SCRIPT}; \
-		test -d \"\$${ROS_HOME}/rosdep/sources.cache/\" || rosdep update; \
-		rosdep resolve $$(cat ${WORKSPACE_DIR}/build/deplist/${PKG} | paste -s -d ' ') \
-		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > \"${WORKSPACE_DIR}/build/deplist/${PKG}.deb\" "
-
-rosdep_install: rosdep_resolve
-	bash -c "${SETUP_SCRIPT}; \
-		cat '${WORKSPACE_DIR}/build/deplist/${PKG}.deb' \
-		| xargs sudo \$${CCWS_CHROOT} ${APT_INSTALL}"
-
-deb_build: rosdep_resolve version_hash
-	bash -c "${DEB_SETUP_SCRIPT}; ${MAKE} build"
-
-deb_pack: assert_PKG_arg_must_be_specified
-	time bash -c "${DEB_SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/DEBIAN\"; \
-		chmod -R g-w \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" ; \
-		find \"\$${CCWS_INSTALL_DIR_HOST_ROOT}/\" -iname '*.pyc' | xargs --no-run-if-empty rm; \
-		${WORKSPACE_DIR}/scripts/deb/control.sh; \
-		${WORKSPACE_DIR}/scripts/deb/preinst.sh; \
-		${WORKSPACE_DIR}/scripts/deb/postinst.sh; \
-		dpkg-deb --root-owner-group --build \"\$${CCWS_INSTALL_DIR_HOST_ROOT}\" \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
-
-# see https://lintian.debian.org/tags/
-deb_lint: assert_PKG_arg_must_be_specified
-	bash -c "${DEB_SETUP_SCRIPT}; \
-	lintian \"install/\$${CCWS_PKG_FULL_NAME}.deb\" "
-
-deb:
-	${MAKE} deb_build
-	${MAKE} deb_pack
-
-tesxt:
-	bash -c "${SETUP_SCRIPT}; echo \$${COLCON_HOME}"
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	bash -c "${SETUP_SCRIPT}; \
+	time bash -c "${SETUP_SCRIPT}; \
 		colcon \
 		--log-base build/log/${PROFILE} \
 		test \
 		--merge-install \
 		--ctest-args --output-on-failure -j ${JOBS} \
 		--build-base build/${PROFILE} \
-		--install-base \"\$${CCWS_INSTALL_DIR_HOST}\" \
+		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
 		--test-result-base build/log/${PROFILE}/testing \
 		--packages-select ${PKG}"
 	${MAKE} showtestresults
 
 ctest: assert_PKG_arg_must_be_specified
-	bash -c "${SETUP_SCRIPT}; \
+	time bash -c "${SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}\"; \
 		cd build/${PROFILE}/${PKG}; \
 		time ctest --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}/ctest_${PKG}.log\" -j ${JOBS}"

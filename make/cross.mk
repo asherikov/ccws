@@ -23,5 +23,5 @@ cross_umount:
 	# should not fail, may be called on unmounted root
 	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
-cross_common_host_install:
+cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user-static

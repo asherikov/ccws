@@ -80,7 +80,7 @@ contains default parameters, which can be overriden by specific profiles:
 Dependencies
 ------------
 
-Dependencies can be installed using `make host_install PROFILE=<profile>`, which is
+Dependencies can be installed using `make install_build PROFILE=<profile>`, which is
 going to install the following tools and profile specific dependencies:
 - `colcon`
 - `wstool` -- much more suitable for `CCWS` workflow than `vcstool` which does
@@ -102,7 +102,7 @@ Initial setup
 
 - Edit `make/config.mk` and `profiles/common/config.bash` to specify
   developer-dependent workspace parameters.
-- Install dependencies using `make host_install PROFILE=<profile>` targets,
+- Install dependencies using `make install_build PROFILE=<profile>` targets,
   cross compilation profiles would require some extra steps as described below.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
@@ -202,9 +202,9 @@ Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
 Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
 container.
 
-1. Install profile dependencies with `make host_install PROFILE=<profile>`
+1. Install profile dependencies with `make install_build PROFILE=<profile>`
 2. Obtain system image:
-    - `cross_raspberry_pi` -- `host_install` target automatically downloads
+    - `cross_raspberry_pi` -- `install_build` target automatically downloads
       standard image;
     - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
       these images automatically, you have to manualy copy system partition
@@ -217,7 +217,7 @@ container.
       `make dep_to_rosinstall PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
-   image: `make target_install PKG=staticoma PROFILE=<profile>`
+   image: `make install_host PKG=staticoma PROFILE=<profile>`
 5. Compile packages:
     - mount sysroot with `make cross_mount PROFILE=<profile>`
     - build packages, e.g. `make staticoma PROFILE=<profile>` or build and
