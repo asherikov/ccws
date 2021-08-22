@@ -184,7 +184,7 @@ dep_to_rosinstall: deplist
 
 rosinstall_extend:
 	bash -c "${SETUP_SCRIPT}; cat ${PKG_LIST} | paste -s -d ' ' \
-		| xargs rosinstall_generator --deps --rosdistro \$${CCWS_ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
+		| xargs rosinstall_generator --deps --rosdistro \$${ROS_DISTRO} > ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall"
 	cd src; wstool merge -y ${WORKSPACE_DIR}/build/deplist/${PKG}.rosinstall
 
 

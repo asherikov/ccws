@@ -21,7 +21,7 @@ private_deb_info: assert_PKG_arg_must_be_specified version_hash
 	echo "${PKG}" > "${CCWS_DEB_INFO_DIR}/pkg.txt"
 	echo ${CCWS_BUILD_USER} ${CCWS_BUILD_TIME} > "${CCWS_DEB_INFO_DIR}/build_info.txt"
 	cat ${WORKSPACE_DIR}/build/version_hash/${PKG} \
-		| sed -e 's/^/${CCWS_BUILD_TIME}_${CCWS_ROS_DISTRO}_/' > "${CCWS_DEB_INFO_DIR}/version.txt"
+		| sed -e 's/^/${CCWS_BUILD_TIME}_${ROS_DISTRO}_/' > "${CCWS_DEB_INFO_DIR}/version.txt"
 
 private_deb_pack: assert_PKG_arg_must_be_specified rosdep_resolve private_deb_info
 	mkdir -p "${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN"

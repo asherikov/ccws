@@ -38,38 +38,32 @@ fi
 ##########################################################################################
 # ROS version
 #
-if [ -z "${CCWS_ROS_DISTRO}" ];
+if [ -z "${ROS_DISTRO}" ];
 then
-    if [ -n "${ROS_DISTRO}" ];
+    # check installed ROS
+    # CCWS_SYSROOT is empty in native builds and nonempty builds, so we are checking the host
+    if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
     then
-        CCWS_ROS_DISTRO=${ROS_DISTRO}
-    else
-        # check installed ROS
-        # CCWS_SYSROOT is empty in native builds and nonempty builds, so we are checking the host
-        if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
-        then
-            CCWS_ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs --no-run-if-empty -0 basename | sort | tail -n 1 | sed 's=/==g')
-        fi
+        ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs --no-run-if-empty -0 basename | sort | tail -n 1 | sed 's=/==g')
+    fi
 
-        # pick default based on the OS version
-        # ROS1 is preferred, override manually if necessary
-        if [ -z "${CCWS_ROS_DISTRO}" ];
-        then
-            case "${OS_DISTRO_HOST}" in
-                bionic)
-                    CCWS_ROS_DISTRO=melodic;;
-                focal)
-                    CCWS_ROS_DISTRO=noetic;;
-            esac
-        fi
+    # pick default based on the OS version
+    # ROS1 is preferred, override manually if necessary
+    if [ -z "${ROS_DISTRO}" ];
+    then
+        case "${OS_DISTRO_HOST}" in
+            bionic)
+                ROS_DISTRO=melodic;;
+            focal)
+                ROS_DISTRO=noetic;;
+        esac
     fi
 fi
-if [ -z "${CCWS_ROS_DISTRO}" ]
+if [ -z "${ROS_DISTRO}" ]
 then
-    echo "Could not determine CCWS_ROS_DISTRO" >&2
+    echo "Could not determine ROS_DISTRO" >&2
 else
-    ROS_DISTRO=${CCWS_ROS_DISTRO}
-    export ROS_DISTRO CCWS_ROS_DISTRO
+    export ROS_DISTRO 
 fi
 ##########################################################################################
 
@@ -153,9 +147,9 @@ export COLCON_HOME
 #
 
 # try sourcing preload scripts
-if [ -f "/opt/ros/${CCWS_ROS_DISTRO}/setup.bash" ];
+if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ];
 then
-    source "/opt/ros/${CCWS_ROS_DISTRO}/setup.bash"
+    source "/opt/ros/${ROS_DISTRO}/setup.bash"
 fi
 if [ -f "${CCWS_WORKSPACE_SETUP}" ];
 then
