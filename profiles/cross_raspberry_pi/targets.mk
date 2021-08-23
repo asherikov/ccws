@@ -43,7 +43,7 @@ cross_raspberry_pi_install_host:
 			apt update; \
 			apt --yes upgrade; \
 			apt clean\" "
-	-${MAKE} rosdep_install PROFILE=cross_raspberry_pi
+	-${MAKE} dep_install PROFILE=cross_raspberry_pi
 	${MAKE} cross_umount PROFILE=cross_raspberry_pi
 
 cross_raspberry_pi_mount:

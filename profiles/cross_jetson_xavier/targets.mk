@@ -22,7 +22,7 @@ cross_jetson_xavier_install_host:
 			${APT_INSTALL} ca-certificates; \
 			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
 			apt clean; '"
-	-${MAKE} rosdep_install PROFILE=cross_jetson_xavier
+	-${MAKE} dep_install PROFILE=cross_jetson_xavier
 	${MAKE} cross_umount PROFILE=cross_jetson_xavier
 
 cross_jetson_xavier_mount:

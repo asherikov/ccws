@@ -4,8 +4,8 @@ test:
 	${MAKE} purge
 	${MAKE} install_build
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
-	${MAKE} dep_to_rosinstall PKG=staticoma
-	${MAKE} wsdep_to_rosinstall
+	${MAKE} dep_to_repolist PKG=staticoma
+	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
 	${MAKE} install_host PKG=staticoma
 	${MAKE} cross_mount

@@ -2,12 +2,10 @@
     "test": {
         "abort-on-error": true,
         "return-code-on-test-failure": true,
-        "executor": "parallel",
         "ctest-args": " --output-on-failure "
         "merge-install": true
     },
     "build": {
-        "executor": "parallel",
         "symlink-install": true,
         "merge-install": true
     }

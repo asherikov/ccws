@@ -24,7 +24,7 @@ cross_jetson_nano_install_host:
 			${APT_INSTALL} ca-certificates; \
 			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
 			apt clean; '"
-	-${MAKE} rosdep_install PROFILE=cross_jetson_nano
+	-${MAKE} dep_install PROFILE=cross_jetson_nano
 	${MAKE} cross_umount PROFILE=cross_jetson_nano
 
 cross_jetson_nano_mount:

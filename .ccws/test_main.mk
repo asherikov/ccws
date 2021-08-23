@@ -6,10 +6,11 @@ test:
 	${MAKE} install_build
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
 	# add dependencies to the workspace and build deb package
-	${MAKE} dep_to_rosinstall PKG=staticoma
-	${MAKE} wsdep_to_rosinstall
+	${MAKE} dep_to_repolist PKG=staticoma
+	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
 	${MAKE} install_host PKG=staticoma
+	${MAKE} install_host
 	${MAKE} deb PKG=staticoma
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean

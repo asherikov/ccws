@@ -39,11 +39,11 @@ install_build:
 	# placeholder target, dont call this target manually
 	test -d "${WORKSPACE_DIR}/profiles/$*"
 
-install_host: assert_PKG_arg_must_be_specified
+install_host:
 	${MAKE} ${PROFILE}_install_host
 
 %_install_host:
-	${MAKE} rosdep_install
+	${MAKE} dep_install
 
 download:
 	bash -c "${SETUP_SCRIPT}; \

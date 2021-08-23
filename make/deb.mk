@@ -23,7 +23,7 @@ private_deb_info: assert_PKG_arg_must_be_specified version_hash
 	cat ${WORKSPACE_DIR}/build/version_hash/${PKG} \
 		| sed -e 's/^/${CCWS_BUILD_TIME}_${ROS_DISTRO}_/' > "${CCWS_DEB_INFO_DIR}/version.txt"
 
-private_deb_pack: assert_PKG_arg_must_be_specified rosdep_resolve private_deb_info
+private_deb_pack: assert_PKG_arg_must_be_specified dep_resolve private_deb_info
 	mkdir -p "${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN"
 	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
 	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' | xargs --no-run-if-empty rm

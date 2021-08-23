@@ -63,7 +63,7 @@ if [ -z "${ROS_DISTRO}" ]
 then
     echo "Could not determine ROS_DISTRO" >&2
 else
-    export ROS_DISTRO 
+    export ROS_DISTRO
 fi
 ##########################################################################################
 
