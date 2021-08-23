@@ -21,7 +21,7 @@ private_dep_install: private_dep_resolve
 
 dep_to_repolist: deplist
 	bash -c "${SETUP_SCRIPT}; cat '${DEPLIST_FILE}' | paste -s -d ' ' \
-		| xargs rosinstall_generator --deps --rosdistro \$${ROS_DISTRO} > ${DEPLIST_FILE}.rosinstall"
+		| xargs rosinstall_generator --deps > ${DEPLIST_FILE}.rosinstall"
 	cd src; wstool merge -y ${DEPLIST_FILE}.rosinstall
 
 

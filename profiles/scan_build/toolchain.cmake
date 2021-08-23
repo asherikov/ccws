@@ -1,4 +1,4 @@
-include("${CMAKE_CURRENT_LIST_DIR}/../common/cmake_flags.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_header.cmake")
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 # disable optimization to increase compilation speed
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O0 -DNDEBUG" CACHE STRING "" FORCE)
@@ -61,3 +61,5 @@ include("${CMAKE_CURRENT_LIST_DIR}/../common/cxx_flags.cmake")
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS} -Werror=extra-tokens -Wno-delete-non-abstract-non-virtual-dtor -Wno-gnu-zero-variadic-macro-arguments" CACHE STRING "" FORCE)
 # fails on gtest
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS} -Wno-deprecated-copy" CACHE STRING "" FORCE)
+
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_footer.cmake")

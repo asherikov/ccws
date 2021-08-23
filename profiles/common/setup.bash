@@ -8,16 +8,17 @@ export CCWS_WORKSPACE_DIR
 source "${CCWS_WORKSPACE_DIR}/profiles/common/config.bash"
 
 
-if [ -n "${CCWS_SYSROOT}" ]
+if [ -z "${PROFILE}" ]
 then
-    CCWS_CHROOT="chroot ${CCWS_SYSROOT}"
-    export CCWS_CHROOT
+    echo "Profile is not defined"
+else
+    export PROFILE
 fi
 
 
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
-CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${CCWS_PROFILE}"
-CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${CCWS_PROFILE}"
+CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${PROFILE}"
+CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${PROFILE}"
 export CCWS_ARTIFACTS_DIR CCWS_PROFILE_DIR CCWS_BUILD_DIR
 
 CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/scripts/proot"
@@ -25,14 +26,52 @@ export CCWS_PROOT_BIN
 
 
 ##########################################################################################
-# Host OS
+# Host OS & arch
 #
 if [ -z "${CCWS_SYSROOT}" ]
 then
     OS_DISTRO_HOST=${OS_DISTRO_BUILD}
     export OS_DISTRO_HOST
 fi
+
+if [ -z "${CCWS_TRIPLE_ARCH}" ];
+then
+    CCWS_TRIPLE_ARCH=$(uname -m)
+    export CCWS_TRIPLE_ARCH
+fi
+
+CCWS_TRIPLE=${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}-${CCWS_TRIPLE_ABI}
+export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI
+
+
 ##########################################################################################
+# cross compilation
+#
+
+if [ -n "${CCWS_SYSROOT}" ]
+then
+    CCWS_CHROOT="chroot ${CCWS_SYSROOT}"
+    export CCWS_SYSROOT CCWS_CHROOT
+
+    # host root in emulation
+    CCWS_HOST_ROOT=/host-rootfs/
+    export CCWS_HOST_ROOT
+
+    PATH=${CCWS_PROOT_BIN}:/bin:${PATH}
+    export PATH
+
+    # system package search parameters TODO redundant?
+    # needed for non-proot crosscompilation
+    #PKG_CONFIG_SYSROOT_DIR=${CCWS_SYSROOT}
+    #PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCWS_SYSROOT}/usr/lib/pkgconfig:${CCWS_SYSROOT}/usr/lib/${CCWS_TRIPLE}/pkgconfig:${CCWS_SYSROOT}/usr/share/pkgconfig"
+    #PKG_CONFIG_SYSROOT_DIR=/
+    PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCWS_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
+    export PKG_CONFIG_PATH
+
+    # skip tests
+    #COLCON_BUILD_ARGS="${COLCON_BUILD_ARGS} --catkin-skip-building-tests"
+    #export COLCON_BUILD_ARGS
+fi
 
 
 ##########################################################################################
@@ -65,7 +104,10 @@ then
 else
     export ROS_DISTRO
 fi
-##########################################################################################
+
+# it is better to stick to defaults
+#ROS_PYTHON_VERSION=3
+#export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
@@ -81,15 +123,9 @@ if [ -z "${CCWS_DEB_ENABLE}" ]
 then
     CCWS_PKG_FULL_NAME=${PKG}
     # CCWS_INSTALL_DIR_BUILD = CCWS_INSTALL_DIR_HOST
-    CCWS_INSTALL_DIR_BUILD="${CCWS_WORKSPACE_DIR}/install/${CCWS_PROFILE}"
+    CCWS_INSTALL_DIR_BUILD="${CCWS_WORKSPACE_DIR}/install/${PROFILE}"
     CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_BUILD}"
 else
-    if [ -z "${CCWS_TRIPLE_ARCH}" ];
-    then
-        CCWS_TRIPLE_ARCH=$(uname -m)
-        export CCWS_TRIPLE_ARCH
-    fi
-
     # package name
     case "${PKG}" in
         *\ *)
@@ -104,7 +140,7 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${CCWS_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
     CCWS_INSTALL_DIR_HOST="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_BUILD_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
@@ -122,7 +158,7 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD CCWS_WORK
 #
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
 CCACHE_DIR=${CCWS_WORKSPACE_DIR}/.ccache
-CCACHE_BASEDIR="/opt/${CCWS_VENDOR_ID}"
+CCACHE_BASEDIR="/opt/"
 export CCACHE_DIR CCACHE_BASEDIR
 
 
@@ -157,7 +193,7 @@ then
 fi
 
 
-ROS_HOME="${CCWS_ARTIFACTS_DIR}/${CCWS_PROFILE}"
+ROS_HOME="${CCWS_ARTIFACTS_DIR}/${PROFILE}"
 ROS_LOG_DIR="${ROS_HOME}/ros_log"
 export ROS_HOME ROS_LOG_DIR
 

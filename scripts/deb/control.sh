@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [ -z "${CCWS_TRIPLE_ARCH}" ]
-then
-    ${CCWS_TRIPLE_ARCH}
-fi
-
 case "${CCWS_TRIPLE_ARCH}" in
     # fixes 'package architecture (aarch64) does not match system (arm64)', deb
     # architecture naming conventions are different

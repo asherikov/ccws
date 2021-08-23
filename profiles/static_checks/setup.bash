@@ -6,12 +6,10 @@ set -o pipefail
 
 ##########################################################################################
 
-if [ -z "${CCWS_PROFILE}" ]
+if [ -z "${PROFILE}" ] # can be used by scan_build profile
 then
-    CCWS_PROFILE="static_checks"
-    export CCWS_PROFILE
+    PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
 fi
-
 source "./profiles/common/setup.bash"
 
 

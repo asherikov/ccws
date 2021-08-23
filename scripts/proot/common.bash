@@ -5,8 +5,8 @@ CCWS_PROOT_ARGS=""
 PATH="${CCWS_HOST_ROOT}/usr/bin:${PATH}"
 LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
 
-# CCWS_TRIPLE_ARCH is set for native builds as well, CCWS_TRIPLE -- does not
-if [ -n "${CCWS_TRIPLE}" ]
+# non-native build
+if [ "${CCWS_TRIPLE_ARCH}" != "$(uname -m)" ]
 then
     CCWS_PROOT_ARGS+=" --qemu=qemu-${CCWS_TRIPLE_ARCH}"
 fi

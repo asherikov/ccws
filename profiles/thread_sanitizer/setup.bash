@@ -6,9 +6,7 @@ set -o pipefail
 
 ##########################################################################################
 
-CCWS_PROFILE="thread_sanitizer"
-export CCWS_PROFILE
-
+PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
 source "./profiles/common/setup.bash"
 
 ##########################################################################################

@@ -6,9 +6,7 @@ set -o pipefail
 
 ##########################################################################################
 
-CCWS_PROFILE="scan_build"
-export CCWS_PROFILE
-
+PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
 source "./profiles/static_checks/setup.bash"
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_PATH_EXCEPTIONS}" | sed "s/ / --exclude /g")
@@ -75,4 +73,3 @@ ${EXCEPTIONS} \
 export CCWS_BUILD_WRAPPER
 
 ##########################################################################################
-set +e

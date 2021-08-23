@@ -1,11 +1,15 @@
+include("${CMAKE_CURRENT_LIST_DIR}/vendor/toolchain_header.cmake" OPTIONAL)
+
 set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
 
 set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 
-set(CCWS_BUILD_PROFILE   "$ENV{CCWS_PROFILE}"   CACHE STRING "" FORCE)
+set(CCWS_BUILD_PROFILE  "$ENV{CCWS_PROFILE}"   CACHE STRING "" FORCE)
 # controls testing of CCWS-aware packages
-set(CCWS_ENABLE_TESTING  ON                     CACHE STRING "" FORCE)
+set(CCWS_ENABLE_TESTING ON                     CACHE STRING "" FORCE)
+# debug level
+set(CCWS_DEBUG          "0"                    CACHE STRING "" FORCE)
 
 # skip some cmake checks
 # TODO https://github.com/cristianadam/cmake-checks-cache
@@ -30,5 +34,5 @@ set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORC
 
 # Find*.cmake debug output
 #set(Boost_DEBUG ON CACHE STRING "" FORCE)
-set(Protobuf_DEBUG ON CACHE STRING "" FORCE)
+#set(Protobuf_DEBUG ON CACHE STRING "" FORCE)
 
