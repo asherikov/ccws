@@ -17,7 +17,8 @@ fi
 CCWS_ARTIFACTS_DIR="${CCWS_WORKSPACE_DIR}/artifacts"
 CCWS_PROFILE_DIR="${CCWS_WORKSPACE_DIR}/profiles/${PROFILE}"
 CCWS_BUILD_DIR="${CCWS_WORKSPACE_DIR}/build/${PROFILE}"
-export CCWS_ARTIFACTS_DIR CCWS_PROFILE_DIR CCWS_BUILD_DIR
+CCWS_SOURCE_DIR="${CCWS_WORKSPACE_DIR}/src"
+export CCWS_ARTIFACTS_DIR CCWS_PROFILE_DIR CCWS_BUILD_DIR CCWS_SOURCE_DIR
 
 CCWS_PROOT_BIN="${CCWS_WORKSPACE_DIR}/scripts/proot"
 export CCWS_PROOT_BIN
@@ -154,6 +155,18 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD CCWS_WORK
 ##########################################################################################
 # ccache
 #
+# since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
+CMAKE_TOOLCHAIN_FILE=${CCWS_PROFILE_DIR}/toolchain.cmake
+export CMAKE_TOOLCHAIN_FILE
+
+# since 3.12: https://cmake.org/cmake/help/latest/envvar/CMAKE_BUILD_PARALLEL_LEVEL.html
+CMAKE_BUILD_PARALLEL_LEVEL=${JOBS}
+export CMAKE_BUILD_PARALLEL_LEVEL
+
+
+##########################################################################################
+# ccache
+#
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
 CCACHE_DIR=${CCWS_WORKSPACE_DIR}/.ccache
 CCACHE_BASEDIR="/opt/"
@@ -163,10 +176,6 @@ export CCACHE_DIR CCACHE_BASEDIR
 ##########################################################################################
 # colcon
 #
-
-# not necessary?
-CMAKE_TOOLCHAIN_FILE=${CCWS_PROFILE_DIR}/toolchain.cmake
-export CMAKE_TOOLCHAIN_FILE
 
 # does not seem to work
 #COLCON_DEFAULTS_FILE="${CCWS_WORKSPACE_DIR}/profiles/common/colcon/defaults.yaml"
@@ -219,3 +228,9 @@ MAKEFLAGS="-j${JOBS}"
 export MAKEFLAGS
 
 umask u=rwx,g=rx,o=rx
+
+
+if [ -f "${CCWS_PROFILE_DIR}/vendor/setup.bash" ]
+then
+    source "${CCWS_PROFILE_DIR}/vendor/setup.bash"
+fi

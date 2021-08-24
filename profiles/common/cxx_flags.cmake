@@ -4,4 +4,4 @@ set(CCWS_CXX_FLAGS
     CACHE STRING "" FORCE)
 
 add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
-add_definitions(-DCCWS_DEBUG="${CCWS_DEBUG}")
+add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})

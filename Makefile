@@ -29,11 +29,12 @@ export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB}
 
 default: build
 .DEFAULT:
-	bash -c "${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s | xargs --no-run-if-empty -I {} ${MAKE} PKG=\"{}\""
+	bash -c "${MAKE} PKG=\"$$(${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s)\""
 
 # include after default targets to avoid shadowing them
 -include profiles/*/*.mk
 -include make/*.mk
+-include make/vendor/*.mk
 
 
 
@@ -41,8 +42,10 @@ default: build
 ## Workspace targets
 ##
 
+
+# warning: MAKEFLAGS set in setup scripts is overriden by make
 wswraptarget:
-	time bash -c "${SETUP_SCRIPT}; ${MAKE} ${TARGET}"
+	bash -c "time (${SETUP_SCRIPT}; ${MAKE} ${TARGET})"
 
 wslist:
 	@${CMD_PKG_NAME_LIST}
@@ -69,6 +72,11 @@ wsscrape:
 wsupdate:
 	-git pull
 	${MAKE} wsupdate_pkgs
+
+wsupdate_shallow:
+	-git pull
+	mv src/.rosinstall src/.rosinstall.orig
+	cd src; wstool init -j${JOBS} --shallow ./ .rosinstall.orig
 
 # Update workspace & all packages
 wsupdate_pkgs:
@@ -101,13 +109,17 @@ wsctest:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
+assert_PROFILE_must_exist:
+	test -d "profiles/${PROFILE}"
+
 build:
 	${MAKE} wswraptarget TARGET=private_build
 
 # --log-level DEBUG
-private_build: assert_PKG_arg_must_be_specified wsprepare_build
+private_build: assert_PKG_arg_must_be_specified assert_PROFILE_must_exist
 	mkdir -p "${CCWS_BUILD_DIR}"
-	${CCWS_BUILD_WRAPPER} colcon \
+	# override make flags to enable multithreaded builds
+	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
 		--log-base build/log/${PROFILE} \
 		build \
 		--merge-install \
@@ -116,13 +128,13 @@ private_build: assert_PKG_arg_must_be_specified wsprepare_build
 		--build-base build/${PROFILE} \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
-		--packages-up-to ${PKG} \
-		&& cp ${WORKSPACE_DIR}/scripts/install/setup.bash "${CCWS_INSTALL_DIR_BUILD}/"
+		--packages-up-to ${PKG}
+	cp ${WORKSPACE_DIR}/scripts/install/setup.bash "${CCWS_INSTALL_DIR_BUILD}/"
 
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	time bash -c "${SETUP_SCRIPT}; \
+	bash -c "time ( ${SETUP_SCRIPT}; \
 		colcon \
 		--log-base build/log/${PROFILE} \
 		test \
@@ -133,14 +145,14 @@ test: assert_PKG_arg_must_be_specified
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
 		--test-result-base build/log/${PROFILE}/testing \
-		--packages-select ${PKG}"
+		--packages-select ${PKG} )"
 	${MAKE} showtestresults
 
 ctest: assert_PKG_arg_must_be_specified
-	time bash -c "${SETUP_SCRIPT}; \
+	bash -c "time ( ${SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}\"; \
 		cd build/${PROFILE}/${PKG}; \
-		time ctest --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}/ctest_${PKG}.log\" -j ${JOBS}"
+		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}/ctest_${PKG}.log\" -j ${JOBS} )"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified

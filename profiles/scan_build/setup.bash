@@ -7,9 +7,14 @@ set -o pipefail
 ##########################################################################################
 
 PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
-source "./profiles/static_checks/setup.bash"
+if [ -f "./profiles/static_checks/vendor/setup.bash" ]
+then
+    source "./profiles/static_checks/vendor/setup.bash"
+fi
+source "./profiles/static_checks/setup.bash" ${PROFILE}
 
-EXCEPTIONS=$(echo "${CCWS_STATIC_PATH_EXCEPTIONS}" | sed "s/ / --exclude /g")
+
+EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")
 
 #apt install clang-tools-10
 CCWS_BUILD_WRAPPER="\

@@ -70,7 +70,7 @@ static_checks_generic_dir_filter:
 	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
 	echo -n "cat ${WORKSPACE_DIR}/build/${TARGET}/input" > ${WORKSPACE_DIR}/build/${TARGET}/filter
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		echo ${CCWS_STATIC_DIR_EXCEPTIONS} | sed 's= \([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
+		echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
 
 
 flawfinder:
@@ -84,7 +84,7 @@ flawfinder:
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	find ${WORKSPACE_DIR}/src -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
-	bash -c " \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
@@ -105,26 +105,23 @@ shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		( find \$${CCWS_WORKSPACE_DIR}/profiles -maxdepth 2 -iname '*.sh' -or -iname '*.bash' && \
+			find \$${CCWS_WORKSPACE_DIR}/profiles/*/vendor -iname '*.sh' -or -iname '*.bash' && \
 			find \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 
 
-CATKIN_LINT_COMMON_IGNORES=--ignore package_path_name \
-						   --ignore unsorted_list \
-						   --ignore description_meaningless \
-						   --ignore critical_var_append \
-						   --ignore missing_export_lib \
-						   --ignore no_catkin_component \
-						   --ignore description_boilerplate \
-						   --ignore uninstalled_script \
-						   --ignore ambiguous_include_path \
-						   --ignore unknown_package
-
 catkin_lint:
 	# --skip-pkg <pkg>
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; catkin_lint --severity-level 2 --strict \
-		${CATKIN_LINT_COMMON_IGNORES} \
+	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --skip-path /g'); \
+		PKG_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_PKG_EXCEPTIONS} | sed -e 's/:/ --skip-pkg /g'); \
+		echo \$${DIR_EXCEPTIONS}; \
+		echo \$${PKG_EXCEPTIONS}; \
+		catkin_lint --severity-level 2 --strict \
+		\$${CCWS_CATKIN_LINT_EXCEPTIONS} \
+		\$${DIR_EXCEPTIONS} \
+		\$${PKG_EXCEPTIONS} \
 		src/"
 

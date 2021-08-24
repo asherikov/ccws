@@ -9,3 +9,6 @@ then
 fi
 
 source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
+
+# ignore errors to prevent session termination
+set +e
