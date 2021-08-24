@@ -4,6 +4,7 @@ export EMAIL?=$(shell git config --get user.email)
 export AUTHOR?=$(shell git config --get user.name)
 export PROFILE
 export VERSION
+export VENDOR
 export ROS_DISTRO
 
 export WORKSPACE_DIR=$(shell pwd)

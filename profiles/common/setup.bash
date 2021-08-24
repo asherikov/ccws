@@ -5,8 +5,6 @@
 CCWS_WORKSPACE_DIR=$(pwd)
 export CCWS_WORKSPACE_DIR
 
-source "${CCWS_WORKSPACE_DIR}/profiles/common/config.bash"
-
 
 if [ -z "${PROFILE}" ]
 then
@@ -130,9 +128,9 @@ else
     case "${PKG}" in
         *\ *)
             # contains spaces = multiple packages provided
-            if [ -n "${CCWS_VENDOR_ID}" ]
+            if [ -n "${VENDOR}" ]
             then
-                INSTALL_PKG_PREFIX="${CCWS_VENDOR_ID}__"
+                INSTALL_PKG_PREFIX="${VENDOR}__"
             fi
             ;;
         *)
@@ -140,9 +138,9 @@ else
             ;;
     esac
 
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${CCWS_TRIPLE_ARCH}__${PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
+    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
-    CCWS_INSTALL_DIR_HOST="/opt/${CCWS_VENDOR_ID}/${CCWS_PKG_FULL_NAME}"
+    CCWS_INSTALL_DIR_HOST="/opt/${VENDOR}/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_BUILD_ROOT="${CCWS_WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
     CCWS_INSTALL_DIR_BUILD="${CCWS_INSTALL_DIR_BUILD_ROOT}/${CCWS_INSTALL_DIR_HOST}"
 

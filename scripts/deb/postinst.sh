@@ -2,7 +2,7 @@
 
 SCRIPT="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/postinst"
 VERSION=$(cat "${CCWS_DEB_INFO_DIR}/version.txt")
-MESSAGE="${CCWS_VENDOR_ID}: Installation of '${CCWS_PKG_FULL_NAME} / ${VERSION}' completed"
+MESSAGE="${VENDOR}: Installation of '${CCWS_PKG_FULL_NAME} / ${VERSION}' completed"
 
 cat > "${SCRIPT}" <<EOF
 #!/bin/sh
