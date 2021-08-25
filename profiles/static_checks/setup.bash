@@ -35,9 +35,10 @@ export CCWS_STATIC_DIR_EXCEPTIONS CCWS_STATIC_PKG_EXCEPTIONS
 # more generic]
 # - SC1090: Can't follow non-constant source. Use a directive to specify
 # location. [not always possible, included files may not be available]
+# - SC1091: Not following: ...: openBinaryFile: does not exist (No such file or directory)
 # - SC2016: Expressions don't expand in single quotes, use double quotes for
 # that. [this is usually intentional]
-CCWS_SHELLCHECK_EXCEPTIONS="--exclude=SC2001,SC1090,SC2016"
+CCWS_SHELLCHECK_EXCEPTIONS="--exclude=SC2001,SC1090,SC1091,SC2016"
 export CCWS_SHELLCHECK_EXCEPTIONS
 
 

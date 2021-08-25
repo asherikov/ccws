@@ -29,13 +29,20 @@ export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB}
 
 default: build
 .DEFAULT:
-	bash -c "${MAKE} PKG=\"$$(${MAKE} --quiet wslist | grep $@ | paste -d ' ' -s)\""
+	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep $@ | paste -d ' ' -s)\""
 
 # include after default targets to avoid shadowing them
 -include profiles/*/*.mk
 -include make/*.mk
 -include make/vendor/*.mk
 
+# make tries to remake missing files, intercept these attempts
+profiles/*/*.mk:
+	@false
+make/*.mk:
+	@false
+make/vendor/*.mk:
+	@false
 
 
 ##

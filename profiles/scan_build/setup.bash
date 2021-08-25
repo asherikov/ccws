@@ -11,7 +11,7 @@ if [ -f "./profiles/static_checks/vendor/setup.bash" ]
 then
     source "./profiles/static_checks/vendor/setup.bash"
 fi
-source "./profiles/static_checks/setup.bash" ${PROFILE}
+source "./profiles/static_checks/setup.bash" "${PROFILE}"
 
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")
