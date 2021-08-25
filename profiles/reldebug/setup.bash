@@ -7,6 +7,6 @@ set -o pipefail
 ##########################################################################################
 
 PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
-source "./profiles/common/setup.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 ##########################################################################################

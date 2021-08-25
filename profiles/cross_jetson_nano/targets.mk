@@ -1,5 +1,5 @@
 # this way there is no need to specify profile explicitly -- it is implied by target names
-SETUP_SCRIPT_cross_jetson_nano=source ${WORKSPACE_DIR}/profiles/cross_jetson_nano/setup.bash
+SETUP_SCRIPT_cross_jetson_nano=source ${BUILD_PROFILES_DIR}/cross_jetson_nano/setup.bash
 
 # assuming ubuntu 18.04
 cross_jetson_nano_install_build: cross_common_install_build

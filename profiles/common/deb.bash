@@ -8,7 +8,7 @@ CCWS_DEB_ENABLE="yes"
 export CCWS_DEB_ENABLE
 
 
-source "${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash"
+source "${BUILD_PROFILES_DIR}/${PROFILE}/setup.bash"
 
 
 CCWS_DEB_INFO_DIR="${CCWS_INSTALL_DIR_BUILD}/ccws/"

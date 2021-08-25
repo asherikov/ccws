@@ -1,4 +1,4 @@
-DOXYGEN_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/doxygen/setup.bash
+DOXYGEN_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/doxygen/setup.bash
 
 doxygen_install_build:
 	sudo ${APT_INSTALL} doxygen graphviz

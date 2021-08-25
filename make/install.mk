@@ -37,7 +37,7 @@ install_build:
 
 %_install_build:
 	# placeholder target, dont call this target manually
-	test -d "${WORKSPACE_DIR}/profiles/$*"
+	test -d "${BUILD_PROFILES_DIR}/$*"
 
 install_host:
 	${MAKE} ${PROFILE}_install_host

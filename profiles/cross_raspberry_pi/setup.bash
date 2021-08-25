@@ -23,7 +23,7 @@ CCWS_TRIPLE_ABI=gnueabihf
 # setup common
 #
 
-source "./profiles/common/setup.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 
 ##########################################################################################

@@ -14,7 +14,7 @@ then
 else
     PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
 fi
-source "./profiles/common/setup.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 
 ##########################################################################################
@@ -35,10 +35,13 @@ export CCWS_STATIC_DIR_EXCEPTIONS CCWS_STATIC_PKG_EXCEPTIONS
 # more generic]
 # - SC1090: Can't follow non-constant source. Use a directive to specify
 # location. [not always possible, included files may not be available]
-# - SC1091: Not following: ...: openBinaryFile: does not exist (No such file or directory)
+# - SC1091: Not following: ...: openBinaryFile: does not exist (No such file or
+# directory)
 # - SC2016: Expressions don't expand in single quotes, use double quotes for
 # that. [this is usually intentional]
-CCWS_SHELLCHECK_EXCEPTIONS="--exclude=SC2001,SC1090,SC1091,SC2016"
+# - SC2034: XXX appears unused. Verify it or export it. [variables are often
+# exported from other scripts]
+CCWS_SHELLCHECK_EXCEPTIONS="--exclude=SC2001,SC1090,SC1091,SC2016,SC2034"
 export CCWS_SHELLCHECK_EXCEPTIONS
 
 

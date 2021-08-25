@@ -1,6 +1,7 @@
 #!/bin/bash
 
-WORKSPACE_DIR=$(dirname ${BASH_SOURCE})
+WORKSPACE_DIR=$(dirname "${BASH_SOURCE[0]}")
+BUILD_PROFILES_DIR="${WORKSPACE_DIR}/profiles/"
 PROFILE=$1
 
 if [ -z "${PROFILE}" ];
@@ -8,7 +9,18 @@ then
     PROFILE="reldebug"
 fi
 
-source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
+SETUP_SCRIPT="${BUILD_PROFILES_DIR}/${PROFILE}/setup.bash"
 
-# ignore errors to prevent session termination
-set +e
+if [ -f "${SETUP_SCRIPT}" ]
+then
+    source "${SETUP_SCRIPT}";
+    if [ -t 0 ];
+    then
+        # ignore errors to prevent session termination if interactive
+        set +e
+    fi
+else
+    echo "Unknown profile: '${PROFILE}'"
+    false
+fi
+

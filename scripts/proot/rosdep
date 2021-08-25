@@ -7,7 +7,7 @@ source ${CCWS_PROOT_BIN}/common.bash
 # shellcheck disable=SC2086
 # -R: rosdep requires random device, network access, etc
 proot -R "${CCWS_SYSROOT}" \
-    --cwd="${CCWS_WORKSPACE_DIR}" \
+    --cwd="${WORKSPACE_DIR}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# rosdep stuff} \

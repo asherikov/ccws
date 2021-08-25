@@ -1,4 +1,4 @@
-STATIC_CHECKS_SETUP_SCRIPT=source ${WORKSPACE_DIR}/profiles/static_checks/setup.bash
+STATIC_CHECKS_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/static_checks/setup.bash
 
 static_checks_install_build:
 	#pip3 install cpplint
@@ -39,7 +39,7 @@ cppcheck:
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
 		cppcheck \
-			\$${CCWS_WORKSPACE_DIR}/src \
+			${WORKSPACE_DIR}/src \
 			--relative-paths \
 			--quiet --verbose --force \
 			--template='[{file}:{line}]  {severity}  {id}  {message}' \
@@ -104,10 +104,11 @@ yamllint:
 shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
-		( find \$${CCWS_WORKSPACE_DIR}/profiles -maxdepth 2 -iname '*.sh' -or -iname '*.bash' \
-			&& find \$${CCWS_WORKSPACE_DIR}/src \$${CCWS_WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' ) \
+		( find ${BUILD_PROFILES_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' \
+			&& find ${WORKSPACE_DIR}/src ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
+			&& find ${WORKSPACE_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
-		find \$${CCWS_WORKSPACE_DIR}/profiles/*/vendor -iname '*.sh' -or -iname '*.bash' >> ${WORKSPACE_DIR}/build/$@/input || true; \
+		find ${BUILD_PROFILES_DIR}/*/vendor -iname '*.sh' -or -iname '*.bash' >> ${WORKSPACE_DIR}/build/$@/input || true; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 

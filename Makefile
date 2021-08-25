@@ -8,6 +8,7 @@ export VENDOR
 export ROS_DISTRO
 
 export WORKSPACE_DIR=$(shell pwd)
+export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/
 export OS_DISTRO_BUILD=$(shell lsb_release -cs)
 
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
@@ -16,7 +17,7 @@ CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
 
 
-SETUP_SCRIPT?=source ${WORKSPACE_DIR}/profiles/${PROFILE}/setup.bash
+SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${PROFILE}/setup.bash
 ARGS?=
 
 MEMORY_PER_JOB_MB?=1024
@@ -117,7 +118,7 @@ assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
 assert_PROFILE_must_exist:
-	test -d "profiles/${PROFILE}"
+	test -d "${BUILD_PROFILES_DIR}/${PROFILE}"
 
 build:
 	${MAKE} wswraptarget TARGET=private_build

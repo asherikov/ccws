@@ -1,5 +1,5 @@
 # this way there is no need to specify profile explicitly -- it is implied by target names
-SETUP_SCRIPT_cross_raspberry_pi=source ${WORKSPACE_DIR}/profiles/cross_raspberry_pi/setup.bash
+SETUP_SCRIPT_cross_raspberry_pi=source ${BUILD_PROFILES_DIR}/cross_raspberry_pi/setup.bash
 
 cross_raspberry_pi_install_build: cross_common_install_build cross_raspberry_pi_clean
 	# gcc -> https://github.com/Pro/raspi-toolchain/

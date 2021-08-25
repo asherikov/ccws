@@ -7,11 +7,12 @@ set -o pipefail
 ##########################################################################################
 
 PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
-if [ -f "./profiles/static_checks/vendor/setup.bash" ]
+PARENT_DIR="$(dirname "${BASH_SOURCE[0]}")/../"
+if [ -f "${PARENT_DIR}/static_checks/vendor/setup.bash" ]
 then
-    source "./profiles/static_checks/vendor/setup.bash"
+    source "${PARENT_DIR}/static_checks/vendor/setup.bash"
 fi
-source "./profiles/static_checks/setup.bash" "${PROFILE}"
+source "${PARENT_DIR}/static_checks/setup.bash" "${PROFILE}"
 
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")
@@ -21,9 +22,9 @@ CCWS_BUILD_WRAPPER="\
 scan-build-10 \
 --use-cc=/usr/bin/clang-10 \
 --use-c++=/usr/bin/clang++-10 \
--o ${CCWS_ARTIFACTS_DIR}/clang_static_analysis \
+-o ${CCWS_ARTIFACTS_DIR}/${PROFILE} \
 --status-bugs \
---exclude ${CCWS_WORKSPACE_DIR}/build \
+--exclude ${WORKSPACE_DIR}/build \
 --exclude /usr/include/ \
 --exclude /usr/src/ \
 --exclude /opt/ros/ \

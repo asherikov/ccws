@@ -11,7 +11,7 @@ wsclean:
 # Purge workspace
 wspurge: wsclean
 	rm -Rf src
-	rm -Rf "${WORKSPACE_DIR}/profiles/*/rosdep"
+	rm -Rf "${BUILD_PROFILES_DIR}/*/rosdep"
 
 
 wsclean_build:
@@ -22,7 +22,7 @@ purge: clean
 
 %_purge:
 	# placeholder target, dont use manually
-	test -d "${WORKSPACE_DIR}/profiles/$*"
+	test -d "${BUILD_PROFILES_DIR}/$*"
 
 clean:
 	rm -Rf "build/${PROFILE}"
