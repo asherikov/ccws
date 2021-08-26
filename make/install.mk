@@ -30,19 +30,24 @@ install_build_focal: install_build_deb_common
 		python3-rospkg
 	${APT_INSTALL} python3-rosinstall python3-wstool
 
-install_build:
+bprof_install_build:
 	sudo ${MAKE} install_build_${OS_DISTRO_BUILD}
 	test -d /etc/ros/rosdep/sources.list.d/ || sudo rosdep init
-	${MAKE} ${PROFILE}_install_build
+	${MAKE} bprof_${BUILD_PROFILE}_install_build
 
-%_install_build:
-	# placeholder target, dont call this target manually
-	test -d "${BUILD_PROFILES_DIR}/$*"
+bprof_%_install_build: assert_BUILD_PROFILE_must_exist
+	# placeholder target
 
-install_host:
-	${MAKE} ${PROFILE}_install_host
+bprof_install_host:
+	${MAKE} bprof_${BUILD_PROFILE}_install_host
 
-%_install_host:
+bprof_%_install_host:
+	${MAKE} dep_install
+
+eprof_install:
+	${MAKE} eprof_${EXEC_PROFILE}_install
+
+eprof_%_install:
 	${MAKE} dep_install
 
 download:

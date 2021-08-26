@@ -7,6 +7,6 @@
         pkg="@@PACKAGE@@"
         type="test_demo_rostest"
         time-limit="120.0"
-        launch-prefix="$(optenv CCWS_ENV_NODE_LAUNCH_PREFIX)"
+        launch-prefix="$(optenv CCWS_NODE_LAUNCH_PREFIX)"
     />
 </launch>

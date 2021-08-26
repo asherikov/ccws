@@ -18,12 +18,11 @@ wsclean_build:
 	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
 purge: clean
-	${MAKE} ${PROFILE}_purge
+	${MAKE} ${BUILD_PROFILE}_purge
 
-%_purge:
-	# placeholder target, dont use manually
-	test -d "${BUILD_PROFILES_DIR}/$*"
+%_purge: assert_BUILD_PROFILE_must_exist
+	# placeholder target
 
 clean:
-	rm -Rf "build/${PROFILE}"
-	rm -Rf "install/${PROFILE}"
+	rm -Rf "build/${BUILD_PROFILE}"
+	rm -Rf "install/${BUILD_PROFILE}"

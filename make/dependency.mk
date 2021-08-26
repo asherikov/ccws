@@ -1,4 +1,4 @@
-DEPLIST_DIR=${WORKSPACE_DIR}/build/${PROFILE}_dep/
+DEPLIST_DIR=${WORKSPACE_DIR}/build/${BUILD_PROFILE}_dep/
 DEPLIST_FILE=${DEPLIST_DIR}/deps_${PKG}
 
 
@@ -6,9 +6,9 @@ dep_%:
 	${MAKE} wswraptarget TARGET="private_$@"
 
 private_dep_init:
-	mkdir -p "${CCWS_PROFILE_DIR}/rosdep"
+	mkdir -p "${CCWS_BUILD_PROFILE_DIR}/rosdep"
 	mkdir -p "${ROS_HOME}"
-	ln --symbolic --force --no-target-directory "${CCWS_PROFILE_DIR}/rosdep" "${ROS_HOME}/rosdep"
+	ln --symbolic --force --no-target-directory "${CCWS_BUILD_PROFILE_DIR}/rosdep" "${ROS_HOME}/rosdep"
 
 private_dep_resolve: private_dep_init deplist
 	test -d '${ROS_HOME}/rosdep/sources.cache/' || rosdep update

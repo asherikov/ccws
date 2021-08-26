@@ -16,6 +16,6 @@ Version: $(sed 's/_/-/g' < "${CCWS_DEB_INFO_DIR}/version.txt")
 Architecture: ${CCWS_DEB_ARCH}
 Maintainer: ${AUTHOR} <${EMAIL}>
 Description: ${VENDOR} ${PKG}
-Depends: $(paste -s -d ',' < "${WORKSPACE_DIR}/build/${PROFILE}_dep/deps_${PKG}.deb")
+Depends: $(paste -s -d ',' < "${WORKSPACE_DIR}/build/${BUILD_PROFILE}_dep/deps_${PKG}.deb")
 EOF
 

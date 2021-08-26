@@ -1,4 +1,4 @@
-CROSS_SETUP_LOOP_DEV=sudo losetup -PL --find --show \"\$${CCWS_PROFILE_DIR}/system.img\"
+CROSS_SETUP_LOOP_DEV=sudo losetup -PL --find --show \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\"
 
 # converts absolute symlinks to relative in a mounted sysroot
 # this is not needed with proot, but is necessary for some other approaches to
@@ -17,7 +17,7 @@ cross_sysroot_mount:
 
 cross_mount:
 	# may be different depending on profile
-	${MAKE} ${PROFILE}_mount
+	${MAKE} ${BUILD_PROFILE}_mount
 
 cross_umount:
 	# should not fail, may be called on unmounted root

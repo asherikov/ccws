@@ -15,9 +15,11 @@ Introduction
 
 `CCWS` is a development environment for ROS, which integrates functionalities
 of traditional workspaces and CI pipelines in order to facilitate
-(cross-)compilation, testing, linting, documetation generation, binary package
+(cross-)compilation, testing, linting, documetation, and binary package
 generation. It is intended to be used both as a CI/CD backbone and a working
-environment for developers.
+environment for developers. Note, however, that `CCWS` is not really meant to
+be a ready to use solution, but rather a basis for development of a
+vendor-specific workflow.
 
 `CCWS` is in an alpha stage of development and has not been tested with ROS2
 yet, but is not conceptually limited to ROS1.
@@ -28,8 +30,12 @@ Features
 
 - Build profiles -- sets of configurations for build process, e.g., cmake
   toolchain, colcon configuration, environment variables, etc. Profiles do not
-  conflict with each other and can be used simultaneously without using
-  separate clones of the workspace and packages.
+  conflict with each other and can be used in parallel without using separate
+  clones of the workspace and packages.
+
+- Execution profiles -- simple shell mixins that are intended to modify run
+  time environment, e.g., execute nodes in `valgrind`, alter node crash
+  handling, etc.
 
 - A number of features implemented via build profiles:
     - Cross compilation to several common platforms.
@@ -57,16 +63,17 @@ Features
   are kept in the workspace and easy to adjust for specific needs.
 
 
-Profiles
---------
+Build profiles
+--------------
 
-Profile configurations are located in `profiles`, `common` subdirectory
+Profile configurations are located in `profiles/build`, `common` subdirectory
 contains default parameters, which can be overriden by specific profiles:
 - [default] `reldebug` -- default compiler, cmake build type is
   `RelWithDebInfo`
 - `scan_build` -- static checks with `scan_build` and `clang-tidy`.
   `clang-tidy` parameters are defined in cmake toolchain and must be enabled in
-  packages as shown in package template. This profile also uses `clang` compiler.
+  packages as shown in package template `CMakeLists`. This profile also uses
+  `clang` compiler.
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
@@ -77,11 +84,29 @@ contains default parameters, which can be overriden by specific profiles:
 - `cross_jetson_nano` -- cross-compilation for Jetson Nano.
 
 
+Execution profiles
+------------------
+
+Execution profiles set environment variables that can be used in launch scripts
+to alter run time behavior as demonstrated in `pkg_template/catkin/launch/bringup.launch`,
+currently available profiles are:
+- `test` -- sets `CCWS_NODE_CRASH_ACTION` variable so that nodes that respect
+  it become `required`, i.e., termination of such nodes would result in crash
+  of test scripts and can thus be easily detected.
+- `valgrind` -- sets `CCWS_NODE_LAUNCH_PREFIX` to `valgrind` and some variables
+  that control behavior of `valgrind`.
+
+Multiple execution profiles can be used at the same time, but none are used by
+default except `test` profile which is always enabled in `*test*` targets
+provided by `CCWS`.
+
+
 Dependencies
 ------------
 
-Dependencies can be installed using `make install_build PROFILE=<profile>`, which is
-going to install the following tools and profile specific dependencies:
+Dependencies can be installed using `make bprof_install_build
+BUILD_PROFILE=<profile>`, which is going to install the following tools and
+profile specific dependencies:
 - `colcon`
 - `wstool` -- much more suitable for `CCWS` workflow than `vcstool` which does
   not maintain repository states.
@@ -102,8 +127,9 @@ Initial setup
 
 - Edit `make/config.mk` and `profiles/common/config.bash` to specify
   developer-dependent workspace parameters.
-- Install dependencies using `make install_build PROFILE=<profile>` targets,
-  cross compilation profiles would require some extra steps as described below.
+- Install dependencies using `make bprof_install_build BUILD_PROFILE=<profile>`
+  targets, cross compilation profiles would require some extra steps as
+  described below.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
 
@@ -115,7 +141,7 @@ Compilation
 - `make <pkg>` -- a shortcut for `make build`, but `<pkg>` can be a substring
   of package name. All packages matching the given substring will be built.
 - The number of jobs can be overriden with `JOBS=X` parameter.
-- `make build PKG=<pkg> PROFILE=scan_build` overrides default profile.
+- `make build PKG=<pkg> BUILD_PROFILE=scan_build` overrides default profile.
 
 
 Running
@@ -202,10 +228,11 @@ Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
 Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
 container.
 
-1. Install profile dependencies with `make install_build PROFILE=<profile>`
+1. Install profile dependencies with `make bprof_install_build
+   BUILD_PROFILE=<profile>`
 2. Obtain system image:
-    - `cross_raspberry_pi` -- `install_build` target automatically downloads
-      standard image;
+    - `cross_raspberry_pi` -- `bprof_install_build` target automatically
+      downloads standard image;
     - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
       these images automatically, you have to manualy copy system partition
       image to `profiles/cross_jetson_xavier/system.img`.
@@ -217,16 +244,30 @@ container.
       `make dep_to_rosinstall PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
-   image: `make install_host PKG=staticoma PROFILE=<profile>`
+   image: `make bprof_install_host PKG=staticoma BUILD_PROFILE=<profile>`
 5. Compile packages:
-    - mount sysroot with `make cross_mount PROFILE=<profile>`
-    - build packages, e.g. `make staticoma PROFILE=<profile>` or build and
-      generate deb package `make deb PKG=staticoma PROFILE=<profile>`
-    - unmount sysroot when done with `make cross_umount PROFILE=<profile>`
+    - mount sysroot with `make cross_mount BUILD_PROFILE=<profile>`
+    - build packages, e.g. `make staticoma BUILD_PROFILE=<profile>` or build and
+      generate deb package `make deb PKG=staticoma BUILD_PROFILE=<profile>`
+    - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
 
 See `doc/cross-compilation.md` for more technical details and
 `.ccws/test_cross.mk` for examples.
 
+
+Extending `CCWS`
+================
+
+`CCWS` functionality can be extended in multiple ways:
+- by adding new build and execution profiles, which can be as easy as copying
+  existing profiles and modifying them as needed, profiles are picked
+  automatically;
+- general `make` targets can be added by creating a `make/vendor/<filename>.mk`
+  file;
+- distributed build profiles can have `vendor` subdirectory where `cmake`
+  header and footer files can be added, as well as shell setup scripts.
+
+`show_vendor_files` target can be used to list all vendor specific files.
 
 
 Related software

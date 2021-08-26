@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
 
-    <arg name="crash_action" default="$(optenv CCWS_ENV_NODE_CRASH_ACTION respawn)" />
+    <arg name="crash_action" default="$(optenv CCWS_NODE_CRASH_ACTION respawn)" />
 
     <node
         pkg="@@PACKAGE@@"
@@ -10,7 +10,7 @@
         output="screen"
         required="$(eval True if arg('crash_action') == 'killall' else False)"
         respawn="$(eval True if arg('crash_action') == 'respawn' else False)"
-        launch-prefix="$(optenv CCWS_ENV_NODE_LAUNCH_PREFIX)"
+        launch-prefix="$(optenv CCWS_NODE_LAUNCH_PREFIX)"
     />
 
 </launch>

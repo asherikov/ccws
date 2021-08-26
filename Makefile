@@ -2,13 +2,13 @@ include make/config.mk
 
 export EMAIL?=$(shell git config --get user.email)
 export AUTHOR?=$(shell git config --get user.name)
-export PROFILE
+export BUILD_PROFILE
 export VERSION
 export VENDOR
 export ROS_DISTRO
 
 export WORKSPACE_DIR=$(shell pwd)
-export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/
+export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
 export OS_DISTRO_BUILD=$(shell lsb_release -cs)
 
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
@@ -17,7 +17,7 @@ CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
 
 
-SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${PROFILE}/setup.bash
+SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 ARGS?=
 
 MEMORY_PER_JOB_MB?=1024
@@ -30,10 +30,10 @@ export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB}
 
 default: build
 .DEFAULT:
-	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep $@ | paste -d ' ' -s)\""
+	make build_glob PKG_NAME_PART=$@
 
 # include after default targets to avoid shadowing them
--include profiles/*/*.mk
+-include profiles/*/*/*.mk
 -include make/*.mk
 -include make/vendor/*.mk
 
@@ -121,23 +121,26 @@ show_vendor_files:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
-assert_PROFILE_must_exist:
-	test -d "${BUILD_PROFILES_DIR}/${PROFILE}"
+assert_BUILD_PROFILE_must_exist:
+	test -d "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
+
+build_glob:
+	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""
 
 build:
 	${MAKE} wswraptarget TARGET=private_build
 
 # --log-level DEBUG
-private_build: assert_PKG_arg_must_be_specified assert_PROFILE_must_exist
+private_build: assert_PKG_arg_must_be_specified assert_BUILD_PROFILE_must_exist
 	mkdir -p "${CCWS_BUILD_DIR}"
 	# override make flags to enable multithreaded builds
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
-		--log-base build/log/${PROFILE} \
+		--log-base build/log/${BUILD_PROFILE} \
 		build \
 		--merge-install \
 		--executor sequential \
 		--base-paths ${WORKSPACE_DIR}/src/ \
-		--build-base build/${PROFILE} \
+		--build-base build/${BUILD_PROFILE} \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
 		--packages-up-to ${PKG}
@@ -146,31 +149,31 @@ private_build: assert_PKG_arg_must_be_specified assert_PROFILE_must_exist
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	bash -c "time ( ${SETUP_SCRIPT}; \
+	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		colcon \
-		--log-base build/log/${PROFILE} \
+		--log-base build/log/${BUILD_PROFILE} \
 		test \
 		--merge-install \
 		--executor sequential \
 		--ctest-args --output-on-failure -j ${JOBS} \
-		--build-base build/${PROFILE} \
+		--build-base build/${BUILD_PROFILE} \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
-		--test-result-base build/log/${PROFILE}/testing \
+		--test-result-base build/log/${BUILD_PROFILE}/testing \
 		--packages-select ${PKG} )"
 	${MAKE} showtestresults
 
 ctest: assert_PKG_arg_must_be_specified
-	bash -c "time ( ${SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}\"; \
-		cd build/${PROFILE}/${PKG}; \
-		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${PROFILE}/ctest_${PKG}.log\" -j ${JOBS} )"
+	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
+		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${BUILD_PROFILE}\"; \
+		cd build/${BUILD_PROFILE}/${PKG}; \
+		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${BUILD_PROFILE}/ctest_${PKG}.log\" -j ${JOBS} )"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
-	colcon --log-base /dev/null test-result --all --test-result-base ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}
-	#bash -c "${SETUP_SCRIPT}; catkin_test_results ${WORKSPACE_DIR}/build/${PROFILE}/${PKG}"
+	colcon --log-base /dev/null test-result --all --test-result-base ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/${PKG}
+	#bash -c "${SETUP_SCRIPT}; catkin_test_results ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/${PKG}"
 
 
 new: assert_PKG_arg_must_be_specified

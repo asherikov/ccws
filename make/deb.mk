@@ -1,4 +1,4 @@
-# this script automatically sources PROFILE specific setup script
+# this script automatically sources profile specific setup script
 DEB_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/common/deb.bash
 
 version_hash: assert_PKG_arg_must_be_specified

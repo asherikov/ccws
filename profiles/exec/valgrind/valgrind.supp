@@ -1,0 +1,7 @@
+{
+    <ros_console_0>
+    Memcheck:Cond
+    ...
+    fun:*ros*console*print*
+}
+
