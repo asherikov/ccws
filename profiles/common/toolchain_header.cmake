@@ -1,4 +1,5 @@
 include("${CMAKE_CURRENT_LIST_DIR}/vendor/toolchain_header.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/../$ENV{PROFILE}/vendor/toolchain_header.cmake" OPTIONAL)
 
 set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
 
@@ -6,6 +7,8 @@ set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 
 set(CCWS_BUILD_PROFILE  "$ENV{PROFILE}"   CACHE STRING "" FORCE)
+
+set(CTEST_BUILD_NAME    "${CCWS_BUILD_PROFILE}" CACHE STRING "" FORCE)
 # controls testing of CCWS-aware packages
 set(CCWS_ENABLE_TESTING ON                     CACHE STRING "" FORCE)
 # debug level

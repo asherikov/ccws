@@ -232,8 +232,40 @@ See `doc/cross-compilation.md` for more technical details and
 Related software
 ================
 
-- https://github.com/ros-industrial/industrial_ci
-- https://github.com/git-afsantos/haros
-- https://github.com/DLu/roscompile
-- https://github.com/ros-tooling/cross_compile/
-- https://github.com/asherikov/catkin_workspace [deprecated]
+- https://github.com/ros-industrial/industrial_ci -- ROS specific CI scripts,
+  noninteractive, "one-shot" design, no sanitizers, emulated cross compilation.
+- https://github.com/ros-tooling/cross_compile/ -- emulated cross compilation
+  for ROS and ROS2.
+- https://github.com/HesselM/rpicross_notes -- cross compilation for Raspberry
+  Pi done in a different way.
+
+
+TODO
+====
+
+- Replace `ccache` with https://github.com/mbitsnbites/buildcache.
+- Integrate https://github.com/oclint/oclint
+- https://github.com/ejfitzgerald/clang-tidy-cache or
+  https://github.com/mbitsnbites/buildcache can be used to cache `clang-tidy`
+  runs.
+- https://github.com/mrtazz/checkmake might be useful for makefile linting.
+- Cache cmake checks with https://github.com/cristianadam/cmake-checks-cache,
+  https://github.com/polysquare/cmake-forward-cache might be useful too.
+- Shell formatter https://github.com/mvdan/sh.
+- https://github.com/myint/cppclean might be useful for unnecessary header
+  detection, but looks stale.
+- https://github.com/include-what-you-use/include-what-you-use
+- Build time analysis with clang https://github.com/aras-p/ClangBuildAnalyzer.
+- Potential replacement for `scan_build`
+  https://github.com/Ericsson/codechecker with extra checks and caching.
+- https://github.com/sscpac/statick is not going to be used, but some of its
+  linters can be integrated.
+- Source code spellcheck https://github.com/myint/scspell.
+- https://github.com/jordansissel/fpm -- generic binary package generator,
+  potential replacement for `dpkg-deb`.
+- https://github.com/git-afsantos/haros -- ROS-aware static analysis, might
+  have issues with non `catkin_make` build environments.
+- https://github.com/DLu/roscompile/tree/main/roscompile -- linter for catkin
+  packages.
+- Use https://libguestfs.org/ or https://github.com/alperakcan/fuse-ext2
+  instead of loop devices, to avoid using sudo.

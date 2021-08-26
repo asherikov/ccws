@@ -110,6 +110,10 @@ wsctest:
 	${MAKE} --quiet wstest_generic TEST_TARGET=ctest EXIT_STATUS=1
 
 
+show_vendor_files:
+	@find ./make ./profiles/*/ -maxdepth 2 -path "*vendor/*"
+
+
 ##
 ## Package targets
 ##
