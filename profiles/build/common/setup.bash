@@ -162,7 +162,7 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD CCWS_WORK
 
 
 ##########################################################################################
-# ccache
+# cmake
 #
 # since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
 CMAKE_TOOLCHAIN_FILE=${CCWS_BUILD_PROFILE_DIR}/toolchain.cmake

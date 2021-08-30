@@ -111,7 +111,7 @@ wsctest:
 
 
 show_vendor_files:
-	@find ./make ./profiles/*/ -maxdepth 2 -path "*vendor/*"
+	@find ./make ./profiles/*/*/ -maxdepth 2 -path "*vendor/*"
 
 
 ##
