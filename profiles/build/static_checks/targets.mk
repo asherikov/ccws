@@ -120,7 +120,7 @@ catkin_lint:
 		PKG_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_PKG_EXCEPTIONS} | sed -e 's/:/ --skip-pkg /g'); \
 		echo \$${DIR_EXCEPTIONS}; \
 		echo \$${PKG_EXCEPTIONS}; \
-		catkin_lint --severity-level 2 --strict \
+		catkin_lint --severity-level 2 --strict --explain \
 		\$${CCWS_CATKIN_LINT_EXCEPTIONS} \
 		\$${DIR_EXCEPTIONS} \
 		\$${PKG_EXCEPTIONS} \

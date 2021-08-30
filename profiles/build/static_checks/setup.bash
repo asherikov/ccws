@@ -55,13 +55,12 @@ CCWS_CATKIN_LINT_EXCEPTIONS="\
 --ignore unsorted_list \
 --ignore description_meaningless \
 --ignore critical_var_append \
---ignore missing_export_lib \
 --ignore no_catkin_component \
 --ignore description_boilerplate \
 --ignore uninstalled_script \
 --ignore ambiguous_include_path \
 --ignore unknown_package \
 --ignore subproject \
---ignore duplicate_cmd"
+--ignore duplicate_cmd \
+--ignore env_var"
 export CCWS_CATKIN_LINT_EXCEPTIONS
-

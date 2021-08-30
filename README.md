@@ -310,3 +310,8 @@ TODO
   packages.
 - Use https://libguestfs.org/ or https://github.com/alperakcan/fuse-ext2
   instead of loop devices, to avoid using sudo.
+- Distributed compilation support with https://github.com/distcc/distcc can be
+  useful.
+- Add memory sanitizer profile as an alternative to `valgrind`, `gcc` doesn't
+  support it currently.
+- Add code coverage profile.
