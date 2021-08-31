@@ -36,6 +36,7 @@ cppcheck:
 	#
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
+	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
 		cppcheck \
@@ -52,8 +53,9 @@ cppcheck:
 			--suppress=syntaxError \
 			--suppress=useInitializationList \
 			\$${EXCEPTIONS} \
-			3>&1 1>&2 2>&3 | tee \$${CCWS_ARTIFACTS_DIR}/cppcheck.err; \
-		test ! -s \$${CCWS_ARTIFACTS_DIR}/cppcheck.err || exit 1"
+			3>&1 1>&2 2>&3" \
+		| tee '${WORKSPACE_DIR}/build/${TARGET}/cppcheck.err'
+	test ! -s '${WORKSPACE_DIR}/build/${TARGET}/cppcheck.err' || exit 1
 
 
 cpplint:
@@ -105,10 +107,10 @@ shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
 		( find ${BUILD_PROFILES_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' \
-			&& find ${WORKSPACE_DIR}/src ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
+			&& find ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
-		find ${BUILD_PROFILES_DIR}/*/vendor -iname '*.sh' -or -iname '*.bash' >> ${WORKSPACE_DIR}/build/$@/input || true; \
+		find ${WORKSPACE_DIR}/src ${BUILD_PROFILES_DIR}/*/vendor -iname '*.sh' -or -iname '*.bash' >> ${WORKSPACE_DIR}/build/$@/input || true; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 

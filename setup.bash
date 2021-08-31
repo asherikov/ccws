@@ -25,15 +25,37 @@ then
         set +e
     fi
 
-    # load 'test' exec profile if not overriden explicitly
+
     if [ $# -eq 0 ]
     then
-        if [ -n "${EXEC_PROFILE}" ]
+        # load 'test' exec profile if not overriden explicitly
+        if [ -z "${EXEC_PROFILE}" ]
         then
-            SETUP_SCRIPT="${PROFILES_DIR}/build/${EXEC_PROFILE}/setup.bash"
-        else
-            SETUP_SCRIPT="${PROFILES_DIR}/build/test/setup.bash"
+            EXEC_PROFILE="test"
         fi
+    else
+        # comman line parameters override environment
+
+        EXEC_PROFILE="$1"
+        shift
+
+        while [ $# -gt 0 ]
+        do
+            EXEC_PROFILE="$1 ${EXEC_PROFILE}"
+            shift
+        done
+    fi
+
+
+    # prepend common
+    EXEC_PROFILE="common ${EXEC_PROFILE}"
+    # normalize
+    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//" -e "s/ *$//" -e "s/ \+/ /g")
+
+
+    for PROFILE in ${EXEC_PROFILE};
+    do
+        SETUP_SCRIPT="${PROFILES_DIR}/exec/${PROFILE}/setup.bash"
 
         if [ -f "${SETUP_SCRIPT}" ]
         then
@@ -44,29 +66,10 @@ then
                 set +e
             fi
         else
-            ERROR="Cannot load default execution profile: '${SETUP_SCRIPT}'"
+            ERROR="Unknown execution profile: '$1'"
+            break
         fi
-    else
-        while [ $# -gt 0 ]
-        do
-            SETUP_SCRIPT="${PROFILES_DIR}/exec/$1/setup.bash"
-
-            if [ -f "${SETUP_SCRIPT}" ]
-            then
-                source "${SETUP_SCRIPT}";
-                if [ -t 0 ];
-                then
-                    # ignore errors to prevent session termination if interactive
-                    set +e
-                fi
-            else
-                ERROR="Unknown execution profile: '$1'"
-                break
-            fi
-
-            shift
-        done
-    fi
+    done
 else
     ERROR="Unknown build profile: '${BUILD_PROFILE}'"
 fi

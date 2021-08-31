@@ -1,9 +1,5 @@
 #!/bin/bash -x
 
-# fail on error
-set -e
-set -o pipefail
-
 ##########################################################################################
 
 CURRENT_DIR=$(dirname "${BASH_SOURCE[0]}")

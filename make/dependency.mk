@@ -5,14 +5,10 @@ DEPLIST_FILE=${DEPLIST_DIR}/deps_${PKG}
 dep_%:
 	${MAKE} wswraptarget TARGET="private_$@"
 
-private_dep_init:
-	mkdir -p "${CCWS_BUILD_PROFILE_DIR}/rosdep"
-	mkdir -p "${ROS_HOME}"
-	ln --symbolic --force --no-target-directory "${CCWS_BUILD_PROFILE_DIR}/rosdep" "${ROS_HOME}/rosdep"
-
-private_dep_resolve: private_dep_init deplist
-	test -d '${ROS_HOME}/rosdep/sources.cache/' || rosdep update
-	cat '${DEPLIST_FILE}' | xargs rosdep resolve \
+private_dep_resolve: deplist
+	mkdir -p '${CCWS_BUILD_PROFILE_DIR}/rosdep'
+	test -d '${CCWS_BUILD_PROFILE_DIR}/rosdep/sources.cache/' || env ROS_HOME='${CCWS_BUILD_PROFILE_DIR}' rosdep update
+	cat '${DEPLIST_FILE}' | env ROS_HOME='${CCWS_BUILD_PROFILE_DIR}' xargs rosdep resolve \
 		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.deb'
 
 private_dep_install: private_dep_resolve

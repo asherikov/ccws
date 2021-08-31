@@ -22,7 +22,7 @@ CCWS_BUILD_WRAPPER="\
 scan-build-10 \
 --use-cc=/usr/bin/clang-10 \
 --use-c++=/usr/bin/clang++-10 \
--o ${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE} \
+-o ${CCWS_ARTIFACTS_DIR} \
 --status-bugs \
 --exclude ${WORKSPACE_DIR}/build \
 --exclude /usr/include/ \

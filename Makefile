@@ -144,7 +144,6 @@ private_build: assert_PKG_arg_must_be_specified assert_BUILD_PROFILE_must_exist
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
 		--packages-up-to ${PKG}
-	cp ${WORKSPACE_DIR}/scripts/install/setup.bash "${CCWS_INSTALL_DIR_BUILD}/"
 
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
@@ -165,9 +164,9 @@ test: assert_PKG_arg_must_be_specified
 
 ctest: assert_PKG_arg_must_be_specified
 	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
-		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}/\$${BUILD_PROFILE}\"; \
+		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
 		cd build/${BUILD_PROFILE}/${PKG}; \
-		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/\$${BUILD_PROFILE}/ctest_${PKG}.log\" -j ${JOBS} )"
+		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log\" -j ${JOBS} )"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified

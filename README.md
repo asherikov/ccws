@@ -90,15 +90,22 @@ Execution profiles
 Execution profiles set environment variables that can be used in launch scripts
 to alter run time behavior as demonstrated in `pkg_template/catkin/launch/bringup.launch`,
 currently available profiles are:
+- `common` -- a set of common ROS parameters, e.g., `ROS_HOME`, it is
+  automatically included in binary packages.
 - `test` -- sets `CCWS_NODE_CRASH_ACTION` variable so that nodes that respect
   it become `required`, i.e., termination of such nodes would result in crash
   of test scripts and can thus be easily detected.
 - `valgrind` -- sets `CCWS_NODE_LAUNCH_PREFIX` to `valgrind` and some variables
   that control behavior of `valgrind`.
 
-Multiple execution profiles can be used at the same time, but none are used by
-default except `test` profile which is always enabled in `*test*` targets
-provided by `CCWS`.
+Execution profiles have no effect on build process and are taken into account
+only in `*test*` targets, where `test` execution profile is always used and
+additional profiles can be provided with `EXEC_PROFILE="<profile1>
+<profile2>"`. These targets load profiles using `setup.bash` script located in
+the root folder of `CCWS`, which can also be used manually, e.g., `source
+setup.bash [<build_profile> [<exec_profile1> ...]]`. Note that the setup
+script always includes `common` profile, and uses `test` execution profile if
+no other execution profiles are specified.
 
 
 Dependencies

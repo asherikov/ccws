@@ -4,18 +4,12 @@ jobs:
     bionic:
         runs-on: ubuntu-18.04
 
-        env:
-            ROS_HOSTNAME: localhost
-
         steps:
             - uses: actions/checkout@v2
             - run: make -f .ccws/test_main.mk
 
     focal:
         runs-on: ubuntu-20.04
-
-        env:
-            ROS_HOSTNAME: localhost
 
         steps:
             - uses: actions/checkout@v2

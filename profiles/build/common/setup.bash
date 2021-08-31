@@ -22,7 +22,7 @@ else
 fi
 
 
-CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts"
+CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts/${BUILD_PROFILE}"
 CCWS_BUILD_PROFILE_DIR="${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
 CCWS_BUILD_DIR="${WORKSPACE_DIR}/build/${BUILD_PROFILE}"
 CCWS_SOURCE_DIR="${WORKSPACE_DIR}/src"
@@ -156,9 +156,8 @@ else
 
     export CCWS_INSTALL_DIR_BUILD_ROOT
 fi
-CCWS_WORKSPACE_SETUP="${CCWS_INSTALL_DIR_BUILD}/setup.bash"
 
-export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD CCWS_WORKSPACE_SETUP
+export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD
 
 
 ##########################################################################################
@@ -199,19 +198,22 @@ export COLCON_HOME
 #
 
 # try sourcing preload scripts
-if [ -f "/opt/ros/${ROS_DISTRO}/setup.bash" ];
+
+# host ROS
+SOURCE_SCRIPT="/opt/ros/${ROS_DISTRO}/setup.bash"
+if [ -f "${SOURCE_SCRIPT}" ];
 then
-    source "/opt/ros/${ROS_DISTRO}/setup.bash"
-fi
-if [ -f "${CCWS_WORKSPACE_SETUP}" ];
-then
-    source "${CCWS_WORKSPACE_SETUP}"
+    source "${SOURCE_SCRIPT}"
 fi
 
+# built packages
+SOURCE_SCRIPT="${CCWS_INSTALL_DIR_BUILD}/local_setup.bash"
+if [ -f "${SOURCE_SCRIPT}" ];
+then
+    COLCON_CURRENT_PREFIX="${CCWS_INSTALL_DIR_BUILD}"
+    source "${SOURCE_SCRIPT}"
+fi
 
-ROS_HOME="${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}"
-ROS_LOG_DIR="${ROS_HOME}/ros_log"
-export ROS_HOME ROS_LOG_DIR
 
 # Disable Lisp & Javascript message and service generators
 #   gencpp - C++ ROS message and service generators.
@@ -222,12 +224,6 @@ export ROS_HOME ROS_LOG_DIR
 #   genpy - Python ROS message and service generators.
 ROS_LANG_DISABLE="genlisp;geneus;gennodejs"
 export ROS_LANG_DISABLE
-
-ROSCONSOLE_FORMAT='[${severity}] [${time}] [${node}]: ${message}'
-export ROSCONSOLE_FORMAT
-
-#ROSCONSOLE_CONFIG_FILE=
-#export ROSCONSOLE_CONFIG_FILE
 
 
 ##########################################################################################

@@ -14,6 +14,8 @@ deb_%:
 
 private_deb_build:
 	${MAKE} private_build
+	# TODO optionally copy other execution profiles
+	cp -r "${WORKSPACE_DIR}/profiles/exec/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/ccws_exec_profile_setup.bash"
 
 private_deb_info: assert_PKG_arg_must_be_specified version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"

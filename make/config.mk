@@ -13,7 +13,6 @@ MEMORY_PER_JOB_MB?=2048
 
 # default profile
 BUILD_PROFILE?=reldebug
-EXEC_PROFILE?=
 
 # global version, string, added to deb package names to enable multiple installations
 VERSION?=staging
