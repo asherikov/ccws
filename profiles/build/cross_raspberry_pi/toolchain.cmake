@@ -1,7 +1,7 @@
 ###############################################################################
 # generic cmake parameters
 ###
-include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_header.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain.cmake")
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 
 
@@ -124,4 +124,4 @@ set(CATKIN_SKIP_TESTING     "ON"  CACHE STRING "" FORCE)
 # not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
 
-include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_footer.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_suffix.cmake" OPTIONAL)

@@ -28,10 +28,10 @@ test:
 	${MAKE} wstest PKG=staticoma EXEC_PROFILE=valgrind
 	# static checks & documentation
 	${MAKE} bprof_install_build BUILD_PROFILE=static_checks
-	${MAKE} static_checks
+	${MAKE} BUILD_PROFILE=static_checks
 	${MAKE} bprof_install_build BUILD_PROFILE=doxygen
-	${MAKE} dox PKG=staticoma
-	${MAKE} doxall
+	${MAKE} PKG=staticoma BUILD_PROFILE=doxygen
+	${MAKE} BUILD_PROFILE=doxygen
 
 build_with_profile:
 	${MAKE} wsclean

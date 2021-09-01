@@ -1,15 +1,17 @@
-DOXYGEN_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/doxygen/setup.bash
-
-bprof_doxygen_install_build:
+bprof_doxygen_install_build: bprof_common_install_build
 	sudo ${APT_INSTALL} doxygen graphviz
 
 doxclean:
-	bash -c "${DOXYGEN_SETUP_SCRIPT} \
+	bash -c "${SETUP_SCRIPT} \
 		&& rm -Rf \$${CCWS_DOXYGEN_OUTPUT_DIR}/doxygen \
 		&& rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}"
 
+doxygen_build:
+	test "${PKG}" = "" || ${MAKE} dox
+	test "${PKG}" != "" || ${MAKE} doxall
+
 doxall: doxclean
-	bash -c "${DOXYGEN_SETUP_SCRIPT} \
+	bash -c "${SETUP_SCRIPT} \
         && ${CMD_PKG_NAME_LIST} | xargs -I {} bash -c '${MAKE} dox PKG={}' || true \
 		&& ${CMD_PKG_GRAPH} | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/graph.svg \
         && cd \$${CCWS_DOXYGEN_OUTPUT_DIR} \
@@ -20,7 +22,7 @@ doxall: doxclean
 # documentation for dependencies should be generated first for cross linking
 dox: assert_PKG_arg_must_be_specified
 	# generate Doxyfile
-	bash -c "${DOXYGEN_SETUP_SCRIPT} \
+	bash -c "${SETUP_SCRIPT} \
         && rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG} \
         && mkdir -p \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG} \
         && cp \$${CCWS_DOXYGEN_CONFIG_DIR}/Doxyfile \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile \

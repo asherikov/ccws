@@ -2,7 +2,7 @@
 SETUP_SCRIPT_cross_jetson_xavier=source ${BUILD_PROFILES_DIR}/cross_jetson_xavier/setup.bash
 
 # assuming ubuntu 18.04
-bprof_cross_jetson_xavier_install_build: cross_common_install_build
+bprof_cross_jetson_xavier_install_build: cross_common_install_build bprof_common_install_build
 	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
 	sudo apt update
 	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2

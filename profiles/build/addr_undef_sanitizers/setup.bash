@@ -5,8 +5,7 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-
-BUILD_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
+BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 

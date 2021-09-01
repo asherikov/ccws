@@ -1,6 +1,4 @@
-STATIC_CHECKS_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/static_checks/setup.bash
-
-bprof_static_checks_install_build:
+bprof_static_checks_install_build: bprof_common_install_build
 	#pip3 install cpplint
 	sudo ${APT_INSTALL} \
 		cppcheck \
@@ -18,7 +16,7 @@ bprof_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
 
-static_checks:
+static_checks_build:
 	${MAKE} cppcheck
 	${MAKE} catkin_lint
 	${MAKE} yamllint
@@ -36,15 +34,15 @@ cppcheck:
 	#
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
-	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	mkdir -p ${WORKSPACE_DIR}/build/$@
+	bash -c "${SETUP_SCRIPT}; \
 		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
 		cppcheck \
 			${WORKSPACE_DIR}/src \
 			--relative-paths \
 			--quiet --verbose --force \
 			--template='[{file}:{line}]  {severity}  {id}  {message}' \
-			--language=c++ --std=c++11 \
+			--language=c++ --std=c++14 \
 			--enable=warning \
 			--enable=style \
 			--enable=performance \
@@ -53,13 +51,13 @@ cppcheck:
 			--suppress=syntaxError \
 			--suppress=useInitializationList \
 			\$${EXCEPTIONS} \
-			3>&1 1>&2 2>&3" \
-		| tee '${WORKSPACE_DIR}/build/${TARGET}/cppcheck.err'
-	test ! -s '${WORKSPACE_DIR}/build/${TARGET}/cppcheck.err' || exit 1
+			3>&1 1>&2 2>&3 \
+			| tee '${WORKSPACE_DIR}/build/$@/cppcheck.err' "
+	test ! -s '${WORKSPACE_DIR}/build/$@/cppcheck.err' || exit 1
 
 
 cpplint:
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude=/g'); \
 		cpplint \
 		\$${EXCEPTIONS} \
@@ -71,7 +69,7 @@ cpplint:
 static_checks_generic_dir_filter:
 	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
 	echo -n "cat ${WORKSPACE_DIR}/build/${TARGET}/input" > ${WORKSPACE_DIR}/build/${TARGET}/filter
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
 
 
@@ -86,7 +84,7 @@ flawfinder:
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	find ${WORKSPACE_DIR}/src -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
@@ -105,7 +103,7 @@ yamllint:
 
 shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		( find ${BUILD_PROFILES_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' \
 			&& find ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' ) \
@@ -117,7 +115,7 @@ shellcheck:
 
 catkin_lint:
 	# --skip-pkg <pkg>
-	bash -c "${STATIC_CHECKS_SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --skip-path /g'); \
 		PKG_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_PKG_EXCEPTIONS} | sed -e 's/:/ --skip-pkg /g'); \
 		echo \$${DIR_EXCEPTIONS}; \

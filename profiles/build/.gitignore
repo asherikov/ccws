@@ -1,4 +1,4 @@
 */*.img
 */sysroot
 */rosdep
-*/vendor
+/vendor*

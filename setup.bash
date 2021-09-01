@@ -18,7 +18,7 @@ SETUP_SCRIPT="${PROFILES_DIR}/build/${BUILD_PROFILE}/setup.bash"
 
 if [ -f "${SETUP_SCRIPT}" ]
 then
-    source "${SETUP_SCRIPT}";
+    source "${SETUP_SCRIPT}" "${BUILD_PROFILE}";
     if [ -t 0 ];
     then
         # ignore errors to prevent session termination if interactive
@@ -47,10 +47,10 @@ then
     fi
 
 
+    # normalize
+    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//"  -e "s/ *$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" | grep -v "^common$" | sort | uniq | paste -d ' ' -s)
     # prepend common
     EXEC_PROFILE="common ${EXEC_PROFILE}"
-    # normalize
-    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//" -e "s/ *$//" -e "s/ \+/ /g")
 
 
     for PROFILE in ${EXEC_PROFILE};

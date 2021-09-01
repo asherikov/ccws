@@ -1,7 +1,7 @@
 # this way there is no need to specify profile explicitly -- it is implied by target names
 SETUP_SCRIPT_cross_raspberry_pi=source ${BUILD_PROFILES_DIR}/cross_raspberry_pi/setup.bash
 
-bprof_cross_raspberry_pi_install_build: cross_common_install_build cross_raspberry_pi_clean
+bprof_cross_raspberry_pi_install_build: cross_common_install_build cross_raspberry_pi_clean bprof_common_install_build
 	# gcc -> https://github.com/Pro/raspi-toolchain/
 	# raspios -> http://downloads.raspberrypi.org/
 	# the only reason we don't use lite image is that it doesn't have enough

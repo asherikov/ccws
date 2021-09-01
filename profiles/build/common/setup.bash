@@ -15,9 +15,10 @@ export WORKSPACE_DIR BUILD_PROFILES_DIR
 
 if [ -z "${BUILD_PROFILE}" ]
 then
-    echo "Profile is not defined"
+    echo "Profile '${BUILD_PROFILE}' is not defined"
     test -n "${BUILD_PROFILE}"
 else
+    echo "Selected profile: '${BUILD_PROFILE}'"
     export BUILD_PROFILE
 fi
 
@@ -168,8 +169,11 @@ CMAKE_TOOLCHAIN_FILE=${CCWS_BUILD_PROFILE_DIR}/toolchain.cmake
 export CMAKE_TOOLCHAIN_FILE
 
 # since 3.12: https://cmake.org/cmake/help/latest/envvar/CMAKE_BUILD_PARALLEL_LEVEL.html
-CMAKE_BUILD_PARALLEL_LEVEL=${JOBS}
-export CMAKE_BUILD_PARALLEL_LEVEL
+if [ -n "${JOBS}" ]
+then
+    CMAKE_BUILD_PARALLEL_LEVEL=${JOBS}
+    export CMAKE_BUILD_PARALLEL_LEVEL
+fi
 
 
 ##########################################################################################
@@ -234,8 +238,3 @@ export MAKEFLAGS
 
 umask u=rwx,g=rx,o=rx
 
-
-if [ -f "${CCWS_BUILD_PROFILE_DIR}/vendor/setup.bash" ]
-then
-    source "${CCWS_BUILD_PROFILE_DIR}/vendor/setup.bash"
-fi

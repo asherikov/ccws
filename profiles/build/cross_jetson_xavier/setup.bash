@@ -5,24 +5,16 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-
-BUILD_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
+BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
 CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
 
-
-##########################################################################################
 # target triple
-#
 CCWS_TRIPLE_ARCH=aarch64
 CCWS_TRIPLE_SYS=linux
 CCWS_TRIPLE_ABI=gnu
 
-
-##########################################################################################
 # setup common
-#
-
 source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 

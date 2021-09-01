@@ -1,5 +1,4 @@
-include("${CMAKE_CURRENT_LIST_DIR}/vendor/toolchain_header.cmake" OPTIONAL)
-include("${CMAKE_CURRENT_LIST_DIR}/../$ENV{BUILD_PROFILE}/vendor/toolchain_header.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_prefix.cmake" OPTIONAL)
 
 set(CMAKE_VERBOSE_MAKEFILE      ON      CACHE STRING "" FORCE)
 
@@ -27,6 +26,18 @@ set(CMAKE_INSTALL_PREFIX        $ENV{CCWS_INSTALL_DIR_HOST} CACHE STRING "" FORC
 # environment, colcon skips devel phase and does not set it
 # https://github.com/colcon/colcon-ros/issues/119
 set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORCE)
+
+
+###############################################################################
+# compilation flags
+###
+set(CMAKE_CXX_FLAGS     "-fdiagnostics-color -fPIC" CACHE STRING "" FORCE)
+set(CCWS_CXX_FLAGS
+    "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors -fPIC -fstack-protector-strong -std=c++14"
+    CACHE STRING "" FORCE)
+
+add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
+add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})
 
 
 ###############################################################################

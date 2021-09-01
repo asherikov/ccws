@@ -266,13 +266,14 @@ Extending `CCWS`
 ================
 
 `CCWS` functionality can be extended in multiple ways:
-- by adding new build and execution profiles, which can be as easy as copying
-  existing profiles and modifying them as needed, profiles are picked
-  automatically;
-- general `make` targets can be added by creating a `make/vendor/<filename>.mk`
-  file;
-- distributed build profiles can have `vendor` subdirectory where `cmake`
-  header and footer files can be added, as well as shell setup scripts.
+- by adding new build profiles, e.g., `make bprof_new
+  BUILD_PROFILE=vendor_static_checks BASE_BUILD_PROFILE=static_checks`, all
+  profiles starting with `vendor` prefix are ignored by git;
+- by adding execution profiles;
+- `make` targets can be added by creating a
+  `profiles/build/vendor/<filename>.mk` file;
+- common `cmake` toolchain suffix can be added to
+  `profiles/build/vendor/toolchain_suffix.cmake`.
 
 `show_vendor_files` target can be used to list all vendor specific files.
 

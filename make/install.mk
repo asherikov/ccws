@@ -1,6 +1,6 @@
 APT_INSTALL?=apt --yes --no-install-recommends install
 
-install_build_deb_common:
+install_ccws_deps:
 	${APT_INSTALL} wget
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	sh -c 'test -f /etc/apt/sources.list.d/ros-latest.list \
@@ -12,9 +12,11 @@ install_build_deb_common:
 		python3-colcon-package-selection \
 		python3-colcon-package-information
 	${APT_INSTALL} build-essential ccache proot
+	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
+	test -d /etc/ros/rosdep/sources.list.d/ || rosdep init
 
 #ubuntu18
-install_build_bionic: install_build_deb_common
+install_ccws_deps_bionic:
 	${APT_INSTALL} \
 		python-rosinstall-generator \
 		python-rosdep \
@@ -23,19 +25,18 @@ install_build_bionic: install_build_deb_common
 	${APT_INSTALL} python-rosinstall python-wstool
 
 #ubuntu20
-install_build_focal: install_build_deb_common
+install_ccws_deps_focal:
 	${APT_INSTALL} \
 		python3-rosinstall-generator \
 		python3-rosdep \
 		python3-rospkg
 	${APT_INSTALL} python3-rosinstall python3-wstool
 
+
 bprof_install_build:
-	sudo ${MAKE} install_build_${OS_DISTRO_BUILD}
-	test -d /etc/ros/rosdep/sources.list.d/ || sudo rosdep init
 	${MAKE} bprof_${BUILD_PROFILE}_install_build
 
-bprof_%_install_build: assert_BUILD_PROFILE_must_exist
+bprof_%_install_build: assert_BUILD_PROFILE_must_exist bprof_common_install_build
 	# placeholder target
 
 bprof_install_host:

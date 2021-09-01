@@ -4,17 +4,8 @@
 set -e
 set -o pipefail
 
-OVERRIDE_BUILD_PROFILE=$1
-
 ##########################################################################################
-
-if [ -n "${OVERRIDE_BUILD_PROFILE}" ] # can be used by scan_build profile
-then
-    BUILD_PROFILE="${OVERRIDE_BUILD_PROFILE}"
-else
-    BUILD_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
-fi
-
+BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
 
 

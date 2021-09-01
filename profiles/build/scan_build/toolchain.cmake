@@ -1,4 +1,4 @@
-include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_header.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain.cmake")
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 # disable optimization to increase compilation speed
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O0" CACHE STRING "" FORCE)
@@ -58,8 +58,6 @@ set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
 # should be enabled selectively, otherwise is going to fail on 3rd party software
 #set(CMAKE_CXX_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
 
-include("${CMAKE_CURRENT_LIST_DIR}/../common/cxx_flags.cmake")
-
 # This profile uses clang compiler (set in setup.bash) and some of the warnings should be disabled, e.g.
 # -Wgnu-zero-variadic-macro-arguments -> gtest, https://github.com/google/googletest/issues/1419
 set(GTEST_WARNINGS "-Wno-unknown-warning-option -Wno-deprecated-copy -Werror=extra-tokens -Wno-delete-non-abstract-non-virtual-dtor -Wno-gnu-zero-variadic-macro-arguments")
@@ -70,4 +68,4 @@ if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
     set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS} ${GTEST_WARNINGS}" CACHE STRING "" FORCE)
 endif ()
 
-include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_footer.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_suffix.cmake" OPTIONAL)

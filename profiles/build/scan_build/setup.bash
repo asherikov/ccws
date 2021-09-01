@@ -5,14 +5,8 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-
-BUILD_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
-PARENT_DIR="$(dirname "${BASH_SOURCE[0]}")/../"
-if [ -f "${PARENT_DIR}/static_checks/vendor/setup.bash" ]
-then
-    source "${PARENT_DIR}/static_checks/vendor/setup.bash"
-fi
-source "${PARENT_DIR}/static_checks/setup.bash" "${BUILD_PROFILE}"
+BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+source "$(dirname "${BASH_SOURCE[0]}")/../static_checks/setup.bash" "${BUILD_PROFILE}"
 
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")

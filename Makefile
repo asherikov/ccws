@@ -35,14 +35,11 @@ default: build
 # include after default targets to avoid shadowing them
 -include profiles/*/*/*.mk
 -include make/*.mk
--include make/vendor/*.mk
 
 # make tries to remake missing files, intercept these attempts
 profiles/*/*.mk:
 	@false
 make/*.mk:
-	@false
-make/vendor/*.mk:
 	@false
 
 
@@ -111,7 +108,7 @@ wsctest:
 
 
 show_vendor_files:
-	@find ./make ./profiles/*/*/ -maxdepth 2 -path "*vendor/*"
+	@find ./profiles/build/vendor* ! -type d
 
 
 ##
@@ -121,13 +118,13 @@ show_vendor_files:
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
 
-assert_BUILD_PROFILE_must_exist:
-	test -d "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
-
 build_glob:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""
 
 build:
+	${MAKE} "${BUILD_PROFILE}_build"
+
+%_build:
 	${MAKE} wswraptarget TARGET=private_build
 
 # --log-level DEBUG
