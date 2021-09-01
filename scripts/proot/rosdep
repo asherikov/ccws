@@ -29,9 +29,8 @@ proot -R "${CCWS_SYSROOT}" \
     --bind=/usr/bin/cmake \
     --bind=/usr/bin/make \
     ${IFS# python bindings} \
-    --bind=/usr/bin/python \
-    --bind=/usr/bin/python3 \
+    $(find /usr/bin/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    "${CCWS_HOST_ROOT}/usr/bin/python" "${CCWS_HOST_ROOT}/usr/bin/rosdep" "$@"
+    "/usr/bin/rosdep" "$@"
 #echo "<<<<< CCWS rosdep wrapper <<<<<<"
 #exit 1

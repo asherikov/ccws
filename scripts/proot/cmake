@@ -30,8 +30,7 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/perl \
     --bind=/usr/bin/make \
     ${IFS# python bindings} \
-    --bind=/usr/bin/python \
-    --bind=/usr/bin/python3 \
+    $(find /usr/bin/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \

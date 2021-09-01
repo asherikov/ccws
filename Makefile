@@ -60,7 +60,7 @@ wsinit: wspurge
 	mkdir -p src
 	cd src; wstool init
 	cd src; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
-	-cd src; wstool scrape -y
+	-${MAKE} wsscrape_all
 	${MAKE} wsupdate
 
 # Status packages in the workspace
@@ -72,6 +72,9 @@ wsstatus:
 # Add new packages to the workspace
 wsscrape:
 	cd src; wstool scrape
+
+wsscrape_all:
+	cd src; wstool scrape -y
 
 # Update workspace & all packages
 wsupdate:

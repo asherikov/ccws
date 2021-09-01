@@ -11,7 +11,7 @@ then
 else
     COLCON_CURRENT_PREFIX=$(dirname "${BASH_SOURCE[0]}")
 fi
-if [ -z "${COLCON_CURRENT_PREFIX}/local_setup.sh" ]
+if [ -f "${COLCON_CURRENT_PREFIX}/local_setup.sh" ]
 then
     source "${COLCON_CURRENT_PREFIX}/local_setup.sh"
 fi

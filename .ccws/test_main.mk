@@ -1,9 +1,19 @@
 THIS_MAKEFILE=.ccws/test_main.mk
 
 test:
+	# package & profile creation
+	${MAKE} bprof_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
+	${MAKE} bprof_install_build BUILD_PROFILE=test_profile
+	${MAKE} wsinit
+	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
+	${MAKE} wsscrape_all
+	${MAKE} dep_to_repolist PKG=test_pkg
+	${MAKE} wsupdate
+	${MAKE} bprof_install_host PKG=test_pkg
+	${MAKE} test_pkg BUILD_PROFILE=test_profile
 	# reset
 	${MAKE} purge
-	${MAKE} bprof_install_build
+	${MAKE} wspurge
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
 	# add dependencies to the workspace and build deb package
 	${MAKE} dep_to_repolist PKG=staticoma

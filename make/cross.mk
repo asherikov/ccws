@@ -24,4 +24,5 @@ cross_umount:
 	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
 cross_common_install_build:
-	sudo ${APT_INSTALL} qemu-user-static
+	sudo ${APT_INSTALL} qemu-user qemu-user-static
+	sudo service binfmt-support restart
