@@ -132,8 +132,9 @@ See `.ccws/test_main.mk` for command usage hints.
 Initial setup
 -------------
 
-- Edit `make/config.mk` and `profiles/common/config.bash` to specify
-  developer-dependent workspace parameters.
+- Override developer and vendor specific parameters by adding them to
+  `make/config.mk`, available parameters can be found in the top section of
+  `Makefile`.
 - Install dependencies using `make bprof_install_build BUILD_PROFILE=<profile>`
   targets, cross compilation profiles would require some extra steps as
   described below.

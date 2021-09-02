@@ -55,4 +55,4 @@ download:
 	bash -c "${SETUP_SCRIPT}; \
 		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
 		cd \"\$${CCWS_BUILD_DIR}\"; \
-		wget --timestamping --no-check-certificate ${FILES};"
+		wget --progress=dot:giga --timestamping --no-check-certificate ${FILES};"

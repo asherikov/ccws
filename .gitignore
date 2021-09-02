@@ -3,4 +3,5 @@
 /install
 /log
 /.ccache
-/make/vendor
+/make/config.mk
+/pkg_template/vendor*

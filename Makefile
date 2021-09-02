@@ -1,27 +1,37 @@
-include make/config.mk
+-include make/config.mk
 
+# obtain from gitconfig by default
 export EMAIL?=$(shell git config --get user.email)
 export AUTHOR?=$(shell git config --get user.name)
-export BUILD_PROFILE
-export VERSION
-export VENDOR
+# no default, can be derived in many cases, in some must be set explicitly
 export ROS_DISTRO
 
+# default profile
+export BUILD_PROFILE?=reldebug
+# default package type
+export PKG_TYPE?=catkin
+# global version, string, added to deb package names to enable multiple installations
+export VERSION?=staging
+# Used in binary package names
+export VENDOR?=ccws
+# default new package license
+export LICENSE?=Apache 2.0
+
+# maximum amout of memory required for a single compilation job -- used to compute job limit
+MEMORY_PER_JOB_MB?=2048
+export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
+
+export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
+
+
+# helpers
 export WORKSPACE_DIR=$(shell pwd)
 export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
-export OS_DISTRO_BUILD=$(shell lsb_release -cs)
-
+SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
-
-
-SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
-ARGS?=
-
-MEMORY_PER_JOB_MB?=1024
-export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
 
 
 ##
@@ -40,6 +50,8 @@ default: build
 profiles/*/*.mk:
 	@false
 make/*.mk:
+	@false
+make/config.mk:
 	@false
 
 
