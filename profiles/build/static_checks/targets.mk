@@ -104,11 +104,10 @@ yamllint:
 shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		( find ${BUILD_PROFILES_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' \
+		( find ${WORKSPACE_DIR}/profiles/ -maxdepth 3 -iname '*.sh' -or -iname '*.bash' \
 			&& find ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
-		find ${WORKSPACE_DIR}/src ${BUILD_PROFILES_DIR}/*/vendor -iname '*.sh' -or -iname '*.bash' >> ${WORKSPACE_DIR}/build/$@/input || true; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 

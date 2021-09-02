@@ -2,3 +2,4 @@
 */sysroot
 */rosdep
 /vendor*
+/test*

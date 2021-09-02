@@ -15,7 +15,7 @@ export WORKSPACE_DIR BUILD_PROFILES_DIR
 
 if [ -z "${BUILD_PROFILE}" ]
 then
-    echo "Profile '${BUILD_PROFILE}' is not defined"
+    echo "Profile is not defined"
     test -n "${BUILD_PROFILE}"
 else
     echo "Selected profile: '${BUILD_PROFILE}'"

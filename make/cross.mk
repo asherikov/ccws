@@ -14,6 +14,7 @@ cross_sysroot_mount:
 	mount "${DEVICE}" "$${CCWS_SYSROOT}"
 	mount --bind /etc/resolv.conf "$${CCWS_SYSROOT}/etc/resolv.conf"
 	mount --bind /dev "$${CCWS_SYSROOT}/dev"
+	-mount --bind /dev/null "$${CCWS_SYSROOT}/etc/ld.so.preload"
 
 cross_mount:
 	# may be different depending on profile

@@ -5,8 +5,9 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
-source "$(dirname "${BASH_SOURCE[0]}")/../static_checks/setup.bash" "${BUILD_PROFILE}"
+BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+BASE_BUILD_PROFILE=${1:-"static_checks"}
+source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:1}"
 
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")

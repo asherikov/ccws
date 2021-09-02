@@ -12,6 +12,9 @@ proot -R "${CCWS_SYSROOT}" \
     ${CCWS_PROOT_ARGS} \
     ${IFS# rosdep stuff} \
     --bind=/etc/ros/rosdep/ \
+    --bind=/usr/bin/rosdep \
+    ${IFS# suppress annoying ld warnings} \
+    --bind="/dev/null:/etc/ld.so.preload" \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \
     --bind=/bin/false \
@@ -26,8 +29,6 @@ proot -R "${CCWS_SYSROOT}" \
     --bind=/bin/mktemp \
     --bind=/usr/bin/env \
     --bind=/usr/bin/perl \
-    --bind=/usr/bin/cmake \
-    --bind=/usr/bin/make \
     ${IFS# python bindings} \
     $(find /usr/bin/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \

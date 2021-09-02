@@ -14,6 +14,8 @@ proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# installation paths} \
     --bind="${CCWS_INSTALL_DIR_BUILD}:${CCWS_INSTALL_DIR_HOST}" \
     --bind=/lib/udev/rules.d \
+    ${IFS# suppress annoying ld warnings} \
+    --bind="/dev/null:/etc/ld.so.preload" \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \
     --bind=/bin/false \

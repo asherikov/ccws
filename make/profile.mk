@@ -1,7 +1,7 @@
 BASE_BUILD_PROFILE?=common
 
 assert_BUILD_PROFILE_must_exist:
-	test -d "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
+	test -f "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash"
 
 assert_BUILD_PROFILE_must_not_exist:
 	test ! -d "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"

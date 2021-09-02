@@ -5,7 +5,7 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-BUILD_PROFILE=${1:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
 CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
 
@@ -15,7 +15,8 @@ CCWS_TRIPLE_SYS=linux
 CCWS_TRIPLE_ABI=gnueabihf
 
 # setup common
-source "$(dirname "${BASH_SOURCE[0]}")/../common/setup.bash"
+BASE_BUILD_PROFILE=${1:-"common"}
+source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:1}"
 
 
 ##########################################################################################
