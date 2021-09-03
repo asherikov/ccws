@@ -305,7 +305,8 @@ TODO
 - https://github.com/myint/cppclean might be useful for unnecessary header
   detection, but looks stale.
 - https://github.com/include-what-you-use/include-what-you-use
-- Build time analysis with clang https://github.com/aras-p/ClangBuildAnalyzer.
+- Build time analysis with clang https://github.com/aras-p/ClangBuildAnalyzer
+  and / or https://github.com/jrmadsen/compile-time-perf.
 - Potential replacement for `scan_build`
   https://github.com/Ericsson/codechecker with extra checks and caching.
 - https://github.com/sscpac/statick is not going to be used, but some of its

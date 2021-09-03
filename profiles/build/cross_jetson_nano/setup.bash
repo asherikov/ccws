@@ -16,7 +16,7 @@ CCWS_TRIPLE_ABI=gnu
 
 # setup common
 BASE_BUILD_PROFILE=${1:-"common"}
-source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:1}"
+source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:2}" ""
 
 
 ##########################################################################################
