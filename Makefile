@@ -123,7 +123,7 @@ wsctest:
 
 
 show_vendor_files:
-	@find ./profiles/build/vendor* ! -type d
+	@find ./profiles/*/vendor* ! -type d
 
 
 ##

@@ -288,6 +288,8 @@ Related software
   for ROS and ROS2.
 - https://github.com/HesselM/rpicross_notes -- cross compilation for Raspberry
   Pi done in a different way.
+- https://github.com/ros-tooling/action-ros-ci -- `github` action that covers
+  some of `ccws` functionality.
 
 
 TODO
@@ -325,3 +327,9 @@ TODO
 - Add memory sanitizer profile as an alternative to `valgrind`, `gcc` doesn't
   support it currently.
 - Add code coverage profile.
+- Execution profile with https://github.com/yugr/libdebugme to automatically
+  start debugger on a signal.
+- https://github.com/yugr/valgrind-preload as an alternative to `valgrind`
+  execution profile -- an overkill in general case though.
+- Control symbol visibility and verify with
+  https://github.com/yugr/ShlibVisibilityChecker.

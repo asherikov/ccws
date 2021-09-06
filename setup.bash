@@ -48,9 +48,9 @@ then
 
 
     # normalize
-    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//"  -e "s/ *$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" | grep -v "^common$" | sort | uniq | paste -d ' ' -s)
-    # prepend common
-    EXEC_PROFILE="common ${EXEC_PROFILE}"
+    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//"  -e "s/ *$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" | grep -v "^common$" | grep -v "^vendor$" | sort | uniq | paste -d ' ' -s)
+    # prepend common and append vendor specific parameters
+    EXEC_PROFILE="common ${EXEC_PROFILE} vendor"
 
 
     for PROFILE in ${EXEC_PROFILE};

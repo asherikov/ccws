@@ -39,6 +39,13 @@ set(CCWS_CXX_FLAGS
 add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
 add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})
 
+# -flto
+# performance gain seems to be marginal in general, but the main limiting
+# factor currently (gcc7) is:
+# "Link-time optimization does not work well with generation of debugging
+# information. Combining -flto with -g is currently experimental and
+# expected to produce unexpected results."
+
 
 ###############################################################################
 # cmake debug
