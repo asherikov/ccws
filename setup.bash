@@ -48,9 +48,14 @@ then
 
 
     # normalize
-    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//"  -e "s/ *$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" | grep -v "^common$" | grep -v "^vendor$" | sort | uniq | paste -d ' ' -s)
+    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/^ *//"  -e "s/ *$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" | grep -v "^common$" | grep -v "^vendor$" | paste -d ' ' -s)
     # prepend common and append vendor specific parameters
-    EXEC_PROFILE="common ${EXEC_PROFILE} vendor"
+    EXEC_PROFILE="common ${EXEC_PROFILE}"
+    if [ -f "${PROFILES_DIR}/exec/vendor/setup.bash" ]
+    then
+        EXEC_PROFILE="${EXEC_PROFILE} vendor"
+    fi
+    EXEC_PROFILE=$(echo "${EXEC_PROFILE}" | sed -e "s/ \+/ /g")
 
 
     for PROFILE in ${EXEC_PROFILE};
