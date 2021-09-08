@@ -11,5 +11,5 @@ test:
 	${MAKE} cross_mount
 	${MAKE} staticoma
 	${MAKE} wsclean
-	${MAKE} deb PKG=staticoma
+	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=${BUILD_PROFILE}
 	${MAKE} cross_umount

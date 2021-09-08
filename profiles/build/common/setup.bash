@@ -25,7 +25,7 @@ fi
 
 CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts/${BUILD_PROFILE}"
 CCWS_BUILD_PROFILE_DIR="${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
-CCWS_BUILD_DIR="${WORKSPACE_DIR}/build/${BUILD_PROFILE}"
+CCWS_BUILD_DIR=${CCWS_BUILD_DIR:-"${WORKSPACE_DIR}/build/${BUILD_PROFILE}"}
 CCWS_SOURCE_DIR="${WORKSPACE_DIR}/src"
 export CCWS_ARTIFACTS_DIR CCWS_BUILD_PROFILE_DIR CCWS_BUILD_DIR CCWS_SOURCE_DIR
 
@@ -128,34 +128,12 @@ CCWS_BUILD_USER=$(whoami)
 export CCWS_BUILD_TIME CCWS_BUILD_USER
 
 
-if [ -z "${CCWS_DEB_ENABLE}" ]
+if [ -z "${CCWS_PKG_FULL_NAME}" ] # can be set elsewhere
 then
     CCWS_PKG_FULL_NAME=${PKG}
     # CCWS_INSTALL_DIR_BUILD = CCWS_INSTALL_DIR_HOST
     CCWS_INSTALL_DIR_BUILD="${WORKSPACE_DIR}/install/${BUILD_PROFILE}"
     CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_BUILD}"
-else
-    # package name
-    case "${PKG}" in
-        *\ *)
-            # contains spaces = multiple packages provided
-            if [ -n "${VENDOR}" ]
-            then
-                INSTALL_PKG_PREFIX="${VENDOR}__"
-            fi
-            ;;
-        *)
-            INSTALL_PKG_PREFIX="${PKG}__"
-            ;;
-    esac
-
-    CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${BUILD_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
-
-    CCWS_INSTALL_DIR_HOST="/opt/${VENDOR}/${CCWS_PKG_FULL_NAME}"
-    CCWS_INSTALL_DIR_BUILD_ROOT="${WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
-    CCWS_INSTALL_DIR_BUILD="${CCWS_INSTALL_DIR_BUILD_ROOT}/${CCWS_INSTALL_DIR_HOST}"
-
-    export CCWS_INSTALL_DIR_BUILD_ROOT
 fi
 
 export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD
@@ -165,7 +143,7 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD
 # cmake
 #
 # since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
-CMAKE_TOOLCHAIN_FILE=${CCWS_BUILD_PROFILE_DIR}/toolchain.cmake
+CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE:-"${CCWS_BUILD_PROFILE_DIR}/toolchain.cmake"}
 export CMAKE_TOOLCHAIN_FILE
 
 # since 3.12: https://cmake.org/cmake/help/latest/envvar/CMAKE_BUILD_PARALLEL_LEVEL.html

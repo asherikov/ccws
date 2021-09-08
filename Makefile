@@ -8,6 +8,8 @@ export ROS_DISTRO
 
 # default profile
 export BUILD_PROFILE?=reldebug
+# used in build profile mixins and profile creation targets
+export BASE_BUILD_PROFILE?=reldebug
 # default package type
 export PKG_TYPE?=catkin
 # global version, string, added to deb package names to enable multiple installations
@@ -137,14 +139,14 @@ assert_PKG_arg_must_be_specified:
 build_glob:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""
 
-build:
+build: assert_BUILD_PROFILE_must_exist
 	${MAKE} "${BUILD_PROFILE}_build"
 
 %_build:
 	${MAKE} wswraptarget TARGET=private_build
 
 # --log-level DEBUG
-private_build: assert_PKG_arg_must_be_specified assert_BUILD_PROFILE_must_exist
+private_build: assert_PKG_arg_must_be_specified
 	mkdir -p "${CCWS_BUILD_DIR}"
 	# override make flags to enable multithreaded builds
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \

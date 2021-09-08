@@ -1,5 +1,5 @@
 # this script automatically sources profile specific setup script
-DEB_SETUP_SCRIPT=source ${BUILD_PROFILES_DIR}/common/deb.bash
+DEB_SETUP_SCRIPT=${SETUP_SCRIPT} ${BASE_BUILD_PROFILE}
 
 version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
@@ -15,7 +15,8 @@ deb_%:
 private_deb_build:
 	${MAKE} private_build
 	# TODO optionally copy other execution profiles
-	cp -r "${WORKSPACE_DIR}/profiles/exec/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/ccws_exec_profile_setup.bash"
+	cp -r "${EXEC_PROFILES_DIR}/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
+	test ! -f "${EXEC_PROFILES_DIR}/vendor/setup.bash" || cat "${EXEC_PROFILES_DIR}/vendor/setup.bash" >> "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
 
 private_deb_info: assert_PKG_arg_must_be_specified version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"
@@ -29,15 +30,16 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	mkdir -p "${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN"
 	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
 	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' | xargs --no-run-if-empty rm
-	${WORKSPACE_DIR}/scripts/deb/control.sh
-	${WORKSPACE_DIR}/scripts/deb/preinst.sh
-	${WORKSPACE_DIR}/scripts/deb/postinst.sh
+	${CCWS_BUILD_PROFILE_DIR}/bin/control.sh
+	${CCWS_BUILD_PROFILE_DIR}/bin/preinst.sh
+	${CCWS_BUILD_PROFILE_DIR}/bin/postinst.sh
 	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "install/${CCWS_PKG_FULL_NAME}.deb"
 
 # see https://lintian.debian.org/tags/
 private_deb_lint: assert_PKG_arg_must_be_specified
 	lintian "install/${CCWS_PKG_FULL_NAME}.deb"
 
-deb:
+deb_build: assert_BASE_BUILD_PROFILE_must_exist
 	${MAKE} wswraptarget TARGET="private_deb_build" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
 	${MAKE} wswraptarget TARGET="private_deb_pack" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
+
