@@ -27,6 +27,7 @@ export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 # helpers
 export WORKSPACE_DIR=$(shell pwd)
 export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
+export EXEC_PROFILES_DIR=${WORKSPACE_DIR}/profiles/exec/
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/

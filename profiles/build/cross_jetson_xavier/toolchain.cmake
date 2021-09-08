@@ -133,4 +133,4 @@ set(CUDA_TOOLKIT_ROOT_DIR "/usr/local/cuda-10.2/" CACHE STRING "" FORCE)
 # not needed with 'CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY'
 #set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc" CACHE STRING "" FORCE)
 
-include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_suffix.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_suffix.cmake")

@@ -68,4 +68,4 @@ if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
     set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS} ${GTEST_WARNINGS}" CACHE STRING "" FORCE)
 endif ()
 
-include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_suffix.cmake" OPTIONAL)
+include("${CMAKE_CURRENT_LIST_DIR}/../common/toolchain_suffix.cmake")
