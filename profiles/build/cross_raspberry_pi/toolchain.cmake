@@ -55,10 +55,10 @@ include_directories(SYSTEM "/usr/include/c++/$ENV{CCWS_GCC_VERSION}/")
 
 # ROS:
 # 1. -Wnarrowing -> issue in ros_comm/xmlrpcpp/test/test_base64.cpp
-# 2. -I/usr/include -> imported google test targets do not get toolchain for
-# some reason and cannot be built, CMAKE_CXX_FLAGS pass through
+# 2. -isystem /usr/include -> imported google test targets do not get toolchain
+# for some reason and cannot be built, CMAKE_CXX_FLAGS pass through
 # 3. SIP_MODULE_NAME is needed for python_orocos_kdl, was defined in python2.7/sip.h
-set(CCWS_ROS_CXX_FLAGS "-Wno-narrowing -I/usr/include -D'SIP_MODULE_NAME=\"sip\"'")
+set(CCWS_ROS_CXX_FLAGS "-Wno-narrowing -isystem /usr/include -D'SIP_MODULE_NAME=\"sip\"'")
 
 # Eigen: disable alignment for simplicity
 # http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html

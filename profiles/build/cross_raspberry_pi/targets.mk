@@ -43,7 +43,7 @@ bprof_cross_raspberry_pi_install_host:
 			apt update; \
 			apt --yes upgrade; \
 			apt clean\" "
-	-${MAKE} dep_install BUILD_PROFILE=cross_raspberry_pi
+	${MAKE} dep_install BUILD_PROFILE=cross_raspberry_pi
 	${MAKE} cross_umount BUILD_PROFILE=cross_raspberry_pi
 
 cross_raspberry_pi_mount:

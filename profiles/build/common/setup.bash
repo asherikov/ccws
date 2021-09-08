@@ -114,9 +114,14 @@ else
     export ROS_DISTRO
 fi
 
-# it is better to stick to defaults
-#ROS_PYTHON_VERSION=3
-#export ROS_PYTHON_VERSION
+# has to be set for colcon to determine dependencies properly
+case "${ROS_DISTRO}" in
+    melodic)
+        ROS_PYTHON_VERSION=2;;
+    *)
+        ROS_PYTHON_VERSION=3;;
+esac
+export ROS_PYTHON_VERSION
 
 
 ##########################################################################################

@@ -19,10 +19,14 @@ BASE_BUILD_PROFILE=${1:-"common"}
 source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:2}" ""
 
 
+ROS_OS_OVERRIDE=debian:10:buster
+export ROS_OS_OVERRIDE
+
+
 ##########################################################################################
 # compiler paths
 #
-CCWS_COMPILER_ROOT_HOST=${CCWS_BUILD_PROFILE_DIR}/cross-pi-gcc
+CCWS_COMPILER_ROOT_HOST=$(dirname "${BASH_SOURCE[0]}")/cross-pi-gcc
 CCWS_COMPILER_ROOT_TARGET=/opt/cross-pi-gcc/
 
 export CCWS_COMPILER_ROOT_HOST CCWS_COMPILER_ROOT_TARGET

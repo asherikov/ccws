@@ -31,12 +31,12 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/env \
     --bind=/usr/bin/perl \
     --bind=/usr/bin/make \
-    ${IFS# python bindings} \
-    $(find /usr/bin/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
+    ${IFS# python bindings (only if the same ROS distro is installed on the build system)} \
+    $(test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \
     $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     "/usr/bin/cmake" "$@"
 #echo "<<<<< CCWS cmake wrapper <<<<<<"
 #exit 1
+
