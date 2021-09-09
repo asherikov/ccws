@@ -1,5 +1,9 @@
 on: [push, pull_request]
 
+env:
+    EMAIL: example@example.com
+    AUTHOR: CI
+
 jobs:
     bionic:
         runs-on: ubuntu-18.04

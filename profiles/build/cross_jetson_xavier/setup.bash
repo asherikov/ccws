@@ -24,8 +24,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@
 #
 CCWS_GCC_VERSION=8
 
-CXX=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
-CC=${CCWS_HOST_ROOT}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}
+CXX=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
+CC=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}
 export CXX CC
 
 

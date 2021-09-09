@@ -1,0 +1,27 @@
+# see descriptions at https://lintian.debian.org/tags/
+
+# TODO we might want to strip binaries optionally
+unstripped-binary-or-object
+
+# we install to /opt and don't quite follow hier conventions, this is unlikely to change
+# "Each binary package has to include a plain file /usr/share/doc/pkg/copyright"
+# TODO add copyright to the package root
+dir-or-file-in-opt
+no-copyright-file
+debian-changelog-file-missing
+
+# TODO need to figure out proper dependencies, declared dependencies are not sufficient
+missing-dep-for-interpreter
+python-script-but-no-python-dep
+missing-dependency-on-libc
+
+# TODO we might want to add extended descriptions
+extended-description-is-empty
+
+# yes it does
+package-has-long-file-name
+
+# may be some day
+no-section-field
+no-priority-field
+

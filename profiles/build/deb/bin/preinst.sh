@@ -6,6 +6,7 @@ MESSAGE="${VENDOR}: Installing '${CCWS_PKG_FULL_NAME} / ${VERSION}'"
 
 cat > "${SCRIPT}" <<EOF
 #!/bin/sh
+set -e
 logger "${MESSAGE}"
 echo "${MESSAGE}"
 EOF

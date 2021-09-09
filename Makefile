@@ -128,6 +128,9 @@ wsctest:
 show_vendor_files:
 	@find ./profiles/*/vendor* ! -type d
 
+ccache_stats:
+	bash -c "${SETUP_SCRIPT}; ccache --show-stats"
+
 
 ##
 ## Package targets
@@ -135,6 +138,13 @@ show_vendor_files:
 
 assert_PKG_arg_must_be_specified:
 	test "${PKG}" != ""
+
+assert_AUTHOR_must_not_be_empty:
+	test "${AUTHOR}" != ""
+
+assert_EMAIL_must_not_be_empty:
+	test "${EMAIL}" != ""
+
 
 build_glob:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""

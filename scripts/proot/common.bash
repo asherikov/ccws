@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
 
-CCWS_PROOT_ARGS=""
-PATH="${CCWS_HOST_ROOT}/usr/bin:${PATH}"
-LD_LIBRARY_PATH=${CCWS_HOST_ROOT}/usr/lib:${LD_LIBRARY_PATH}
+# suppress annoying ld warnings
+CCWS_PROOT_ARGS="--bind='/dev/null:/etc/ld.so.preload'"
+
+PATH="${CCWS_BUILD_ROOTFS}/usr/bin:${PATH}"
+LD_LIBRARY_PATH=${CCWS_BUILD_ROOTFS}/usr/lib:${LD_LIBRARY_PATH}
 
 # non-native build
 if [ "${CCWS_TRIPLE_ARCH}" != "$(uname -m)" ]

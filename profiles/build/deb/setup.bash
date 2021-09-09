@@ -54,7 +54,11 @@ case "${CCWS_TRIPLE_ARCH}" in
     # architecture naming conventions are different
     aarch64) CCWS_DEB_ARCH=arm64;;
     x86_64) CCWS_DEB_ARCH=amd64;;
-
+    arm)
+        case "${CCWS_TRIPLE_ABI}" in
+            gnueabihf) CCWS_DEB_ARCH=armhf;;
+            *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
+        esac;;
     *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
 esac
 

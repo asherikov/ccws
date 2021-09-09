@@ -1,37 +1,25 @@
 #!/bin/bash
 source ${CCWS_PROOT_BIN}/common.bash
 
+set -e
+
 #echo ">>>>> CCWS rosdep wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
 # shellcheck disable=SC2086
-# -R: rosdep requires random device, network access, etc
-proot -R "${CCWS_SYSROOT}" \
-    --cwd="${WORKSPACE_DIR}" \
-    ${IFS# profile specific args} \
-    ${CCWS_PROOT_ARGS} \
-    ${IFS# rosdep stuff} \
-    --bind=/etc/ros/rosdep/ \
-    --bind=/usr/bin/rosdep \
-    ${IFS# suppress annoying ld warnings} \
-    --bind="/dev/null:/etc/ld.so.preload" \
-    ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
-    --bind=/bin/true \
-    --bind=/bin/false \
-    --bind=/bin/echo \
-    --bind=/bin/ls \
-    --bind=/bin/ln \
-    --bind=/bin/sh \
-    --bind=/bin/rm \
-    --bind=/bin/pwd \
-    --bind=/bin/bash \
-    --bind=/bin/uname \
-    --bind=/bin/mktemp \
-    --bind=/usr/bin/env \
-    --bind=/usr/bin/perl \
-    ${IFS# python bindings} \
-    $(find /usr/bin/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    $(find /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
-    "/usr/bin/rosdep" "$@"
+
+# detect OS and override rosdep autodection
+# http://wiki.ros.org/ROS/EnvironmentVariables#ROS_OS_OVERRIDE
+if [ -z "${ROS_OS_OVERRIDE}" ]
+then
+    ROS_OS_OVERRIDE=$(proot \
+        ${IFS# common args} \
+        ${CCWS_PROOT_ARGS} \
+        "/usr/bin/lsb_release" -rsci | paste -d ':' -s | tr '[:upper:]' '[:lower:]')
+    export ROS_OS_OVERRIDE
+fi
+
+/usr/bin/rosdep "$@"
+
 #echo "<<<<< CCWS rosdep wrapper <<<<<<"
 #exit 1

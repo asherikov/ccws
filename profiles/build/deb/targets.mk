@@ -18,14 +18,15 @@ private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	cat ${WORKSPACE_DIR}/build/version_hash/${PKG} \
 		| sed -e 's/^/${CCWS_BUILD_TIME}_${ROS_DISTRO}_/' > "${CCWS_DEB_INFO_DIR}/version.txt"
 
-private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_deb_info
+private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_deb_info assert_AUTHOR_must_not_be_empty assert_EMAIL_must_not_be_empty
 	mkdir -p "${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN"
+	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
-	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' | xargs --no-run-if-empty rm
+	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' -or -iname '__pycache__' | xargs --no-run-if-empty rm -Rf
 	${CCWS_BUILD_PROFILE_DIR}/bin/control.sh
 	${CCWS_BUILD_PROFILE_DIR}/bin/preinst.sh
 	${CCWS_BUILD_PROFILE_DIR}/bin/postinst.sh
-	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "install/${CCWS_PKG_FULL_NAME}.deb"
+	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
@@ -35,11 +36,14 @@ private_deb_version_hash: assert_PKG_arg_must_be_specified
 	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
 
-# see https://lintian.debian.org/tags/
 private_deb_lint: assert_PKG_arg_must_be_specified
-	lintian "install/${CCWS_PKG_FULL_NAME}.deb"
+	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 deb_build: assert_BASE_BUILD_PROFILE_must_exist
 	${MAKE} wswraptarget TARGET="private_deb_build" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
 	${MAKE} wswraptarget TARGET="private_deb_pack" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
+
+
+bprof_deb_install_build: bprof_common_install_build
+	sudo ${APT_INSTALL} dpkg lintian
 

@@ -21,7 +21,9 @@ test:
 	${MAKE} wsupdate
 	${MAKE} bprof_install_host PKG=staticoma
 	${MAKE} bprof_install_host
+	${MAKE} bprof_install_build BUILD_PROFILE=deb
 	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
+	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./

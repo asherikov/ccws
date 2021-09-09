@@ -63,8 +63,8 @@ then
     export CCWS_SYSROOT CCWS_CHROOT
 
     # host root in emulation
-    CCWS_HOST_ROOT=/host-rootfs/
-    export CCWS_HOST_ROOT
+    CCWS_BUILD_ROOTFS=/host-rootfs/
+    export CCWS_BUILD_ROOTFS
 
     PATH=${CCWS_PROOT_BIN}:/bin:${PATH}
     export PATH
@@ -165,7 +165,8 @@ fi
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
 CCACHE_DIR=${WORKSPACE_DIR}/.ccache
 CCACHE_BASEDIR="/opt/"
-export CCACHE_DIR CCACHE_BASEDIR
+CCACHE_MAXSIZE=8G
+export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE
 
 
 ##########################################################################################

@@ -14,8 +14,6 @@ proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# installation paths} \
     --bind="${CCWS_INSTALL_DIR_BUILD}:${CCWS_INSTALL_DIR_HOST}" \
     --bind=/lib/udev/rules.d \
-    ${IFS# suppress annoying ld warnings} \
-    --bind="/dev/null:/etc/ld.so.preload" \
     ${IFS# bind mounting of /bin/ breaks stuff for some reason} \
     --bind=/bin/true \
     --bind=/bin/false \
@@ -31,6 +29,7 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/env \
     --bind=/usr/bin/perl \
     --bind=/usr/bin/make \
+    --bind=/usr/bin/ccache \
     ${IFS# python bindings (only if the same ROS distro is installed on the build system)} \
     $(test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# cmake bindings} \

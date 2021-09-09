@@ -11,5 +11,7 @@ test:
 	${MAKE} cross_mount
 	${MAKE} staticoma
 	${MAKE} wsclean
+	${MAKE} bprof_install_build BUILD_PROFILE=deb
 	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=${BUILD_PROFILE}
+	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=${BUILD_PROFILE}
 	${MAKE} cross_umount
