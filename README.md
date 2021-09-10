@@ -21,8 +21,7 @@ environment for developers. Note, however, that `CCWS` is not really meant to
 be a ready to use solution, but rather a basis for development of a
 vendor-specific workflow.
 
-`CCWS` is in an alpha stage of development and has not been tested with ROS2
-yet, but is not conceptually limited to ROS1.
+`CCWS` is meant to be ROS version agnostic, but is mainly tested with ROS1.
 
 
 Features

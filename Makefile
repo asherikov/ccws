@@ -71,7 +71,8 @@ wslist:
 	@${CMD_PKG_NAME_LIST}
 
 # Reset & initialize workspace
-wsinit: wspurge
+wsinit: 
+	test ! -f src/.rosinstall
 	mkdir -p src
 	cd src; wstool init
 	cd src; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
@@ -209,6 +210,12 @@ new: assert_PKG_arg_must_be_specified
 	find src/${PKG} -type f | xargs sed -i "s/@@AUTHOR@@/${AUTHOR}/g"
 	find src/${PKG} -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
 	find src/${PKG} -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
+
+add:
+	test -f src/.rosinstall || ${MAKE} wsinit
+	cd src; bash -c "\
+		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
+		wstool set \$${DIR} --git ${REPO} --version-new=${VERSION} --confirm --update"
 
 
 ##

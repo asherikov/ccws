@@ -2,6 +2,7 @@ THIS_MAKEFILE=.ccws/test_main.mk
 
 test:
 	# package & profile creation
+	${MAKE} wspurge
 	${MAKE} bprof_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
 	${MAKE} bprof_install_build BUILD_PROFILE=test_profile
 	${MAKE} wsinit

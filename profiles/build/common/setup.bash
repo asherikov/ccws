@@ -92,7 +92,7 @@ then
     # CCWS_SYSROOT is empty in native builds and nonempty builds, so we are checking the host
     if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
     then
-        ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -print0 -type d | xargs --no-run-if-empty -0 basename | sort | tail -n 1 | sed 's=/==g')
+        ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1 | xargs basename | sed 's=/==g')
     fi
 
     # pick default based on the OS version
@@ -111,6 +111,7 @@ if [ -z "${ROS_DISTRO}" ]
 then
     echo "Could not determine ROS_DISTRO" >&2
 else
+    echo "Selected ROS distro: '${ROS_DISTRO}'"
     export ROS_DISTRO
 fi
 

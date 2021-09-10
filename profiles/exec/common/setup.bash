@@ -18,7 +18,10 @@ fi
 
 # TODO is this still necessary?
 # sometimes packages cannot be located, this should fix such issues
-rospack profile
+if command -p rospack 
+then
+    rospack profile
+fi
 
 
 ##########################################################################################
