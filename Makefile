@@ -165,7 +165,7 @@ private_build: assert_PKG_arg_must_be_specified
 		--merge-install \
 		--executor sequential \
 		--base-paths ${WORKSPACE_DIR}/src/ \
-		--build-base build/${BUILD_PROFILE} \
+		--build-base "${CCWS_BUILD_DIR}" \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
 		--packages-up-to ${PKG}
@@ -180,7 +180,7 @@ test: assert_PKG_arg_must_be_specified
 		--merge-install \
 		--executor sequential \
 		--ctest-args --output-on-failure -j ${JOBS} \
-		--build-base build/${BUILD_PROFILE} \
+		--build-base ${CCWS_BUILD_DIR} \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
 		--test-result-base build/log/${BUILD_PROFILE}/testing \
@@ -190,14 +190,14 @@ test: assert_PKG_arg_must_be_specified
 ctest: assert_PKG_arg_must_be_specified
 	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
-		cd build/${BUILD_PROFILE}/${PKG}; \
+		cd ${CCWS_BUILD_DIR}/${PKG}; \
 		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log\" -j ${JOBS} )"
 	${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
-	colcon --log-base /dev/null test-result --all --test-result-base ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/${PKG}
-	#bash -c "${SETUP_SCRIPT}; catkin_test_results ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/${PKG}"
+	bash -c "${SETUP_SCRIPT}; colcon --log-base /dev/null test-result --all --test-result-base \$${CCWS_BUILD_DIR}/${PKG}"
+	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
 
 
 new: assert_PKG_arg_must_be_specified

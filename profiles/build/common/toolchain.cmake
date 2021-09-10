@@ -36,7 +36,10 @@ set(CCWS_CXX_FLAGS_COMMON "-std=c++14 -fPIC -fstack-protector-strong" CACHE STRI
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 
-add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
+# 1. it is generally a bad idea to depend on a build profile in the code
+# 2. this may lead to unnecessary cache misses during compilation (ccache)
+# 3. if necessary this define can be added for a specific package
+#add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
 
 # -flto
 # performance gain seems to be marginal in general, but the main limiting

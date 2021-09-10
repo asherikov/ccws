@@ -18,7 +18,9 @@ bprof_cross_jetson_xavier_install_host:
        	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
 	        | sudo chroot ./ apt-key add -; \
 		sudo chroot ./ /bin/sh -c \
-			'apt remove --yes libopencv-dev; \
+			'apt update; \
+			apt upgrade --yes; \
+			apt remove --yes libopencv-dev; \
 			${APT_INSTALL} ca-certificates; \
 			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
 			apt clean; '"
@@ -29,4 +31,4 @@ cross_jetson_xavier_mount:
 	${MAKE} cross_umount BUILD_PROFILE=cross_jetson_xavier
 	sudo bash -c "${SETUP_SCRIPT_cross_jetson_xavier}; \
 		DEVICE=\$$(${CROSS_SETUP_LOOP_DEV}); \
-		${MAKE} cross_sysroot_mount DEVICE=\$${DEVICE}; "
+		${MAKE} private_cross_mount DEVICE=\$${DEVICE}; "

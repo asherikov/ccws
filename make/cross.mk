@@ -9,12 +9,12 @@ cross_sysroot_fix_abs_symlinks:
 		find ./usr -lname '/*' -printf 'sudo ln --relative --symbolic --force ./%l %p\n' | /bin/sh"
 
 # internal target, should be called with initialized environment
-cross_sysroot_mount:
-	mkdir -p "$${CCWS_SYSROOT}"
-	mount "${DEVICE}" "$${CCWS_SYSROOT}"
-	mount --bind /etc/resolv.conf "$${CCWS_SYSROOT}/etc/resolv.conf"
-	mount --bind /dev "$${CCWS_SYSROOT}/dev"
-	-mount --bind /dev/null "$${CCWS_SYSROOT}/etc/ld.so.preload"
+private_cross_mount:
+	mkdir -p "${CCWS_SYSROOT}"
+	mount "${DEVICE}" "${CCWS_SYSROOT}"
+	mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf"
+	mount --bind /dev "${CCWS_SYSROOT}/dev"
+	mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
 
 cross_mount:
 	# may be different depending on profile

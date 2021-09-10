@@ -50,7 +50,7 @@ cross_raspberry_pi_mount:
 	${MAKE} cross_umount BUILD_PROFILE=cross_raspberry_pi
 	sudo bash -c "${SETUP_SCRIPT_cross_raspberry_pi}; \
 		DEVICE=\$$(${CROSS_SETUP_LOOP_DEV}); \
-		${MAKE} cross_sysroot_mount DEVICE=\$${DEVICE}p2; "
+		${MAKE} private_cross_mount DEVICE=\$${DEVICE}p2; "
 
 cross_raspberry_pi_purge:
 	${MAKE} cross_umount BUILD_PROFILE=cross_raspberry_pi

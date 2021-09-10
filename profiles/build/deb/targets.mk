@@ -4,7 +4,7 @@ DEB_SETUP_SCRIPT=${SETUP_SCRIPT} ${BASE_BUILD_PROFILE}
 deb_%:
 	${MAKE} wswraptarget TARGET="private_$@" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
 
-private_deb_build:
+private_deb_compile:
 	${MAKE} private_build
 	# TODO optionally copy other execution profiles
 	cp -r "${EXEC_PROFILES_DIR}/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
@@ -26,6 +26,7 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	${CCWS_BUILD_PROFILE_DIR}/bin/control.sh
 	${CCWS_BUILD_PROFILE_DIR}/bin/preinst.sh
 	${CCWS_BUILD_PROFILE_DIR}/bin/postinst.sh
+	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
@@ -40,9 +41,8 @@ private_deb_lint: assert_PKG_arg_must_be_specified
 	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 deb_build: assert_BASE_BUILD_PROFILE_must_exist
-	${MAKE} wswraptarget TARGET="private_deb_build" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
-	${MAKE} wswraptarget TARGET="private_deb_pack" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
-
+	${MAKE} deb_compile
+	${MAKE} deb_pack
 
 bprof_deb_install_build: bprof_common_install_build
 	sudo ${APT_INSTALL} dpkg lintian

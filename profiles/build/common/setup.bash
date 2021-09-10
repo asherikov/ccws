@@ -222,3 +222,7 @@ export MAKEFLAGS
 
 umask u=rwx,g=rx,o=rx
 
+# prevent apt from being interactive
+DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND
+

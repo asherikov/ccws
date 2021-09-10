@@ -2,7 +2,7 @@
 SETUP_SCRIPT_cross_jetson_nano=source ${BUILD_PROFILES_DIR}/cross_jetson_nano/setup.bash
 
 # assuming ubuntu 18.04
-brof_cross_jetson_nano_install_build: cross_common_install_build bprof_common_install_build
+bprof_cross_jetson_nano_install_build: cross_common_install_build bprof_common_install_build
 	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
 	sudo apt update
 	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
@@ -31,4 +31,4 @@ cross_jetson_nano_mount:
 	${MAKE} cross_umount BUILD_PROFILE=cross_jetson_nano
 	sudo bash -c "${SETUP_SCRIPT_cross_jetson_nano}; \
 		DEVICE=\$$(${CROSS_SETUP_LOOP_DEV}); \
-		${MAKE} cross_sysroot_mount DEVICE=\$${DEVICE}; "
+		${MAKE} private_cross_mount DEVICE=\$${DEVICE}; "
