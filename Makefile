@@ -71,7 +71,7 @@ wslist:
 	@${CMD_PKG_NAME_LIST}
 
 # Reset & initialize workspace
-wsinit: 
+wsinit:
 	test ! -f src/.rosinstall
 	mkdir -p src
 	cd src; wstool init
@@ -161,7 +161,7 @@ private_build: assert_PKG_arg_must_be_specified
 	mkdir -p "${CCWS_BUILD_DIR}"
 	# override make flags to enable multithreaded builds
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
-		--log-base build/log/${BUILD_PROFILE} \
+		--log-base ${CCWS_LOG_DIR} \
 		build \
 		--merge-install \
 		--executor sequential \
@@ -176,7 +176,7 @@ private_build: assert_PKG_arg_must_be_specified
 test: assert_PKG_arg_must_be_specified
 	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		colcon \
-		--log-base build/log/${BUILD_PROFILE} \
+		--log-base \$${CCWS_LOG_DIR} \
 		test \
 		--merge-install \
 		--executor sequential \
@@ -184,7 +184,7 @@ test: assert_PKG_arg_must_be_specified
 		--build-base \"\$${CCWS_BUILD_DIR}\" \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
-		--test-result-base build/log/${BUILD_PROFILE}/testing \
+		--test-result-base \$${CCWS_LOG_DIR}/testing \
 		--packages-select ${PKG} )"
 	${MAKE} showtestresults
 

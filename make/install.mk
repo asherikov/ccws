@@ -33,26 +33,23 @@ install_ccws_deps_focal:
 	${APT_INSTALL} python3-rosinstall python3-wstool
 
 
-bprof_install_build:
-	${MAKE} bprof_${BUILD_PROFILE}_install_build
+bp_install_build:
+	${MAKE} bp_${BUILD_PROFILE}_install_build
 
-bprof_%_install_build: assert_BUILD_PROFILE_must_exist bprof_common_install_build
+bp_%_install_build: assert_BUILD_PROFILE_must_exist bp_common_install_build
 	# placeholder target
 
-bprof_install_host:
-	${MAKE} bprof_${BUILD_PROFILE}_install_host
+bp_install_host:
+	${MAKE} bp_${BUILD_PROFILE}_install_host
 
-bprof_%_install_host:
+bp_%_install_host:
 	${MAKE} dep_install
 
-eprof_install:
-	${MAKE} eprof_${EXEC_PROFILE}_install
+ep_install:
+	${MAKE} ep_${EXEC_PROFILE}_install
 
-eprof_%_install:
+ep_%_install:
 	${MAKE} dep_install
 
 download:
-	bash -c "${SETUP_SCRIPT}; \
-		mkdir -p \"\$${CCWS_BUILD_DIR}\"; \
-		cd \"\$${CCWS_BUILD_DIR}\"; \
-		wget --progress=dot:giga --timestamping --no-check-certificate ${FILES};"
+	cd ${WORKSPACE_DIR}/cache; wget --progress=dot:giga --timestamping --no-check-certificate ${FILES}

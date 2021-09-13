@@ -44,6 +44,6 @@ deb_build: assert_BASE_BUILD_PROFILE_must_exist
 	${MAKE} deb_compile
 	${MAKE} deb_pack
 
-bprof_deb_install_build: bprof_common_install_build
+bp_deb_install_build: bp_common_install_build
 	sudo ${APT_INSTALL} dpkg lintian
 

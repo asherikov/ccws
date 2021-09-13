@@ -1,4 +1,4 @@
-bprof_doxygen_install_build: bprof_common_install_build
+bp_doxygen_install_build: bp_common_install_build
 	sudo ${APT_INSTALL} doxygen graphviz
 
 doxclean:

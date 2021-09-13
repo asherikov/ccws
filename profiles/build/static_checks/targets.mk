@@ -1,18 +1,18 @@
-bprof_static_checks_install_build: bprof_common_install_build
+bp_static_checks_install_build: bp_common_install_build
 	#pip3 install cpplint
 	sudo ${APT_INSTALL} \
 		cppcheck \
 		flawfinder \
 		yamllint \
 		shellcheck
-	sudo ${MAKE} bprof_static_checks_install_build_${OS_DISTRO_BUILD}
+	sudo ${MAKE} bp_static_checks_install_build_${OS_DISTRO_BUILD}
 
 #ubuntu18
-bprof_static_checks_install_build_bionic:
+bp_static_checks_install_build_bionic:
 	${APT_INSTALL} python-catkin-lint
 
 #ubuntu20
-bprof_static_checks_install_build_focal:
+bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
 

@@ -17,10 +17,10 @@ wspurge: wsclean
 wsclean_build:
 	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
-purge: clean
-	${MAKE} ${BUILD_PROFILE}_purge
+bp_purge:
+	${MAKE} bp_${BUILD_PROFILE}_purge
 
-%_purge: assert_BUILD_PROFILE_must_exist
+bp_%_purge: assert_BUILD_PROFILE_must_exist
 	# placeholder target
 
 clean:
