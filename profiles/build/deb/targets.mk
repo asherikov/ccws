@@ -38,6 +38,7 @@ private_deb_version_hash: assert_PKG_arg_must_be_specified
 	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
 
 private_deb_lint: assert_PKG_arg_must_be_specified
+	test -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 deb_build: assert_BASE_BUILD_PROFILE_must_exist
