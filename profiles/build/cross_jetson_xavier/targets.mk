@@ -30,3 +30,7 @@ bp_cross_jetson_xavier_install_host: assert_BUILD_PROFILE_must_be_cross_jetson_x
 bp_cross_jetson_xavier_mount: assert_BUILD_PROFILE_must_be_cross_jetson_xavier
 	${MAKE} cross_umount
 	sudo ${MAKE} wswraptarget TARGET=private_cross_mount BUILD_PROFILE=${BUILD_PROFILE}
+
+bp_cross_jetson_xavier_build: private_cross_build
+	# redirection
+

@@ -14,6 +14,11 @@ private_cross_mount:
 	mount --bind /dev "${CCWS_SYSROOT}/dev"
 	mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
 
+private_cross_build:
+	${MAKE} cross_mount
+	${MAKE} private_build
+	${MAKE} cross_umount
+
 cross_mount:
 	# implementation is profile specific
 	${MAKE} bp_${BUILD_PROFILE}_mount

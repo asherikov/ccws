@@ -7,7 +7,7 @@ set -o pipefail
 
 ##########################################################################################
 BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
-BASE_BUILD_PROFILE=${BASE_BUILD_PROFILE:-"$1"}
+BASE_BUILD_PROFILE=${1:-"$BASE_BUILD_PROFILE"}
 if [ -z "${BASE_BUILD_PROFILE}" ]
 then
     echo "Build profile cannot be chosen automatically for 'deb' mixin, make sure BASE_BUILD_PROFILE is set."

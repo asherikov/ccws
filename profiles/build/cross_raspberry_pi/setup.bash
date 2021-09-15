@@ -15,8 +15,7 @@ CCWS_TRIPLE_SYS=linux
 CCWS_TRIPLE_ABI=gnueabihf
 
 # setup common
-BASE_BUILD_PROFILE=${1:-"common"}
-source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:2}" ""
+source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 
 
 ROS_OS_OVERRIDE=debian:10:buster

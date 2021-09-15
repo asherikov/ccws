@@ -1,4 +1,4 @@
-APT_INSTALL?=apt --yes --no-install-recommends install
+APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
 
 install_ccws_deps:
 	${APT_INSTALL} wget

@@ -62,3 +62,7 @@ bp_cross_raspberry_pi_purge: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	bash -c "${SETUP_SCRIPT}; \
 		rm -Rf \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\"; \
 		rm -Rf \"\$${CCWS_BUILD_PROFILE_DIR}/cross-pi-gcc\" "
+
+bp_cross_raspberry_pi_build: private_cross_build
+	# redirection
+

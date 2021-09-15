@@ -5,7 +5,7 @@ deb_%:
 	${MAKE} wswraptarget TARGET="private_$@" SETUP_SCRIPT="${DEB_SETUP_SCRIPT}"
 
 private_deb_compile:
-	${MAKE} private_build
+	${MAKE} bp_${BASE_BUILD_PROFILE}_build BUILD_PROFILE=${BASE_BUILD_PROFILE}
 	# TODO optionally copy other execution profiles
 	cp -r "${EXEC_PROFILES_DIR}/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
 	test ! -f "${EXEC_PROFILES_DIR}/vendor/setup.bash" || cat "${EXEC_PROFILES_DIR}/vendor/setup.bash" >> "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"

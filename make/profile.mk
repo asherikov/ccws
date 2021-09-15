@@ -1,5 +1,3 @@
-BASE_BUILD_PROFILE?=common
-
 assert_BUILD_PROFILE_must_exist:
 	test -f "${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash"
 
