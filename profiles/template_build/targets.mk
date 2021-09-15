@@ -4,6 +4,6 @@ bp_@@BUILD_PROFILE@@_install_build: bp_@@BASE_BUILD_PROFILE@@_install_build
 bp_@@BUILD_PROFILE@@_install_host: bp_@@BASE_BUILD_PROFILE@@_install_host
 	# redirection
 
-@@BUILD_PROFILE@@_build: @@BASE_BUILD_PROFILE@@_build
+bp_@@BUILD_PROFILE@@_build: bp_@@BASE_BUILD_PROFILE@@_build
 	# redirection
 

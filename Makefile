@@ -151,10 +151,10 @@ build_glob:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""
 
 build: assert_BUILD_PROFILE_must_exist
-	${MAKE} "${BUILD_PROFILE}_build"
+	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_build
 
-%_build:
-	${MAKE} wswraptarget TARGET=private_build
+bp_%_build: private_build
+	# skip to default
 
 # --log-level DEBUG
 private_build: assert_PKG_arg_must_be_specified

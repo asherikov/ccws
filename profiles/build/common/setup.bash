@@ -166,9 +166,12 @@ fi
 #
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
 CCACHE_DIR=${CCACHE_DIR:-"${WORKSPACE_DIR}/cache/ccache"}
-CCACHE_BASEDIR="/opt/"
+# should help with absolute include paths
+CCACHE_BASEDIR="${CCWS_INSTALL_DIR_HOST}"
+# TODO can mess up debug info paths, needs testing
+CCACHE_NOHASHDIR="YES"
 CCACHE_MAXSIZE=${CCACHE_MAXSIZE:-"8G"}
-export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE
+export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE CCACHE_NOHASHDIR
 
 
 ##########################################################################################

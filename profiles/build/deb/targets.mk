@@ -41,9 +41,9 @@ private_deb_lint: assert_PKG_arg_must_be_specified
 	test -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
-deb_build: assert_BASE_BUILD_PROFILE_must_exist
-	${MAKE} deb_compile
-	${MAKE} deb_pack
+bp_deb_build: assert_BASE_BUILD_PROFILE_must_exist
+	${MAKE} private_deb_compile
+	${MAKE} private_deb_pack
 
 bp_deb_install_build: bp_common_install_build
 	sudo ${APT_INSTALL} dpkg lintian

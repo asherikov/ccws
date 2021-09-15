@@ -16,7 +16,7 @@ bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
 
-static_checks_build:
+bp_static_checks_build:
 	${MAKE} cppcheck
 	${MAKE} catkin_lint
 	${MAKE} yamllint

@@ -6,7 +6,7 @@ doxclean:
 		&& rm -Rf \$${CCWS_DOXYGEN_OUTPUT_DIR}/doxygen \
 		&& rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}"
 
-doxygen_build:
+bp_doxygen_build:
 	test "${PKG}" = "" || ${MAKE} dox
 	test "${PKG}" != "" || ${MAKE} doxall
 

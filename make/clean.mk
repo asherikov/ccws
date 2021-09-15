@@ -18,11 +18,15 @@ wsclean_build:
 	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
 bp_purge:
-	${MAKE} bp_${BUILD_PROFILE}_purge
+	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_purge
 
 bp_%_purge: assert_BUILD_PROFILE_must_exist
 	# placeholder target
 
-clean:
+bp_clean:
+	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_clean
+
+bp_%_clean: assert_BUILD_PROFILE_must_exist
 	rm -Rf "build/${BUILD_PROFILE}"
 	rm -Rf "install/${BUILD_PROFILE}"
+
