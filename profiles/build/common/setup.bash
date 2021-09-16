@@ -197,7 +197,11 @@ SOURCE_SCRIPT="/opt/ros/${ROS_DISTRO}/setup.bash"
 if [ -f "${SOURCE_SCRIPT}" ];
 then
     source "${SOURCE_SCRIPT}"
+
+    CCWS_EXTRA_SOURCE_SCRIPTS="${SOURCE_SCRIPT}"
+    export CCWS_EXTRA_SOURCE_SCRIPTS
 fi
+
 
 # built packages
 SOURCE_SCRIPT="${CCWS_INSTALL_DIR_BUILD}/local_setup.bash"

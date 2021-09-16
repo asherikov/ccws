@@ -86,3 +86,5 @@ then
     export CCWS_SYSROOT
 fi
 
+CCWS_SOURCE_SCRIPT="${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
+export CCWS_SOURCE_SCRIPT

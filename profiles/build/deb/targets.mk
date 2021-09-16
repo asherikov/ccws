@@ -6,9 +6,13 @@ deb_%:
 
 private_deb_compile:
 	${MAKE} bp_${BASE_BUILD_PROFILE}_build BUILD_PROFILE=${BASE_BUILD_PROFILE}
-	# TODO optionally copy other execution profiles
-	cp -r "${EXEC_PROFILES_DIR}/common/setup.bash" "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
-	test ! -f "${EXEC_PROFILES_DIR}/vendor/setup.bash" || cat "${EXEC_PROFILES_DIR}/vendor/setup.bash" >> "${CCWS_INSTALL_DIR_BUILD}/${VENDOR}_setup.bash"
+	echo "#!/bin/bash -x"                                                           >  "${CCWS_SOURCE_SCRIPT}"
+	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               >> "${CCWS_SOURCE_SCRIPT}"
+	cat "${EXEC_PROFILES_DIR}/common/setup.bash" | grep -v "^#!"                    >> "${CCWS_SOURCE_SCRIPT}"
+	test "${EXEC_PROFILE}" = "" || echo "${EXEC_PROFILE}" \
+		| sed -e "s/^ *//"  -e "s/ *$$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" \
+		| xargs --no-run-if-empty -I {} cat "${EXEC_PROFILES_DIR}/{}/setup.bash" | grep -v "^#!" >> "${CCWS_SOURCE_SCRIPT}"
+	test ! -f "${EXEC_PROFILES_DIR}/vendor/setup.bash" || cat "${EXEC_PROFILES_DIR}/vendor/setup.bash" | grep -v "^#!" >> "${CCWS_SOURCE_SCRIPT}"
 
 private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"

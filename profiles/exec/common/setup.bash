@@ -5,20 +5,36 @@
 # source scripts
 #
 
+CCWS_SETUP="${BASH_SOURCE[0]}"
+export CCWS_SETUP
+
 if [ -n "${CCWS_INSTALL_DIR_BUILD}" ]
 then
     COLCON_CURRENT_PREFIX=${CCWS_INSTALL_DIR_BUILD}
 else
-    COLCON_CURRENT_PREFIX=$(dirname "${BASH_SOURCE[0]}")
+    COLCON_CURRENT_PREFIX=$(dirname "${CCWS_SETUP}")
 fi
 if [ -f "${COLCON_CURRENT_PREFIX}/local_setup.sh" ]
 then
+    for SETUP_SCRIPT in ${CCWS_EXTRA_SOURCE_SCRIPTS};
+    do
+        if [ -f "${SETUP_SCRIPT}" ]
+        then
+            source "${SETUP_SCRIPT}";
+            if [ -t 0 ];
+            then
+                # ignore errors to prevent session termination if interactive
+                set +e
+            fi
+        fi
+    done
+
     source "${COLCON_CURRENT_PREFIX}/local_setup.sh"
 fi
 
 # TODO is this still necessary?
 # sometimes packages cannot be located, this should fix such issues
-if command -p rospack 
+if type rospack > /dev/null;
 then
     rospack profile
 fi
