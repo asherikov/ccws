@@ -1,21 +1,18 @@
 # Clean workspace
 wsclean:
-	find ${WORKSPACE_DIR}/artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
 	rm -Rf build*
 	rm -Rf devel*
 	rm -Rf install*
 	rm -Rf log*
 	rm -Rf src/.rosinstall.bak
 
+artifacts_clean:
+	find ${WORKSPACE_DIR}/artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
 
 # Purge workspace
-wspurge: wsclean
+wspurge: wsclean artifacts_clean
 	rm -Rf src
 	rm -Rf "${BUILD_PROFILES_DIR}/*/rosdep"
-
-
-wsclean_build:
-	bash -c "${SETUP_SCRIPT}; rm -Rf \"\$${CCWS_BUILD_DIR}\""
 
 bp_purge:
 	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_purge

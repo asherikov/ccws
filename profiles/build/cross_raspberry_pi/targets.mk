@@ -2,7 +2,6 @@ assert_BUILD_PROFILE_must_be_cross_raspberry_pi:
 	test "${BUILD_PROFILE}" = "cross_raspberry_pi"
 
 bp_cross_raspberry_pi_install_build: cross_common_install_build bp_cross_raspberry_pi_purge bp_common_install_build
-	${MAKE} wsclean_build
 	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler bp_cross_raspberry_pi_install_build_image
 
 bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
