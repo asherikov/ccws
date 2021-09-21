@@ -52,7 +52,7 @@ fi
 
 if [ -z "${CCWS_ARTIFACTS_DIR}" ]
 then
-    CCWS_ARTIFACTS_ROOT_DIR="/media/artifacts/$(hostname)/"
+    CCWS_ARTIFACTS_ROOT_DIR="${HOME}/ccws/artifacts/"
     export CCWS_ARTIFACTS_ROOT_DIR
 
     CCWS_ARTIFACTS_DIR="${CCWS_ARTIFACTS_ROOT_DIR}/$(date '+%Y_%m_%d')"
