@@ -32,5 +32,33 @@ cross_umount:
 	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
 
 cross_common_install_build:
-	sudo ${APT_INSTALL} qemu-user qemu-user-static
+	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
 	sudo service binfmt-support restart
+
+# ubuntu 18.04
+cross_jetson_install_build_bionic:
+	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+	${MAKE} download FILES="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
+	sudo dpkg -i ${WORKSPACE_DIR}/cache/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+	sudo apt update
+	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
+
+cross_jetson_install_host_bionic:
+	# 1. copy qemu in order to be able to do chroot
+	# 2. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
+	#    see `apt-cache policy libopencv-dev`
+	${MAKE} cross_mount
+	-bash -c "${SETUP_SCRIPT}; \
+		cd \"\$${CCWS_SYSROOT}\"; \
+		sudo cp /usr/bin/qemu-aarch64-static ./usr/bin/; \
+		wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
+	        | sudo chroot ./ apt-key add -; \
+		sudo chroot ./ /bin/sh -c \
+			'apt update; \
+			apt upgrade --yes; \
+			apt remove --yes libopencv-dev; \
+			${APT_INSTALL} ca-certificates; \
+			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
+			apt clean; '"
+	-${MAKE} dep_install
+	${MAKE} cross_umount
