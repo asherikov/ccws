@@ -22,6 +22,8 @@ be a ready to use solution, but rather a basis for development of a
 vendor-specific workflow.
 
 `CCWS` is meant to be ROS version agnostic, but is mainly tested with ROS1.
+There are also some technical issues wth ROS2 packages that must be resolved,
+e.g., https://github.com/ament/google_benchmark_vendor/issues/17.
 
 
 Features
@@ -110,7 +112,7 @@ no other execution profiles are specified.
 Dependencies
 ------------
 
-Dependencies can be installed using `make bprof_install_build
+Dependencies can be installed using `make bp_install_build
 BUILD_PROFILE=<profile>`, which is going to install the following tools and
 profile specific dependencies:
 - `colcon`
@@ -134,7 +136,7 @@ Initial setup
 - Override developer and vendor specific parameters by adding them to
   `make/config.mk`, available parameters can be found in the top section of
   `Makefile`.
-- Install dependencies using `make bprof_install_build BUILD_PROFILE=<profile>`
+- Install dependencies using `make bp_install_build BUILD_PROFILE=<profile>`
   targets, cross compilation profiles would require some extra steps as
   described below.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
@@ -177,17 +179,17 @@ Debian package generation
 
 ### Overview
 
-`ccws` takes a somewhat uncommon approach to binary package generation which is
+`CCWS` takes a somewhat uncommon approach to binary package generation which is
 a middle ground between traditional ROS (1 package = 1 deb) and docker
 containers: all packages built in the workspace are packed together into a
-single debian 'superpackage'. Unlike `bloom` `ccws` generates binary packages
+single debian 'superpackage'. Unlike `bloom` `CCWS` generates binary packages
 directly instead of generating source packages first.
 
 Binary package generation is implemented as a build profile mixin that can be
 overlayed over an arbitrary build profile: `make <pkg> BUILD_PROFILE=deb
 BASE_BUILD_PROFILE=reldebug`.
 
-`ccws` approach has a number of advantages:
+`CCWS` approach has a number of advantages:
 
 - Binary compatibility issues are minimized compared to traditional ROS
   approach:
@@ -221,7 +223,7 @@ BASE_BUILD_PROFILE=reldebug`.
 
 Generally, it is necessary to install packages to the filesystem root during
 compilation in order to get all paths right in `catkin` `cmake` files and
-properly install system files. `ccws` avoids this using `proot` similarly to
+properly install system files. `CCWS` avoids this using `proot` similarly to
 cross-compilation profiles.
 
 
@@ -236,10 +238,13 @@ Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
 Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
 container.
 
-1. Install profile dependencies with `make bprof_install_build
+The general workflow is documented below, for more technical details see
+`doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`:
+
+1. Install profile dependencies with `make bp_install_build
    BUILD_PROFILE=<profile>`
 2. Obtain system image:
-    - `cross_raspberry_pi` -- `bprof_install_build` target automatically
+    - `cross_raspberry_pi` -- `bp_install_build` target automatically
       downloads standard image;
     - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
       these images automatically, you have to manualy copy system partition
@@ -247,27 +252,24 @@ container.
 3. Initialize source repositories:
     - `make wsinit REPOS="https://github.com/asherikov/staticoma.git"`
     - [when building all ROS packages] add ROS dependencies of all your
-      packages to the workspace `make wsdep_to_rosinstall ROS_DISTRO=melodic`,
+      packages to the workspace `make dep_to_repolist ROS_DISTRO=melodic`,
       or a specific package
-      `make dep_to_rosinstall PKG=<pkg> ROS_DISTRO=melodic`;
+      `make dep_to_repolist PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
-   image: `make bprof_install_host PKG=staticoma BUILD_PROFILE=<profile>`
+   image: `make bp_install_host PKG=staticoma BUILD_PROFILE=<profile>`
 5. Compile packages:
     - mount sysroot with `make cross_mount BUILD_PROFILE=<profile>`
     - build packages, e.g. `make staticoma BUILD_PROFILE=<profile>` or build and
       generate deb package `make deb PKG=staticoma BUILD_PROFILE=<profile>`
     - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
 
-See `doc/cross-compilation.md` for more technical details and
-`.ccws/test_cross.mk` for examples.
-
 
 Extending `CCWS`
 ================
 
 `CCWS` functionality can be extended in multiple ways:
-- by adding new build profiles, e.g., `make bprof_new
+- by adding new build profiles, e.g., `make bp_new
   BUILD_PROFILE=vendor_static_checks BASE_BUILD_PROFILE=static_checks`, all
   profiles starting with `vendor` prefix are ignored by git;
 - by adding execution profiles;
@@ -289,7 +291,7 @@ Related software
 - https://github.com/HesselM/rpicross_notes -- cross compilation for Raspberry
   Pi done in a different way.
 - https://github.com/ros-tooling/action-ros-ci -- `github` action that covers
-  some of `ccws` functionality.
+  some of `CCWS` functionality.
 
 
 TODO
