@@ -138,7 +138,9 @@ Initial setup
   `Makefile`.
 - Install dependencies using `make bp_install_build BUILD_PROFILE=<profile>`
   targets, cross compilation profiles would require some extra steps as
-  described below.
+  described below. In some minimalistic environments you may need to run
+  `./scripts/bootstrap.sh` before using `bp_install_build` target in order to
+  install `make` and other utils.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
 

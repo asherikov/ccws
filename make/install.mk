@@ -1,7 +1,7 @@
 APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
 
 install_ccws_deps:
-	${APT_INSTALL} wget
+	${APT_INSTALL} wget gnupg2
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	sh -c 'test -f /etc/apt/sources.list.d/ros-latest.list \
 		|| (echo "deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main" > /etc/apt/sources.list.d/ros-latest.list && apt update)'
