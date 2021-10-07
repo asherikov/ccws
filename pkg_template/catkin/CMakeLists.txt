@@ -207,6 +207,22 @@ include_directories(
 #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 #)
 
+# systemd units
+#if (DEFINED ENV{CCWS_SYSTEMD_UNIT_INSTALL_DIR})
+#    install(FILES
+#        ${CMAKE_CURRENT_LIST_DIR}/systemd/example.service
+#        DESTINATION $ENV{CCWS_SYSTEMD_UNIT_INSTALL_DIR}
+#    )
+#endif()
+
+# udev rules
+#if (DEFINED ENV{CCWS_UDEV_RULE_INSTALL_DIR})
+#    install(FILES
+#        ${CMAKE_CURRENT_LIST_DIR}/udev/99-example.rules
+#        DESTINATION $ENV{CCWS_UDEV_RULE_INSTALL_DIR}
+#    )
+#endif()
+
 
 #----------------------------------------------
 # Uncomment to enable tests.
