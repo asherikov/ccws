@@ -52,6 +52,7 @@ CCWS_CATKIN_LINT_EXCEPTIONS="\
 --ignore ambiguous_include_path \
 --ignore unknown_package \
 --ignore subproject \
---ignore duplicate_cmd"
+--ignore duplicate_cmd \
+--ignore env_var"
 export CCWS_CATKIN_LINT_EXCEPTIONS
 
