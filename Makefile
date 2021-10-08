@@ -197,7 +197,11 @@ ctest: assert_PKG_arg_must_be_specified
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
-	bash -c "${SETUP_SCRIPT}; colcon --log-base /dev/null test-result --all --test-result-base \$${CCWS_BUILD_DIR}/${PKG}"
+	bash -c "${SETUP_SCRIPT}; \
+		mkdir -p \$${CCWS_ARTIFACTS_DIR}/${PKG}/; \
+		cp -R \$${CCWS_BUILD_DIR}/${PKG}/Testing \$${CCWS_ARTIFACTS_DIR}/${PKG}/ || true; \
+		cp -R \$${CCWS_BUILD_DIR}/${PKG}/test_results \$${CCWS_ARTIFACTS_DIR}/${PKG}/ || true; \
+		colcon --log-base /dev/null test-result --all --test-result-base \$${CCWS_BUILD_DIR}/${PKG}"
 	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
 
 
