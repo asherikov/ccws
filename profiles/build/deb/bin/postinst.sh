@@ -7,6 +7,13 @@ MESSAGE="${VENDOR}: Installation of '${CCWS_PKG_FULL_NAME} / ${VERSION}' complet
 cat > "${SCRIPT}" <<EOF
 #!/bin/sh
 set -e
+
+for POSTINST in ${CCWS_INSTALL_DIR_HOST}/share/*/postinst/*.sh;
+do
+    echo "Running \${POSTINST}"
+    "\${POSTINST}"
+done
+
 logger "${MESSAGE}"
 echo "${MESSAGE}"
 EOF

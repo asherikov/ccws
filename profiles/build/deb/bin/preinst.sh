@@ -7,6 +7,13 @@ MESSAGE="${VENDOR}: Installing '${CCWS_PKG_FULL_NAME} / ${VERSION}'"
 cat > "${SCRIPT}" <<EOF
 #!/bin/sh
 set -e
+
+for PREINST in ${CCWS_INSTALL_DIR_HOST}/share/*/preinst/*.sh;
+do
+    echo "Running \${PREINST}"
+    "\${PREINST}"
+done
+
 logger "${MESSAGE}"
 echo "${MESSAGE}"
 EOF
