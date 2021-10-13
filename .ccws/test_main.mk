@@ -26,6 +26,8 @@ test:
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
+	sudo dpkg -i artifacts/*/*.deb
+	dpkg --get-selections | grep staticoma | cut -f 1 |  xargs sudo apt purge --yes
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./

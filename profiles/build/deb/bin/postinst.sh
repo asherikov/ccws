@@ -10,8 +10,11 @@ set -e
 
 for POSTINST in ${CCWS_INSTALL_DIR_HOST}/share/*/postinst/*.sh;
 do
-    echo "Running \${POSTINST}"
-    "\${POSTINST}"
+    if [ -f "\${POSTINST}" ]
+    then
+        echo "Running \${POSTINST}"
+        "\${POSTINST}"
+    fi
 done
 
 logger "${MESSAGE}"

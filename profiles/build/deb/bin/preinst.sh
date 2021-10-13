@@ -10,8 +10,11 @@ set -e
 
 for PREINST in ${CCWS_INSTALL_DIR_HOST}/share/*/preinst/*.sh;
 do
-    echo "Running \${PREINST}"
-    "\${PREINST}"
+    if [ -f "\${PREINST}" ]
+    then
+        echo "Running \${PREINST}"
+        "\${PREINST}"
+    fi
 done
 
 logger "${MESSAGE}"
