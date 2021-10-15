@@ -185,15 +185,15 @@ test: assert_PKG_arg_must_be_specified
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths ${WORKSPACE_DIR}/src/ \
 		--test-result-base \$${CCWS_LOG_DIR}/testing \
-		--packages-select ${PKG} )"
-	${MAKE} showtestresults
+		--packages-select ${PKG} )" \
+		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
 ctest: assert_PKG_arg_must_be_specified
 	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
 		cd \"\$${CCWS_BUILD_DIR}/${PKG}\"; \
-		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log\" -j ${JOBS} )"
-	${MAKE} showtestresults
+		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log\" -j ${JOBS} )" \
+		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
 showtestresults: assert_PKG_arg_must_be_specified
 	# shows fewer tests
