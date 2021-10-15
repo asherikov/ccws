@@ -41,6 +41,8 @@ export CCWS_SHELLCHECK_EXCEPTIONS
 # catkin lint
 #
 
+# env_var: does not allow using environment variables, which are useful in some cases
+# missing_directory: does not allow installation from CMAKE_BINARY_DIR, where generated files can be placed
 CCWS_CATKIN_LINT_EXCEPTIONS="\
 --ignore package_path_name \
 --ignore unsorted_list \
@@ -53,6 +55,7 @@ CCWS_CATKIN_LINT_EXCEPTIONS="\
 --ignore unknown_package \
 --ignore subproject \
 --ignore duplicate_cmd \
---ignore env_var"
+--ignore env_var \
+--ignore missing_directory"
 export CCWS_CATKIN_LINT_EXCEPTIONS
 
