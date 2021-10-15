@@ -94,7 +94,7 @@ wsscrape_all:
 
 # Update workspace & all packages
 wsupdate:
-	-git pull
+	-git pull --rebase
 	${MAKE} wsupdate_pkgs
 
 wsupdate_shallow:
