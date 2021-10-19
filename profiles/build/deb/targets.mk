@@ -30,9 +30,7 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
 	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' -or -iname '__pycache__' | xargs --no-run-if-empty rm -Rf
-	${CCWS_BUILD_PROFILE_DIR}/bin/control.sh
-	${CCWS_BUILD_PROFILE_DIR}/bin/preinst.sh
-	${CCWS_BUILD_PROFILE_DIR}/bin/postinst.sh
+	find "${CCWS_BUILD_PROFILE_DIR}/bin/" -iname "*.sh" | xargs -I {} sh {}
 	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
