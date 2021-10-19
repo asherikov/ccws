@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKSPACE_DIR=$(dirname "${BASH_SOURCE[0]}")
+WORKSPACE_DIR=$(dirname "${BASH_SOURCE[0]}" | xargs realpath)
 PROFILES_DIR="${WORKSPACE_DIR}/profiles/"
 
 if [ -z "${BUILD_PROFILE}" ];
