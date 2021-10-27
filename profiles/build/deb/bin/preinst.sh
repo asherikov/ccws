@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/preinst"
-VERSION=$(cat "${CCWS_DEB_INFO_DIR}/version.txt")
+VERSION=$(cat "${CCWS_DEB_INFO_DIR}/version_hash.txt")
 MESSAGE="${VENDOR}: Installing '${CCWS_PKG_FULL_NAME} / ${VERSION}'"
 
 cat > "${SCRIPT}" <<EOF
