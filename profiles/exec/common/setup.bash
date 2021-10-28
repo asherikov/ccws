@@ -77,6 +77,11 @@ export ROSCONSOLE_FORMAT
 ROS_HOSTNAME=localhost
 export ROS_HOSTNAME
 
+# enable line buffering -- useful when ROS output is piped to some log file (CI, system service)
+# http://wiki.ros.org/rosconsole#Force_line_buffering_for_ROS_logger
+ROSCONSOLE_STDOUT_LINE_BUFFERED=1
+export ROSCONSOLE_STDOUT_LINE_BUFFERED
+
 
 ##########################################################################################
 # python
