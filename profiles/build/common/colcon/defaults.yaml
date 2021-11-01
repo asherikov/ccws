@@ -2,11 +2,10 @@
     "test": {
         "abort-on-error": true,
         "return-code-on-test-failure": true,
-        "ctest-args": " --output-on-failure "
+        "ctest-args": " --output-on-failure ",
         "merge-install": true
     },
     "build": {
-        "symlink-install": true,
         "merge-install": true
     }
 }
