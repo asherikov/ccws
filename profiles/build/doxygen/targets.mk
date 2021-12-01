@@ -10,7 +10,10 @@ bp_doxygen_build:
 	test "${PKG}" = "" || ${MAKE} dox
 	test "${PKG}" != "" || ${MAKE} doxall
 
-doxall: doxclean
+assert_doxygen_installed:
+	type doxygen > /dev/null
+
+doxall: doxclean assert_doxygen_installed
 	bash -c "${SETUP_SCRIPT} \
         && ${CMD_PKG_NAME_LIST} | xargs -I {} bash -c '${MAKE} dox PKG={}' || true \
 		&& ${CMD_PKG_GRAPH} | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/graph.svg \
@@ -20,7 +23,7 @@ doxall: doxclean
         && cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.html >> \$${CCWS_DOXYGEN_OUTPUT_DIR}/index.html"
 
 # documentation for dependencies should be generated first for cross linking
-dox: assert_PKG_arg_must_be_specified
+dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
 	# generate Doxyfile
 	bash -c "${SETUP_SCRIPT} \
         && rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG} \
