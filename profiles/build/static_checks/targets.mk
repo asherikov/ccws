@@ -75,7 +75,7 @@ static_checks_generic_dir_filter:
 
 flawfinder:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find ${WORKSPACE_DIR}/src -iname '*.cpp' -or -iname '*.h' > ${WORKSPACE_DIR}/build/$@/input
+	find ${WORKSPACE_DIR}/src -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${WORKSPACE_DIR}/build/$@/input
 	bash -c " \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/shellcheck/input.filtered | xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
@@ -83,7 +83,7 @@ flawfinder:
 
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find ${WORKSPACE_DIR}/src -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
+	find ${WORKSPACE_DIR}/src -type f -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
 	bash -c "${SETUP_SCRIPT}; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} \
@@ -104,9 +104,9 @@ yamllint:
 shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		( find ${WORKSPACE_DIR}/profiles/ -maxdepth 3 -iname '*.sh' -or -iname '*.bash' \
-			&& find ${WORKSPACE_DIR}/scripts -iname '*.sh' -or -iname '*.bash' \
-			&& find ${WORKSPACE_DIR} -maxdepth 2 -iname '*.sh' -or -iname '*.bash' ) \
+		( find ${WORKSPACE_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
+			&& find ${WORKSPACE_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
+			&& find ${WORKSPACE_DIR} -maxdepth 2 -type f \( -iname '*.sh' -or -iname '*.bash' \) ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
