@@ -39,12 +39,6 @@ bp_install_build:
 bp_%_install_build: assert_BUILD_PROFILE_must_exist bp_common_install_build
 	# placeholder target
 
-bp_install_host:
-	${MAKE} bp_${BUILD_PROFILE}_install_host
-
-bp_%_install_host:
-	${MAKE} dep_install
-
 ep_install:
 	${MAKE} ep_${EXEC_PROFILE}_install
 

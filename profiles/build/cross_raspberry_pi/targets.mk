@@ -2,7 +2,7 @@ assert_BUILD_PROFILE_must_be_cross_raspberry_pi:
 	test "${BUILD_PROFILE}" = "cross_raspberry_pi"
 
 bp_cross_raspberry_pi_install_build: cross_common_install_build bp_cross_raspberry_pi_purge bp_common_install_build
-	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler bp_cross_raspberry_pi_install_build_image
+	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler
 
 bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# gcc -> https://github.com/Pro/raspi-toolchain/
@@ -11,19 +11,16 @@ bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross
 		cd \"\$${CCWS_BUILD_PROFILE_DIR}\"; \
 		tar -xf '${WORKSPACE_DIR}/cache/raspi-toolchain.tar.gz'"
 
-bp_cross_raspberry_pi_install_build_image: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
+bp_cross_raspberry_pi_get: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# raspios -> http://downloads.raspberrypi.org/
 	# the only reason we don't use lite image is that it doesn't have enough
 	# space to install ROS dependencies, it is possible to resize it, but not
 	# necessary for this demo
 	${MAKE} download FILES="http://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip"
-	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCWS_BUILD_PROFILE_DIR}\"; \
-		unzip -o '${WORKSPACE_DIR}/cache/2021-05-07-raspios-buster-armhf.zip'; \
-		mv 2021-05-07-raspios-buster-armhf.img system.img"
+	bash -c "${SETUP_SCRIPT}; unzip -p '${WORKSPACE_DIR}/cache/2021-05-07-raspios-buster-armhf.zip' > \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\""
 
 
-bp_cross_raspberry_pi_install_host: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
+bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# 1. copy qemu in order to be able to do chroot
 	# 2. add ROS apt sources in order to avoid weird package conflicts,
 	#    e.g., lack of catkin_pkg_modules in upstream repos.
@@ -31,8 +28,7 @@ bp_cross_raspberry_pi_install_host: assert_BUILD_PROFILE_must_be_cross_raspberry
 	#    http://wiki.ros.org/UpstreamPackages
 	#    apt-cache showpkg python-catkin-pkg
 	# 3. remove some heavy packages to get free space for ROS dependencies
-	${MAKE} cross_mount
-	-bash -c "${SETUP_SCRIPT}; \
+	bash -c "${SETUP_SCRIPT}; \
 		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
        	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
@@ -48,8 +44,6 @@ bp_cross_raspberry_pi_install_host: assert_BUILD_PROFILE_must_be_cross_raspberry
 			apt update; \
 			apt --yes upgrade; \
 			apt clean\" "
-	${MAKE} dep_install
-	${MAKE} cross_umount
 
 
 bp_cross_raspberry_pi_mount: assert_BUILD_PROFILE_must_be_cross_raspberry_pi

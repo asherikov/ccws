@@ -7,7 +7,7 @@ test:
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
-	${MAKE} bp_install_host PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 	# deb
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug

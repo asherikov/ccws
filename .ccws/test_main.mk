@@ -11,7 +11,7 @@ test:
 	${MAKE} wsscrape_all
 	${MAKE} dep_to_repolist PKG=test_pkg
 	${MAKE} wsupdate
-	${MAKE} bp_install_host PKG=test_pkg
+	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile
 	# reset
 	${MAKE} bp_purge
@@ -21,8 +21,8 @@ test:
 	${MAKE} dep_to_repolist PKG=staticoma
 	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
-	${MAKE} bp_install_host PKG=staticoma
-	${MAKE} bp_install_host
+	${MAKE} dep_install PKG=staticoma
+	${MAKE} dep_install
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
@@ -33,7 +33,7 @@ test:
 	mv src/staticoma ./
 	rm -Rf ./src/*
 	mv staticoma ./src/
-	${MAKE} bp_install_host PKG=staticoma
+	${MAKE} dep_install PKG=staticoma
 	# test various build profiles
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer

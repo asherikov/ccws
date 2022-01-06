@@ -12,7 +12,7 @@ private_cross_mount:
 	losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} mount "{}${PARTITION}" "${CCWS_SYSROOT}"
 	# resolv.conf can be a symlink to a nonexistent systemd file, in such cases
 	# we have to create this file in order to use bind mounting
-	test -f ${CCWS_SYSROOT}/etc/resolv.conf || touch ${CCWS_SYSROOT}/etc/resolv.conf
+	test -f ${CCWS_SYSROOT}/etc/resolv.conf || rm ${CCWS_SYSROOT}/etc/resolv.conf && touch ${CCWS_SYSROOT}/etc/resolv.conf
 	mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf"
 	mount --bind /dev "${CCWS_SYSROOT}/dev"
 	mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
@@ -43,22 +43,36 @@ cross_jetson_install_build_bionic:
 	sudo apt update
 	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
 
-cross_jetson_install_host_bionic:
-	# 1. copy qemu in order to be able to do chroot
-	# 2. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
-	#    see `apt-cache policy libopencv-dev`
+cross_image_write:
+	test "${DEVICE}" != ""
+	${MAKE} cross_umount
+	bash -c "${SETUP_SCRIPT}; sudo dd if=\"\$${CCWS_BUILD_PROFILE_DIR}/system.img\" of=${DEVICE} status=progress bs=16M"
+
+cross_get:
+	${MAKE} bp_${BUILD_PROFILE}_get
+
+cross_initialize:
+	${MAKE} bp_${BUILD_PROFILE}_initialize
+
+cross_install: cross_get
 	${MAKE} cross_mount
-	-bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCWS_SYSROOT}\"; \
-		sudo cp /usr/bin/qemu-aarch64-static ./usr/bin/; \
-		wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
-	        | sudo chroot ./ apt-key add -; \
-		sudo chroot ./ /bin/sh -c \
+	${MAKE} cross_initialize
+	${MAKE} dep_install
+	${MAKE} cross_umount
+
+private_cross_jetson_initialize_bionic:
+	# 1. copy qemu in order to be able to do chroot
+	# 2. 'wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo chroot ./ apt-key add -;'
+	#    may not work, using workaround from https://github.com/Microsoft/WSL/issues/3286
+	# 3. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
+	#    see `apt-cache policy libopencv-dev`
+	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
+	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo tee ${CCWS_SYSROOT}/etc/apt/trusted.gpg.d/ros.gpg > /dev/null
+	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo tee ${CCWS_SYSROOT}/etc/apt/sources.list.d/ros-latest.list
+	sudo chroot ${CCWS_SYSROOT} /bin/sh -c \
 			'apt update; \
 			apt upgrade --yes; \
 			apt remove --yes libopencv-dev; \
 			${APT_INSTALL} ca-certificates; \
 			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
-			apt clean; '"
-	-${MAKE} dep_install
-	${MAKE} cross_umount
+			apt clean'

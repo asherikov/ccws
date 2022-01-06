@@ -259,7 +259,7 @@ The general workflow is documented below, for more technical details see
       `make dep_to_repolist PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
-   image: `make bp_install_host PKG=staticoma BUILD_PROFILE=<profile>`
+   image: `make cross_install PKG=staticoma BUILD_PROFILE=<profile> ROS_DISTRO=<distro>`
 5. Compile packages:
     - mount sysroot with `make cross_mount BUILD_PROFILE=<profile>`
     - build packages, e.g. `make staticoma BUILD_PROFILE=<profile>` or build and

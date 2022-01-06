@@ -8,7 +8,7 @@ test:
 	${MAKE} dep_to_repolist PKG=staticoma
 	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
-	${MAKE} bp_install_host PKG=staticoma
+	${MAKE} cross_install PKG=staticoma
 	${MAKE} cross_mount
 	${MAKE} staticoma
 	${MAKE} wsclean
