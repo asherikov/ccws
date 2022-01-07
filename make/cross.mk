@@ -9,18 +9,24 @@ cross_sysroot_fix_abs_symlinks:
 # internal target, should be called with initialized environment
 private_cross_mount:
 	mkdir -p "${CCWS_SYSROOT}"
-	losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} mount "{}${PARTITION}" "${CCWS_SYSROOT}"
+	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} sudo mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"
 	# resolv.conf can be a symlink to a nonexistent systemd file, in such cases
 	# we have to create this file in order to use bind mounting
-	test -f ${CCWS_SYSROOT}/etc/resolv.conf || rm ${CCWS_SYSROOT}/etc/resolv.conf && touch ${CCWS_SYSROOT}/etc/resolv.conf
-	mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf"
-	mount --bind /dev "${CCWS_SYSROOT}/dev"
-	mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
+	# keep going if this hack fails
+	test -f ${CCWS_SYSROOT}/etc/resolv.conf || sudo rm ${CCWS_SYSROOT}/etc/resolv.conf && sudo touch ${CCWS_SYSROOT}/etc/resolv.conf || true
+	sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf" || true
+	sudo mount --bind /dev "${CCWS_SYSROOT}/dev"
+	sudo mount --bind /tmp "${CCWS_SYSROOT}/tmp"
+	# suppress noisy warnings
+	sudo mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
 
 assert_CCWS_SYSROOT_must_be_mounted:
 	test -d "${CCWS_SYSROOT}/dev"
 
-private_cross_build: assert_CCWS_SYSROOT_must_be_mounted
+private_cross_build:
+	# remount in read only mode
+	${MAKE} cross_umount
+	${MAKE} cross_mount SYSROOT_MOUNT_OPTIONS="-o ro"
 	${MAKE} private_build
 
 cross_mount:

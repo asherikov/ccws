@@ -11,7 +11,7 @@ bp_cross_jetson_xavier_install_build: cross_common_install_build bp_common_insta
 
 bp_cross_jetson_xavier_mount: assert_BUILD_PROFILE_must_be_cross_jetson_xavier
 	${MAKE} cross_umount
-	sudo ${MAKE} wswraptarget TARGET=private_cross_mount BUILD_PROFILE=${BUILD_PROFILE}
+	${MAKE} wswraptarget TARGET=private_cross_mount
 
 bp_cross_jetson_xavier_build: private_cross_build
 	# redirection

@@ -14,7 +14,7 @@ bp_cross_jetson_nano_get: assert_BUILD_PROFILE_must_be_cross_jetson_nano
 
 bp_cross_jetson_nano_mount: assert_BUILD_PROFILE_must_be_cross_jetson_nano
 	${MAKE} cross_umount
-	sudo ${MAKE} wswraptarget TARGET=private_cross_mount BUILD_PROFILE=${BUILD_PROFILE} PARTITION=p1
+	${MAKE} wswraptarget TARGET=private_cross_mount SYSROOT_PARTITION=p1
 
 bp_cross_jetson_nano_build: private_cross_build
 	# redirection

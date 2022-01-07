@@ -6,8 +6,6 @@ deb_%:
 
 private_deb_compile:
 	echo ${CCWS_EXTRA_INSTALL_DIRS} | sed -e "s/ /\n/g" | xargs -I {} mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/{}
-	mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/lib/udev/rules.d
-	mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/lib/systemd/system
 	${MAKE} bp_${BASE_BUILD_PROFILE}_build BUILD_PROFILE=${BASE_BUILD_PROFILE}
 	echo "#!/bin/bash -x"                                                           >  "${CCWS_SOURCE_SCRIPT}"
 	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               >> "${CCWS_SOURCE_SCRIPT}"

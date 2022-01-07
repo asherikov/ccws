@@ -48,7 +48,7 @@ bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_p
 
 bp_cross_raspberry_pi_mount: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	${MAKE} cross_umount
-	sudo ${MAKE} wswraptarget TARGET=private_cross_mount PARTITION=p2 BUILD_PROFILE=${BUILD_PROFILE}
+	${MAKE} wswraptarget TARGET=private_cross_mount SYSROOT_PARTITION=p2
 
 bp_cross_raspberry_pi_purge: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	${MAKE} cross_umount
