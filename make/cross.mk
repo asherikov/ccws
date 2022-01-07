@@ -43,7 +43,10 @@ cross_jetson_install_build_bionic:
 	sudo apt update
 	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
 
-cross_image_write:
+cross_flash:
+	${MAKE} bp_${BUILD_PROFILE}_flash
+
+bp_%_flash:
 	test "${DEVICE}" != ""
 	${MAKE} cross_umount
 	bash -c "${SETUP_SCRIPT}; sudo dd if=\"\$${CCWS_BUILD_PROFILE_DIR}/system.img\" of=${DEVICE} status=progress bs=16M"
@@ -69,10 +72,13 @@ private_cross_jetson_initialize_bionic:
 	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo tee ${CCWS_SYSROOT}/etc/apt/trusted.gpg.d/ros.gpg > /dev/null
 	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo tee ${CCWS_SYSROOT}/etc/apt/sources.list.d/ros-latest.list
-	sudo chroot ${CCWS_SYSROOT} /bin/sh -c \
-			'apt update; \
-			apt upgrade --yes; \
-			apt remove --yes libopencv-dev; \
-			${APT_INSTALL} ca-certificates; \
-			${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
-			apt clean'
+	wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor | sudo tee ${CCWS_SYSROOT}/etc/apt/trusted.gpg.d/nvidia-cuda.gpg > /dev/null
+	# repos may be commented out
+	sudo sed -i 's/^# *deb/deb/' ${CCWS_SYSROOT}/etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+	#sudo chroot ${CCWS_SYSROOT} /bin/sh -c \
+	#		'apt update; \
+	#		apt upgrade --yes; \
+	#		apt remove --yes libopencv-dev; \
+	#		${APT_INSTALL} ca-certificates; \
+	#		${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
+	#		apt clean'
