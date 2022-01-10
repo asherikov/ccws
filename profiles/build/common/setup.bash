@@ -162,6 +162,13 @@ fi
 
 
 ##########################################################################################
+# cache
+#
+CCWS_CACHE=${CCWS_CACHE:-"${WORKSPACE_DIR}/cache"}
+export CCWS_CACHE
+
+
+##########################################################################################
 # ccache
 #
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers

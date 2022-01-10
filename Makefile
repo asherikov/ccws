@@ -25,7 +25,7 @@ export WORKSPACE_DIR=$(shell pwd)
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
-export CCWS_CACHE?="${WORKSPACE_DIR}/cache"
+export CCWS_CACHE?=${WORKSPACE_DIR}/cache
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
