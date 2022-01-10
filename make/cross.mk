@@ -27,6 +27,11 @@ private_cross_build:
 	# remount in read only mode
 	${MAKE} cross_umount
 	${MAKE} cross_mount SYSROOT_MOUNT_OPTIONS="-o ro"
+	# overlayfs has some issues with permissions, might need to use bindfs to remap user or libguestfs
+	#mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}
+	#mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}_overlayfs
+	#sudo mount -t overlay overlay -o lowerdir="${CCWS_SYSROOT}",upperdir="${CCWS_INSTALL_DIR_BUILD_ROOT}",workdir="${CCWS_INSTALL_DIR_BUILD_ROOT}_overlayfs" "${CCWS_SYSROOT}"
+	#sudo mount --bind /dev "${CCWS_SYSROOT}/dev"
 	${MAKE} private_build
 
 cross_mount:
