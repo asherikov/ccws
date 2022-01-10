@@ -23,7 +23,8 @@ private_cross_mount:
 assert_CCWS_SYSROOT_must_be_mounted:
 	test -d "${CCWS_SYSROOT}/dev"
 
-private_cross_build:
+private_cross_build: assert_CCWS_SYSROOT_must_be_mounted
+	# root must still be already mounted in order to determine ROS_DISTRO
 	# remount in read only mode
 	${MAKE} cross_umount
 	${MAKE} cross_mount SYSROOT_MOUNT_OPTIONS="-o ro"
