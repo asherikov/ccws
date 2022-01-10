@@ -51,7 +51,7 @@ cross_common_install_build:
 cross_jetson_install_build_bionic:
 	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
 	${MAKE} download FILES="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
-	sudo dpkg -i ${WORKSPACE_DIR}/cache/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+	sudo dpkg -i ${CCWS_CACHE}/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
 	sudo apt update
 	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
 

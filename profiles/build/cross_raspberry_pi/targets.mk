@@ -9,7 +9,7 @@ bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross
 	${MAKE} download FILES="https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz"
 	bash -c "${SETUP_SCRIPT}; \
 		cd \"\$${CCWS_BUILD_PROFILE_DIR}\"; \
-		tar -xf '${WORKSPACE_DIR}/cache/raspi-toolchain.tar.gz'"
+		tar -xf '${CCWS_CACHE}/raspi-toolchain.tar.gz'"
 
 bp_cross_raspberry_pi_get: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# raspios -> http://downloads.raspberrypi.org/
@@ -17,7 +17,7 @@ bp_cross_raspberry_pi_get: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# space to install ROS dependencies, it is possible to resize it, but not
 	# necessary for this demo
 	${MAKE} download FILES="http://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip"
-	bash -c "${SETUP_SCRIPT}; unzip -p '${WORKSPACE_DIR}/cache/2021-05-07-raspios-buster-armhf.zip' > \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\""
+	bash -c "${SETUP_SCRIPT}; unzip -p '${CCWS_CACHE}/2021-05-07-raspios-buster-armhf.zip' > \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\""
 
 
 bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_pi

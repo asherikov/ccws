@@ -46,4 +46,4 @@ ep_%_install:
 	${MAKE} dep_install
 
 download:
-	cd ${WORKSPACE_DIR}/cache; wget --progress=dot:giga --timestamping --no-check-certificate ${FILES}
+	cd ${CCWS_CACHE}; wget --progress=dot:giga --timestamping --no-check-certificate ${FILES}

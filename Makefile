@@ -19,15 +19,18 @@ export VENDOR?=ccws
 # default new package license
 export LICENSE?=Apache 2.0
 
+
+export WORKSPACE_DIR=$(shell pwd)
+
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
+export CCWS_CACHE?="${WORKSPACE_DIR}/cache"
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
 
 # helpers
-export WORKSPACE_DIR=$(shell pwd)
 export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
 export EXEC_PROFILES_DIR=${WORKSPACE_DIR}/profiles/exec/
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
