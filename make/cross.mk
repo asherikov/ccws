@@ -10,18 +10,20 @@ cross_sysroot_fix_abs_symlinks:
 private_cross_mount:
 	mkdir -p "${CCWS_SYSROOT}"
 	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} sudo mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"
-	# resolv.conf can be a symlink to a nonexistent systemd file, in such cases
-	# we have to create this file in order to use bind mounting
+	# resolv.conf can be a symlink to a nonexistent systemd file or an absolute
+	# symlink, in such cases we have to recreate this file in order to use bind
+	# mounting
 	# keep going if this hack fails
-	test -f ${CCWS_SYSROOT}/etc/resolv.conf || sudo rm ${CCWS_SYSROOT}/etc/resolv.conf && sudo touch ${CCWS_SYSROOT}/etc/resolv.conf || true
+	test -L ${CCWS_SYSROOT}/etc/resolv.conf && sudo mv ${CCWS_SYSROOT}/etc/resolv.conf ${CCWS_SYSROOT}/etc/resolv.conf.back && sudo touch ${CCWS_SYSROOT}/etc/resolv.conf || true
 	sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf" || true
 	sudo mount --bind /dev "${CCWS_SYSROOT}/dev"
 	sudo mount --bind /tmp "${CCWS_SYSROOT}/tmp"
 	# suppress noisy warnings
 	sudo mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
+	mount | grep resolv
 
 assert_CCWS_SYSROOT_must_be_mounted:
-	test -d "${CCWS_SYSROOT}/dev"
+	mountpoint -q "${CCWS_SYSROOT}"
 
 private_cross_build: assert_CCWS_SYSROOT_must_be_mounted
 	# root must still be already mounted in order to determine ROS_DISTRO
@@ -40,8 +42,7 @@ cross_mount:
 	${MAKE} bp_${BUILD_PROFILE}_mount
 
 cross_umount:
-	# should not fail, may be called on unmounted root
-	sudo bash -c "${SETUP_SCRIPT}; umount --recursive \"\$${CCWS_SYSROOT}\" || true"
+	sudo bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || umount --recursive \"\$${CCWS_SYSROOT}\""
 
 cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
