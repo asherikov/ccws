@@ -2,7 +2,8 @@
 set -e
 
 # suppress annoying ld warnings
-CCWS_PROOT_ARGS="--bind=/dev/null:/etc/ld.so.preload"
+#CCWS_PROOT_ARGS="--bind=/dev/null:/etc/ld.so.preload"
+CCWS_PROOT_ARGS="--bind=${CCWS_CACHE}"
 
 PATH="${CCWS_BUILD_ROOTFS}/usr/bin:${PATH}"
 LD_LIBRARY_PATH=${CCWS_BUILD_ROOTFS}/usr/lib:${LD_LIBRARY_PATH}
