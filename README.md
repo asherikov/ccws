@@ -326,7 +326,8 @@ TODO
   packages.
 - Use https://libguestfs.org/ or https://github.com/alperakcan/fuse-ext2
   instead of loop devices, to avoid using sudo. There are some issues in Ubuntu
-  though, bug 759725, see https://libguestfs.org/guestfs-faq.1.html.
+  though, bug 759725, see https://libguestfs.org/guestfs-faq.1.html. `guestfs`
+  is too slow to be practical.
 - Distributed compilation support with https://github.com/distcc/distcc can be
   useful.
 - Add memory sanitizer profile as an alternative to `valgrind`, `gcc` doesn't

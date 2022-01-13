@@ -14,13 +14,15 @@ private_cross_mount:
 	# symlink, in such cases we have to recreate this file in order to use bind
 	# mounting
 	# keep going if this hack fails
-	test -L ${CCWS_SYSROOT}/etc/resolv.conf && sudo mv ${CCWS_SYSROOT}/etc/resolv.conf ${CCWS_SYSROOT}/etc/resolv.conf.back && sudo touch ${CCWS_SYSROOT}/etc/resolv.conf || true
+	test -L ${CCWS_SYSROOT}/etc/resolv.conf \
+		&& sudo mv ${CCWS_SYSROOT}/etc/resolv.conf ${CCWS_SYSROOT}/etc/resolv.conf.back \
+		&& sudo cp /etc/resolv.conf ${CCWS_SYSROOT}/etc/resolv.conf \
+		|| true
 	sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf" || true
 	sudo mount --bind /dev "${CCWS_SYSROOT}/dev"
 	sudo mount --bind /tmp "${CCWS_SYSROOT}/tmp"
 	# suppress noisy warnings
 	sudo mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
-	mount | grep resolv
 
 assert_CCWS_SYSROOT_must_be_mounted:
 	mountpoint -q "${CCWS_SYSROOT}"
@@ -42,7 +44,7 @@ cross_mount:
 	${MAKE} bp_${BUILD_PROFILE}_mount
 
 cross_umount:
-	sudo bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || umount --recursive \"\$${CCWS_SYSROOT}\""
+	bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\""
 
 cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
@@ -83,11 +85,11 @@ private_cross_jetson_initialize_bionic:
 	# 3. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
 	#    see `apt-cache policy libopencv-dev`
 	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
-	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo tee ${CCWS_SYSROOT}/etc/apt/trusted.gpg.d/ros.gpg > /dev/null
-	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo tee ${CCWS_SYSROOT}/etc/apt/sources.list.d/ros-latest.list
-	wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor | sudo tee ${CCWS_SYSROOT}/etc/apt/trusted.gpg.d/nvidia-cuda.gpg > /dev/null
+	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/ros.gpg > /dev/null
+	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/sources.list.d/ros-latest.list
+	wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/nvidia-cuda.gpg > /dev/null
 	# repos may be commented out
-	sudo sed -i 's/^# *deb/deb/' ${CCWS_SYSROOT}/etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+	sudo chroot ${CCWS_SYSROOT} sed -i 's/^# *deb/deb/' /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
 	#sudo chroot ${CCWS_SYSROOT} /bin/sh -c \
 	#		'apt update; \
 	#		apt upgrade --yes; \
