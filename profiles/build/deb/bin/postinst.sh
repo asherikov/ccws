@@ -1,6 +1,9 @@
 #!/bin/bash
 
-SCRIPT="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/postinst"
+set -e
+shopt -s nullglob dotglob
+
+SCRIPT="${CCWS_DEBIAN_DIR}/postinst"
 VERSION=$(cat "${CCWS_DEB_INFO_DIR}/version_hash.txt")
 MESSAGE="${VENDOR}: Installation of '${CCWS_PKG_FULL_NAME} / ${VERSION}' completed"
 
@@ -16,7 +19,15 @@ do
         "\${POSTINST}"
     fi
 done
+EOF
 
+for EXTRA_SCRIPT in "${CCWS_DEBIAN_POSTINST_DIR}"/*
+do
+    echo "echo 'Running $(basename ${EXTRA_SCRIPT})'" >> ${SCRIPT}
+    cat "${EXTRA_SCRIPT}" >> ${SCRIPT}
+done
+
+cat >> "${SCRIPT}" <<EOF
 logger "${MESSAGE}"
 echo "${MESSAGE}"
 EOF

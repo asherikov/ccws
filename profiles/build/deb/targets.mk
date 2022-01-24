@@ -6,6 +6,7 @@ deb_%:
 
 private_deb_compile:
 	echo ${CCWS_EXTRA_INSTALL_DIRS} | sed -e "s/ /\n/g" | xargs -I {} mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/{}
+	mkdir -p "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
 	${MAKE} bp_${BASE_BUILD_PROFILE}_build BUILD_PROFILE=${BASE_BUILD_PROFILE}
 	echo "#!/bin/bash -x"                                                           >  "${CCWS_SOURCE_SCRIPT}"
 	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               >> "${CCWS_SOURCE_SCRIPT}"
@@ -25,11 +26,15 @@ private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	echo "${VERSION}" > "${CCWS_DEB_INFO_DIR}/version.txt"
 
 private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_deb_info assert_AUTHOR_must_not_be_empty assert_EMAIL_must_not_be_empty
-	mkdir -p "${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN"
-	mkdir -p "${CCWS_ARTIFACTS_DIR}"
-	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
+	# generate scripts
+	mkdir -p "${CCWS_DEBIAN_DIR}"
+	find "${CCWS_BUILD_PROFILE_DIR}/bin/" -iname "*.sh" | xargs -I {} bash {}
+	rm -Rf "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
+	# cleanup
 	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' -or -iname '__pycache__' | xargs --no-run-if-empty rm -Rf
-	find "${CCWS_BUILD_PROFILE_DIR}/bin/" -iname "*.sh" | xargs -I {} sh {}
+	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
+	# generate package
+	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 

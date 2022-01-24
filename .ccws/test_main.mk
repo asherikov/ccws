@@ -42,6 +42,9 @@ test:
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
 	${MAKE} wstest PKG=staticoma EXEC_PROFILE=valgrind
+	# check core_pattern exec profile
+	${MAKE} ep_install EXEC_PROFILE=core_pattern
+	${MAKE} wstest PKG=staticoma EXEC_PROFILE="core_pattern valgrind"
 	# static checks & documentation
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
 	${MAKE} BUILD_PROFILE=static_checks
