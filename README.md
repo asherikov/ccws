@@ -322,6 +322,7 @@ TODO
   potential replacement for `dpkg-deb`.
 - https://github.com/git-afsantos/haros -- ROS-aware static analysis, might
   have issues with non `catkin_make` build environments.
+- https://github.com/Tencent/TscanCode -- C++ static analysis tool.
 - https://github.com/DLu/roscompile/tree/main/roscompile -- linter for catkin
   packages.
 - Use https://libguestfs.org/ or https://github.com/alperakcan/fuse-ext2
