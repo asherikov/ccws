@@ -92,3 +92,5 @@ export ROSCONSOLE_STDOUT_LINE_BUFFERED
 # debian package
 PYTHONDONTWRITEBYTECODE=1
 export PYTHONDONTWRITEBYTECODE
+
+##########################################################################################
