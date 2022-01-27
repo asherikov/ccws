@@ -1,6 +1,11 @@
 #!/bin/bash
 source ${CCWS_PROOT_BIN}/common.bash
 
+for DIR in ${CCWS_EXTRA_INSTALL_DIRS};
+do
+    CCWS_PROOT_ARGS+=" --bind=${CCWS_INSTALL_DIR_BUILD_ROOT}/${DIR}:${DIR}"
+done
+
 #echo ">>>>> CCWS cmake wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
