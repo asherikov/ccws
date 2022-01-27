@@ -10,5 +10,6 @@ Architecture: ${CCWS_DEB_ARCH}
 Maintainer: ${AUTHOR} <${EMAIL}>
 Description: ${VENDOR} ${PKG}
 Depends: $(paste -s -d ',' < "${WORKSPACE_DIR}/build/${BUILD_PROFILE}_dep/deps_${PKG}.deb")
+Installed-Size: $(du -s "${CCWS_INSTALL_DIR_BUILD_ROOT}" | cut -f 1)
 EOF
 
