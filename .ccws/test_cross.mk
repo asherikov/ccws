@@ -9,6 +9,9 @@ test:
 	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
 	${MAKE} cross_install PKG=staticoma
+	${MAKE} cross_pack
+	${MAKE} cross_purge
+	${MAKE} cross_unpack
 	${MAKE} cross_mount
 	${MAKE} staticoma
 	${MAKE} wsclean

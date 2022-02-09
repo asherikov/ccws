@@ -78,6 +78,18 @@ cross_install: cross_get
 	${MAKE} dep_install
 	${MAKE} cross_umount
 
+cross_pack:
+	${MAKE} cross_umount
+	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_pack
+
+cross_unpack:
+	${MAKE} cross_umount
+	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_unpack
+
+cross_purge:
+	${MAKE} cross_umount
+	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_purge
+
 private_cross_jetson_initialize_bionic:
 	# 1. copy qemu in order to be able to do chroot
 	# 2. 'wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo chroot ./ apt-key add -;'

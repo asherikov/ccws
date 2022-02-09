@@ -1,7 +1,7 @@
 assert_BUILD_PROFILE_must_be_cross_raspberry_pi:
 	test "${BUILD_PROFILE}" = "cross_raspberry_pi"
 
-bp_cross_raspberry_pi_install_build: cross_common_install_build bp_cross_raspberry_pi_purge bp_common_install_build
+bp_cross_raspberry_pi_install_build: cross_common_install_build cross_purge bp_common_install_build
 	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler
 
 bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
@@ -50,12 +50,18 @@ bp_cross_raspberry_pi_mount: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	${MAKE} cross_umount
 	${MAKE} wswraptarget TARGET=private_cross_mount SYSROOT_PARTITION=p2
 
-bp_cross_raspberry_pi_purge: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
-	${MAKE} cross_umount
-	bash -c "${SETUP_SCRIPT}; \
-		rm -Rf \"\$${CCWS_BUILD_PROFILE_DIR}/system.img\"; \
-		rm -Rf \"\$${CCWS_BUILD_PROFILE_DIR}/cross-pi-gcc\" "
+private_bp_cross_raspberry_pi_purge:
+	rm -Rf "${CCWS_BUILD_PROFILE_DIR}/system.img"
+	rm -Rf "${CCWS_BUILD_PROFILE_DIR}/cross-pi-gcc"
 
 bp_cross_raspberry_pi_build: private_cross_build
 	# redirection
 
+private_bp_cross_raspberry_pi_pack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
+	mkdir -p "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}/"
+	cd "${CCWS_BUILD_PROFILE_DIR}"; \
+		tar -cjf "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}_image.tar.bz2" system.img cross-pi-gcc
+
+private_bp_cross_raspberry_pi_unpack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
+	cd "${CCWS_BUILD_PROFILE_DIR}"; \
+		tar -xf "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}_image.tar.bz2"
