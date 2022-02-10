@@ -228,7 +228,14 @@ include_directories(
 # Uncomment to enable tests.
 #----------------------------------------------
 # It is recommended to introduce vendor specific testing flag for finer control.
-#if(CATKIN_ENABLE_TESTING OR CCWS_ENABLE_TESTING)
+# CATKIN_ENABLE_TESTING needs to be set in order to suppress warning:
+# ```
+# /opt/ros/melodic/share/catkin/cmake/test/tests.cmake:50 (message):
+#  add_rostest() should only be used inside a conditional block which checks
+#  that testing is enabled:
+# ```
+#if(CCWS_ENABLE_TESTING)
+#    set(CATKIN_ENABLE_TESTING ON)
 #    if (NOT TARGET gmock)
 #        find_package(GMock REQUIRED)
 #    endif()

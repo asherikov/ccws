@@ -58,7 +58,7 @@ bp_cross_raspberry_pi_build: private_cross_build
 	# redirection
 
 private_bp_cross_raspberry_pi_pack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
-	mkdir -p "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}/"
+	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	cd "${CCWS_BUILD_PROFILE_DIR}"; \
 		tar -cjf "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}_image.tar.bz2" system.img cross-pi-gcc
 
