@@ -87,6 +87,25 @@ export ROSCONSOLE_STDOUT_LINE_BUFFERED
 # python
 #
 
+# https://answers.ros.org/question/394564/colcon-not-adding-python-module-built-with-cmake-to-pythonpath/
+for PYTHONDIR in "${COLCON_CURRENT_PREFIX}/lib/python"*"/site-packages";
+do
+    if [ -d "${PYTHONDIR}" ] # matching is a bit sketchy
+    then
+        if [ -z "${PYTHONPATH}" ]
+        then
+            PYTHONPATH="${PYTHONDIR}"
+        else
+            case ${PYTHONPATH} in
+                *${PYTHONDIR}*) ;;
+                *) PYTHONPATH="${PYTHONPATH}:${PYTHONDIR}";;
+            esac
+        fi
+    fi
+done
+export PYTHONPATH
+
+
 # TODO prevents generation of *.pyc files, which are not removed when package
 # is uninstalled, a more appropriate thing to do is to add prerm script to
 # debian package
