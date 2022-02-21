@@ -9,7 +9,8 @@ cross_sysroot_fix_abs_symlinks:
 # internal target, should be called with initialized environment
 private_cross_mount:
 	mkdir -p "${CCWS_SYSROOT}"
-	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} sudo mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"
+	#losetup -j "${CCWS_BUILD_PROFILE_DIR}/system.img" | cut -f 1 -d ':' | xargs --no-run-if-empty -I {} sudo losetup -d {}
+	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} sudo /bin/sh -c 'partprobe -s "{}" && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
 	# resolv.conf can be a symlink to a nonexistent systemd file or an absolute
 	# symlink, in such cases we have to recreate this file in order to use bind
 	# mounting
@@ -47,7 +48,7 @@ cross_umount:
 	bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\""
 
 cross_common_install_build:
-	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
+	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support parted
 	sudo service binfmt-support restart
 
 # ubuntu 18.04
