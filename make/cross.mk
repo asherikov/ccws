@@ -10,7 +10,8 @@ cross_sysroot_fix_abs_symlinks:
 private_cross_mount:
 	mkdir -p "${CCWS_SYSROOT}"
 	#losetup -j "${CCWS_BUILD_PROFILE_DIR}/system.img" | cut -f 1 -d ':' | xargs --no-run-if-empty -I {} sudo losetup -d {}
-	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" | xargs -I {} sudo /bin/sh -c 'partprobe -s "{}" && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
+	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" \
+		| xargs -I {} sudo /bin/sh -c 'make private_cross_loopback_initialize LOOPBACK_DEVICE={} && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
 	# resolv.conf can be a symlink to a nonexistent systemd file or an absolute
 	# symlink, in such cases we have to recreate this file in order to use bind
 	# mounting
@@ -24,6 +25,14 @@ private_cross_mount:
 	sudo mount --bind /tmp "${CCWS_SYSROOT}/tmp"
 	# suppress noisy warnings
 	sudo mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
+
+# workaround for docker -- loopback device partitions not created in /dev
+# https://github.com/moby/moby/issues/27886#issuecomment-417074845
+private_cross_loopback_initialize:
+	lsblk --raw --output MAJ:MIN --noheadings ${LOOPBACK_DEVICE} \
+		| tail -n +2 | cat -n \
+		| sed -e "s=\t= =" -e "s=:= =" -e "s= *\([0-9]\+\) *\([0-9]*\) *\([0-9]*\)=test -b ${LOOPBACK_DEVICE}p\1 || mknod ${LOOPBACK_DEVICE}p\1 b \2 \3=" \
+		| /bin/sh
 
 assert_CCWS_SYSROOT_must_be_mounted:
 	mountpoint -q "${CCWS_SYSROOT}"
@@ -47,8 +56,13 @@ cross_mount:
 cross_umount:
 	bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\""
 
+# to be used in docker
+cross_umount_all:
+	sudo umount -a || true
+	losetup | grep `pwd` | cut -f 1 -d " " | xargs --no-run-if-empty -I {} sudo losetup -d {}
+
 cross_common_install_build:
-	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support parted
+	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
 	sudo service binfmt-support restart
 
 # ubuntu 18.04
@@ -98,6 +112,8 @@ private_cross_jetson_initialize_bionic:
 	# 3. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
 	#    see `apt-cache policy libopencv-dev`
 	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
+	# might be necessary in some docker environments
+	sudo update-binfmts --enable qemu-aarch64
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/ros.gpg > /dev/null
 	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/sources.list.d/ros-latest.list
 	wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/nvidia-cuda.gpg > /dev/null

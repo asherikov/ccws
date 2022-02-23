@@ -31,6 +31,7 @@ bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_p
 	bash -c "${SETUP_SCRIPT}; \
 		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
+		sudo update-binfmts --enable qemu-arm; \
        	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
 	        | sudo chroot ./ apt-key add -; \
     	sudo chroot ./ /bin/sh -c \"\
