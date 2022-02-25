@@ -71,7 +71,7 @@ cross_jetson_install_build_bionic:
 	${MAKE} download FILES="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
 	sudo dpkg -i ${CCWS_CACHE}/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
 	sudo apt update
-	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2
+	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2 device-tree-compiler cpio
 
 cross_flash:
 	${MAKE} bp_${BUILD_PROFILE}_flash
