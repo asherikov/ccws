@@ -37,7 +37,7 @@ SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
-CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot
+CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot --dot-cluster
 
 
 ##

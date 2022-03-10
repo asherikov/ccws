@@ -20,6 +20,8 @@
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
     <tab type="examples" visible="yes" title="" intro=""/>
+    <tab type="user" url="./pkg_dependency_graph.svg" title="Dependencies"/>
+    <tab type="user" url="../index.html" title="Package index"/>
   </navindex>
 
   <!-- Layout definition for a class page -->
