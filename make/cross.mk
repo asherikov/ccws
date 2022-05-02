@@ -65,14 +65,6 @@ cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
 	sudo service binfmt-support restart
 
-# ubuntu 18.04
-cross_jetson_install_build_bionic:
-	sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-	${MAKE} download FILES="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
-	sudo dpkg -i ${CCWS_CACHE}/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
-	sudo apt update
-	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2 device-tree-compiler cpio
-
 cross_flash:
 	${MAKE} bp_${BUILD_PROFILE}_flash
 
@@ -105,24 +97,3 @@ cross_purge:
 	${MAKE} cross_umount
 	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_purge
 
-private_cross_jetson_initialize_bionic:
-	# 1. copy qemu in order to be able to do chroot
-	# 2. 'wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo chroot ./ apt-key add -;'
-	#    may not work, using workaround from https://github.com/Microsoft/WSL/issues/3286
-	# 3. NVIDIA overrides OpenCV package with version 4, but we need OpenCV 3 in melodic
-	#    see `apt-cache policy libopencv-dev`
-	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
-	# might be necessary in some docker environments
-	sudo update-binfmts --enable qemu-aarch64
-	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/ros.gpg > /dev/null
-	echo 'deb http://packages.ros.org/ros/ubuntu bionic main' | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/sources.list.d/ros-latest.list
-	wget -qO - https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/nvidia-cuda.gpg > /dev/null
-	# repos may be commented out
-	sudo chroot ${CCWS_SYSROOT} sed -i 's/^# *deb/deb/' /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
-	#sudo chroot ${CCWS_SYSROOT} /bin/sh -c \
-	#		'apt update; \
-	#		apt upgrade --yes; \
-	#		apt remove --yes libopencv-dev; \
-	#		${APT_INSTALL} ca-certificates; \
-	#		${APT_INSTALL} libopencv-dev:arm64=3.2.0+dfsg-4ubuntu0.1; \
-	#		apt clean'
