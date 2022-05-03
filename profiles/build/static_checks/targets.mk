@@ -39,6 +39,7 @@ cppcheck:
 		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
 		cppcheck \
 			${WORKSPACE_DIR}/src \
+			-j ${JOBS} \
 			--relative-paths \
 			--quiet --verbose --force \
 			--template='[{file}:{line}]  {severity}  {id}  {message}' \
