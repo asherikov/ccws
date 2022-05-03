@@ -11,6 +11,7 @@ test:
 	${MAKE} wsscrape_all
 	${MAKE} dep_to_repolist PKG=test_pkg
 	${MAKE} wsupdate
+	${MAKE} log_output TARGET=wsstatus
 	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile
 	# reset

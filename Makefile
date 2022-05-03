@@ -21,6 +21,7 @@ export LICENSE?=Apache 2.0
 
 
 export WORKSPACE_DIR=$(shell pwd)
+export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
@@ -64,6 +65,13 @@ make/config.mk:
 ##
 ## Workspace targets
 ##
+
+log_output:
+	mkdir -p ${ARTIFACTS_DIR}/${MAKE}
+	${MAKE} log_output_to_file OUTPUT_LOG_FILE=\"${ARTIFACTS_DIR}/${MAKE}/${TARGET}_${OUTPUT_LOG_ID}_`env | md5sum | cut -f 1 -d ' '`.log\"
+
+log_output_to_file:
+	${MAKE} ${TARGET} 2>&1 | ts "[%F %T %.s]" > ${OUTPUT_LOG_FILE}
 
 
 # warning: MAKEFLAGS set in setup scripts is overriden by make
