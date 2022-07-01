@@ -84,6 +84,19 @@ export ROSCONSOLE_STDOUT_LINE_BUFFERED
 
 
 ##########################################################################################
+# tests
+#
+
+# Force ROS macros to log color even in colcon test
+RCUTILS_COLORIZED_OUTPUT=1
+export RCUTILS_COLORIZED_OUTPUT
+
+# Force color on gtest
+GTEST_COLOR=1
+export GTEST_COLOR
+
+
+##########################################################################################
 # python
 #
 
