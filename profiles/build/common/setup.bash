@@ -1,15 +1,9 @@
 #!/bin/bash -x
 ##########################################################################################
 
-if [ -z "${WORKSPACE_DIR}" ]
-then
-    # assuming that this preload is sourced from the root of the workspace
-    WORKSPACE_DIR=$(pwd)
-fi
-if [ -z "${BUILD_PROFILES_DIR}" ]
-then
-    BUILD_PROFILES_DIR="${WORKSPACE_DIR}/profiles/build"
-fi
+# if not set assume that this preload is sourced from the root of the workspace
+WORKSPACE_DIR=${WORKSPACE_DIR:-"$(pwd)"}
+BUILD_PROFILES_DIR=${BUILD_PROFILES_DIR:-"${WORKSPACE_DIR}/profiles/build"}
 export WORKSPACE_DIR BUILD_PROFILES_DIR
 
 
@@ -22,8 +16,15 @@ else
     export BUILD_PROFILE
 fi
 
-
-CCWS_ARTIFACTS_DIR="${ARTIFACTS_DIR}/${BUILD_PROFILE}"
+if [ -z "${CCWS_ARTIFACTS_DIR}" ]
+then
+    if [ -z "${ARTIFACTS_DIR}" ]
+    then
+        CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts/${BUILD_PROFILE}"
+    else
+        CCWS_ARTIFACTS_DIR="${ARTIFACTS_DIR}/${BUILD_PROFILE}"
+    fi
+fi
 CCWS_BUILD_PROFILE_DIR="${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
 CCWS_BUILD_DIR=${CCWS_BUILD_DIR:-"${WORKSPACE_DIR}/build/${BUILD_PROFILE}"}
 CCWS_LOG_DIR=${CCWS_LOG_DIR:-"${WORKSPACE_DIR}/build/log/${BUILD_PROFILE}"}
