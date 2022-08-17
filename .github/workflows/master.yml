@@ -5,13 +5,6 @@ env:
     AUTHOR: CI
 
 jobs:
-    bionic:
-        runs-on: ubuntu-18.04
-
-        steps:
-            - uses: actions/checkout@v2
-            - run: make -f .ccws/test_main.mk
-
     focal:
         runs-on: ubuntu-20.04
 
@@ -27,7 +20,7 @@ jobs:
             - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=foxy
 
     cross_raspi:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-20.04
 
         steps:
             - uses: actions/checkout@v2
