@@ -54,11 +54,9 @@ default: build
 -include make/*.mk
 
 # make tries to remake missing files, intercept these attempts
-profiles/*/*.mk:
+profiles/%/%.mk:
 	@false
-make/*.mk:
-	@false
-make/config.mk:
+make/%.mk:
 	@false
 
 
