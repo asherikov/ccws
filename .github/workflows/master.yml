@@ -9,21 +9,21 @@ jobs:
         runs-on: ubuntu-20.04
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - run: make -f .ccws/test_main.mk ROS_DISTRO=noetic
 
     focal_ros2:
         runs-on: ubuntu-20.04
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=foxy
 
     cross_raspi:
         runs-on: ubuntu-20.04
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - run: sudo apt update
             - run: sudo apt upgrade --yes
             - run: make -f .ccws/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic

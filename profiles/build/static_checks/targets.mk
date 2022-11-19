@@ -6,6 +6,7 @@ bp_static_checks_install_build: bp_common_install_build
 		yamllint \
 		shellcheck
 	sudo ${MAKE} bp_static_checks_install_build_${OS_DISTRO_BUILD}
+	${MAKE} bp_static_checks_install_build_python
 
 #ubuntu18
 bp_static_checks_install_build_bionic:
@@ -14,6 +15,14 @@ bp_static_checks_install_build_bionic:
 #ubuntu20
 bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
+
+bp_static_checks_install_build_python:
+	sudo ${APT_INSTALL} python3 python3-pip
+	python3 -m pip install pylint
+	python3 -m pip install flake8
+	python3 -m pip install mypy
+	# required by mypy
+	python3 -m pip install types-PyYAML
 
 
 bp_static_checks_build:
@@ -24,6 +33,13 @@ bp_static_checks_build:
 	${MAKE} shellcheck
 	# false positives
 	-${MAKE} flawfinder
+	${MAKE} bp_static_checks_build_python
+
+bp_static_checks_build_python:
+	${MAKE} pylint
+	${MAKE} flake8
+	${MAKE} mypy
+
 
 
 cppcheck:
@@ -126,4 +142,21 @@ catkin_lint:
 		\$${DIR_EXCEPTIONS} \
 		\$${PKG_EXCEPTIONS} \
 		src/"
+
+pylint:
+	bash -c "${SETUP_SCRIPT}; \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --ignore-paths /g'); \
+		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src'"
+
+flake8:
+	bash -c "${SETUP_SCRIPT}; \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
+		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
+
+mypy:
+	bash -c "${SETUP_SCRIPT}; \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
+		(test `find ${WORKSPACE_DIR}/src/ -iname "*\.py" | wc -l` -gt 0 \
+			&& mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/') \
+		|| true"
 

@@ -1,0 +1,13 @@
+[flake8]
+
+# W391 blank line EOF
+# E303 too many blank lines
+# E126 continuation line over-indented for hanging indent
+# W503 line break before binary operator
+ignore=W391,E303,E126,W503
+
+# unused imports, unable to detect undefined names
+per-file-ignores =
+    __init__.py:F401,F403
+
+max-line-length = 170
