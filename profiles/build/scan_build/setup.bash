@@ -9,12 +9,14 @@ BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"static_checks"}/setup.bash" "${@:2}" ""
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")
+CCWS_LLVM_VERSION=12
+export CCWS_LLVM_VERSION
 
-#apt install clang-tools-10
+
 CCWS_BUILD_WRAPPER="\
-scan-build-10 \
---use-cc=/usr/bin/clang-10 \
---use-c++=/usr/bin/clang++-10 \
+scan-build-${CCWS_LLVM_VERSION} \
+--use-cc=/usr/bin/clang-${CCWS_LLVM_VERSION} \
+--use-c++=/usr/bin/clang++-${CCWS_LLVM_VERSION} \
 -o ${CCWS_ARTIFACTS_DIR} \
 --status-bugs \
 --exclude ${WORKSPACE_DIR}/build \

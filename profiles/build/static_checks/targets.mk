@@ -64,6 +64,7 @@ cppcheck:
 			--enable=style \
 			--enable=performance \
 			--enable=portability \
+			--inline-suppr \
 			--suppress=uninitMemberVar \
 			--suppress=syntaxError \
 			--suppress=useInitializationList \

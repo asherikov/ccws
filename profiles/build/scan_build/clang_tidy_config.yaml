@@ -1,0 +1,76 @@
+# minor & annoying
+# -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance
+# do not enforce auto
+# -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto
+# do not enforce capitalization of literal suffix, e.g., x = 1u -> x = 1U.
+# -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix
+# allow function arguments with default values
+# -fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations
+# member variables can be public/protected
+# -cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes
+# member initialization in constructors -- false positives
+# -cppcoreguidelines-pro-type-member-init,-hicpp-member-init
+# default member initialization scatters initializations -- initialization must be done via constructors
+# -modernize-use-default-member-init
+# calling virtual functions from desctructors is well defined and generally safe
+# -clang-analyzer-optin.cplusplus.VirtualCall
+# these checks require values to be assigned to const variables, which is inconvenient
+# -cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers
+# I use access specifiers (public/protected/private) to group members
+# -readability-redundant-access-specifiers
+# issues on many macro
+# -cppcoreguidelines-pro-type-vararg,-hicpp-vararg
+# there is no from_string
+# -boost-use-to-string
+# too common
+# -cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay
+# interferes with 3rd party libs, mostly ROS callbacks
+# -google-runtime-references,-readability-convert-member-functions-to-static
+
+# overly restrictive fuchsia stuff
+# -fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,-fuchsia-statically-constructed-objects
+# overly restrictive cppcoreguidelines stuff
+# -cppcoreguidelines-macro-usage
+# llvmlibc stuff
+# -llvmlibc-*
+
+# suppress issues with gtest/gmock macro, alternatively NOLINT can be used for each macro
+# -hicpp-special-member-functions,-cppcoreguidelines-special-member-functions
+# -cppcoreguidelines-owning-memory
+# -cert-err58-cpp
+#
+# not useful in version 12 (no way to disable macro processing)
+# -readability-function-cognitive-complexity
+
+# recursion is ok https://clang.llvm.org/extra/clang-tidy/checks/misc/no-recursion.html
+# -misc-no-recursion
+#
+# does not allow '#pragma once'
+# -llvm-header-guard
+Checks: '*,
+-llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,
+-modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,
+-readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix,
+-fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,
+-cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes,
+-cppcoreguidelines-pro-type-member-init,-hicpp-member-init,
+-modernize-use-default-member-init,
+-clang-analyzer-optin.cplusplus.VirtualCall,
+-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,
+-readability-redundant-access-specifiers,
+-cppcoreguidelines-pro-type-vararg,-hicpp-vararg,
+-boost-use-to-string,
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-hicpp-no-array-decay,
+-google-runtime-references,-readability-convert-member-functions-to-static,
+-fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,-fuchsia-statically-constructed-objects,
+-cppcoreguidelines-macro-usage,
+-llvmlibc-*,
+-hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,
+-cppcoreguidelines-owning-memory,
+-cert-err58-cpp,
+-readability-function-cognitive-complexity,
+-misc-no-recursion,
+-llvm-header-guard'
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
