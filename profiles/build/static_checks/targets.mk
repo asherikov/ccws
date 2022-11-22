@@ -157,7 +157,6 @@ flake8:
 mypy:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
-		(test `find ${WORKSPACE_DIR}/src/ -iname "*\.py" | wc -l` -gt 0 \
-			&& mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/') \
-		|| true"
+		test `find ${WORKSPACE_DIR}/src/ -iname "*\.py" | wc -l` -eq 0 \
+			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
 
