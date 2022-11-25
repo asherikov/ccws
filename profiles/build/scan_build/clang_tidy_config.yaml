@@ -47,6 +47,10 @@
 #
 # does not allow '#pragma once'
 # -llvm-header-guard
+#
+# introduces small discrepancies between declarations and definitions, which is
+# actually making code less readable
+# -readability-avoid-const-params-in-decls
 Checks: '*,
 -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,
@@ -70,7 +74,8 @@ Checks: '*,
 -cert-err58-cpp,
 -readability-function-cognitive-complexity,
 -misc-no-recursion,
--llvm-header-guard'
+-llvm-header-guard,
+-readability-avoid-const-params-in-decls'
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
