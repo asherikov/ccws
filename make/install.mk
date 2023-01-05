@@ -1,4 +1,5 @@
 APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
+PIP3_INSTALL?=python3 -m pip install
 
 install_ccws_deps:
 	# moreutils: ts (timestamping utility)
@@ -15,6 +16,9 @@ install_ccws_deps:
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
 	test -d /etc/ros/rosdep/sources.list.d/ || rosdep init
+
+install_python3:
+	sudo ${APT_INSTALL} python3 python3-pip
 
 #ubuntu18
 install_ccws_deps_bionic:

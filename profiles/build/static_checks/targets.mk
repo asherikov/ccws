@@ -1,5 +1,5 @@
 bp_static_checks_install_build: bp_common_install_build
-	#pip3 install cpplint
+	#${PIP3_INSTALL} cpplint
 	sudo ${APT_INSTALL} \
 		cppcheck \
 		flawfinder \
@@ -16,13 +16,12 @@ bp_static_checks_install_build_bionic:
 bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
-bp_static_checks_install_build_python:
-	sudo ${APT_INSTALL} python3 python3-pip
-	python3 -m pip install pylint
-	python3 -m pip install flake8
-	python3 -m pip install mypy
+bp_static_checks_install_build_python: install_python3
+	${PIP3_INSTALL} pylint
+	${PIP3_INSTALL} flake8
+	${PIP3_INSTALL} mypy
 	# required by mypy
-	python3 -m pip install types-PyYAML
+	${PIP3_INSTALL} types-PyYAML
 
 
 bp_static_checks_build:
