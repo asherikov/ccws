@@ -345,8 +345,8 @@ TODO
 - Add `CodeQL` profile (https://github.com/github/codeql).
 
 
-TODO
-====
+FAQ
+===
 
 - Console output does not show compilation commands: make sure that
   `colcon-output` is not installed.
