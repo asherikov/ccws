@@ -12,7 +12,8 @@ install_ccws_deps:
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
-		python3-colcon-package-information
+		python3-colcon-package-information \
+		python3-colcon-bash
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
 	test -d /etc/ros/rosdep/sources.list.d/ || rosdep init
