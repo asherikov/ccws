@@ -91,8 +91,10 @@ wsinit:
 # Status packages in the workspace
 wsstatus:
 	git status
-	cd src; wstool info
+	${MAKE} wsstatuspkg
 
+wsstatuspkg:
+	cd src; wstool info
 
 # Add new packages to the workspace
 wsscrape:
