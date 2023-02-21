@@ -48,7 +48,7 @@ private_deb_version_hash: assert_PKG_arg_must_be_specified
 
 private_deb_lint: assert_PKG_arg_must_be_specified
 	test -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
-	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
+	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian_${OS_DISTRO_BUILD}.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 bp_deb_build: assert_BASE_BUILD_PROFILE_must_exist
 	${MAKE} private_deb_compile
