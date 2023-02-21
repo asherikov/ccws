@@ -17,7 +17,7 @@ bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
 #ubuntu22
-bp_static_checks_install_build_jammy:
+bp_static_checks_install_build_jammy: install_python3
 	${PIP3_INSTALL} catkin-lint
 
 bp_static_checks_install_build_python: install_python3
