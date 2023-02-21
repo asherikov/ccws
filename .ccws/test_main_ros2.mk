@@ -8,6 +8,8 @@ test:
 	${MAKE} bp_install_build
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
 	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
+	# static checks
+	${MAKE} bp_install_build BUILD_PROFILE=static_checks
 	# deb
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug

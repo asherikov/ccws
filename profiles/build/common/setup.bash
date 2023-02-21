@@ -106,6 +106,8 @@ then
                 ROS_DISTRO=melodic;;
             focal)
                 ROS_DISTRO=noetic;;
+            jammy)
+                ROS_DISTRO=humble;;
         esac
     fi
 fi
