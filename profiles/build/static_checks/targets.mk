@@ -16,6 +16,10 @@ bp_static_checks_install_build_bionic:
 bp_static_checks_install_build_focal:
 	${APT_INSTALL} python3-catkin-lint
 
+#ubuntu22
+bp_static_checks_install_build_jammy: install_python3
+	${PIP3_INSTALL} catkin-lint
+
 bp_static_checks_install_build_python: install_python3
 	${PIP3_INSTALL} pylint
 	${PIP3_INSTALL} flake8
@@ -95,15 +99,15 @@ flawfinder:
 	find ${WORKSPACE_DIR}/src -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${WORKSPACE_DIR}/build/$@/input
 	bash -c " \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
-		cat ${WORKSPACE_DIR}/build/shellcheck/input.filtered | xargs  --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
+		cat ${WORKSPACE_DIR}/build/shellcheck/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
 
 
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	find ${WORKSPACE_DIR}/src -type f -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
 	bash -c "${SETUP_SCRIPT}; \
-		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
-		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered || true; \
+		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
                       rules: { \
                         colons: {max-spaces-before: 0, max-spaces-after: -1}, \
@@ -127,7 +131,7 @@ shellcheck:
 			&& find ${WORKSPACE_DIR}/src -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/$@/input; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
-		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
+		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 
 
 catkin_lint:
