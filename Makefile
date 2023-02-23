@@ -110,12 +110,15 @@ wsupdate:
 
 wsupdate_shallow:
 	-git pull
-	mv src/.rosinstall src/.rosinstall.orig
-	cd src; wstool init -j${JOBS} --shallow ./ .rosinstall.orig
+	${MAKE} wsupdate_pkgs_shallow
 
 # Update workspace & all packages
 wsupdate_pkgs:
 	cd src; wstool update -j${JOBS} --continue-on-error
+
+wsupdate_pkgs_shallow:
+	mv src/.rosinstall src/.rosinstall.orig
+	cd src; wstool init -j${JOBS} --shallow ./ .rosinstall.orig
 
 
 show_vendor_files:
