@@ -89,9 +89,10 @@ cpplint:
 # internal target
 static_checks_generic_dir_filter:
 	mkdir -p ${WORKSPACE_DIR}/build/${TARGET}
-	echo -n "cat ${WORKSPACE_DIR}/build/${TARGET}/input" > ${WORKSPACE_DIR}/build/${TARGET}/filter
+	echo -n "test -f ${WORKSPACE_DIR}/build/${TARGET}/input && (cat ${WORKSPACE_DIR}/build/${TARGET}/input" > ${WORKSPACE_DIR}/build/${TARGET}/filter
 	bash -c "${SETUP_SCRIPT}; \
-		echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
+		echo -n \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${WORKSPACE_DIR}/build/${TARGET}/filter"
+	echo -n " || true)" >> ${WORKSPACE_DIR}/build/${TARGET}/filter
 
 
 flawfinder:
@@ -106,7 +107,7 @@ yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	find ${WORKSPACE_DIR}/src -type f -iname '*.yaml' > ${WORKSPACE_DIR}/build/$@/input
 	bash -c "${SETUP_SCRIPT}; \
-		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered || true; \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
                       rules: { \
@@ -158,8 +159,11 @@ flake8:
 		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
 
 mypy:
+	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
-		test `find ${WORKSPACE_DIR}/src/ -iname "*\.py" | wc -l` -eq 0 \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${WORKSPACE_DIR}/src==g'); \
+		find ${WORKSPACE_DIR}/src/ -iname '*\.py' > ${WORKSPACE_DIR}/build/$@/input; \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
+		test `cat ${WORKSPACE_DIR}/build/$@/input.filtered | wc -l` -eq 0 \
 			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
 
