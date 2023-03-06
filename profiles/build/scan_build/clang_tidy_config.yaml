@@ -1,7 +1,7 @@
 # minor & annoying
-# -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance
+# -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments
 # do not enforce auto
-# -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto
+# -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type
 # do not enforce capitalization of literal suffix, e.g., x = 1u -> x = 1U.
 # -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix
 # allow function arguments with default values
@@ -52,8 +52,8 @@
 # actually making code less readable
 # -readability-avoid-const-params-in-decls
 Checks: '*,
--llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,
--modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,
+-llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,
+-modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
 -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix,
 -fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,
 -cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes,
