@@ -62,7 +62,7 @@ cppcheck:
 			--relative-paths \
 			--quiet --verbose --force \
 			--template='[{file}:{line}]  {severity}  {id}  {message}' \
-			--language=c++ --std=c++14 \
+			--language=c++ --std=c++\$${CCWS_CXX_STANDARD} \
 			--enable=warning \
 			--enable=style \
 			--enable=performance \

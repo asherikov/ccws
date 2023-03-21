@@ -32,7 +32,7 @@ set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORC
 # compilation flags
 ###
 set(CMAKE_CXX_FLAGS     "-fdiagnostics-color -fPIC" CACHE STRING "" FORCE)
-set(CCWS_CXX_FLAGS_COMMON "-std=c++14 -fPIC -fstack-protector-strong" CACHE STRING "" FORCE)
+set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fPIC -fstack-protector-strong" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 
