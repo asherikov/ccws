@@ -35,6 +35,7 @@ dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
         mkdir -p \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}; \
         cp \$${CCWS_DOXYGEN_CONFIG_DIR}/Doxyfile \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
         sed -i -e 's/@@PKG@@/${PKG}/' \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
+        sed -i -e 's/@@JOBS@@/${JOBS}/' \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
         ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG} --packages-skip ${PKG} \
             | xargs -I {} find \$${CCWS_DOXYGEN_WORKING_DIR} -mindepth 2 -maxdepth 2 -ipath '*{}/Doxyfile.append' >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/deps; \
         cat \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/deps | xargs -I {} cat {} >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
