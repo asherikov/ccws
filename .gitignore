@@ -5,3 +5,4 @@
 /.ccache
 /make/config.mk
 /pkg_template/vendor*
+.clangd

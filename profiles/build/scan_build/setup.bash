@@ -9,8 +9,6 @@ BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"static_checks"}/setup.bash" "${@:2}" ""
 
 EXCEPTIONS=$(echo "${CCWS_STATIC_DIR_EXCEPTIONS}" | sed "s/:/ --exclude /g")
-CCWS_LLVM_VERSION=12
-export CCWS_LLVM_VERSION
 
 
 CCWS_BUILD_WRAPPER="\

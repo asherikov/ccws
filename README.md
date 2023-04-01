@@ -82,6 +82,8 @@ contains default parameters, which can be overriden by specific profiles:
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
 - `cross_jetson_nano` -- cross-compilation for Jetson Nano.
+- `clangd` -- collects compilation commands for a given `BASE_BUILD_PROFILE`
+  and generates clangd configuration file in the workspace root.
 
 
 Execution profiles

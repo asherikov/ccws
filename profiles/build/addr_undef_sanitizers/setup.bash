@@ -11,6 +11,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 
 ##########################################################################################
 
+# https://stackoverflow.com/questions/48267394/what-are-the-valid-sanitizer-suppression-strings-for-gcc
+
 # undefined
 UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${CCWS_BUILD_PROFILE_DIR}/undefined.supp
 export UBSAN_OPTIONS
@@ -18,6 +20,10 @@ export UBSAN_OPTIONS
 # leaks
 LSAN_OPTIONS=suppressions=${CCWS_BUILD_PROFILE_DIR}/leak.supp
 export LSAN_OPTIONS
+
+# Suppressions dont work on alloc-dealloc-mismatch for some reason
+ASAN_OPTIONS=alloc_dealloc_mismatch=0
+export ASAN_OPTIONS
 
 # address sanitizer
 #

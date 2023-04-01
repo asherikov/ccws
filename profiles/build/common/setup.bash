@@ -130,6 +130,18 @@ export ROS_PYTHON_VERSION
 
 
 ##########################################################################################
+# LLVM version
+#
+case "${OS_DISTRO_HOST}" in
+    focal)
+        CCWS_LLVM_VERSION=12;;
+    jammy)
+        CCWS_LLVM_VERSION=12;;
+esac
+export CCWS_LLVM_VERSION
+
+
+##########################################################################################
 # installation path
 #
 

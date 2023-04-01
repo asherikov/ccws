@@ -29,6 +29,10 @@ test:
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep staticoma | cut -f 1 |  xargs sudo apt purge --yes
+	# clangd
+	${MAKE} bp_install_build BUILD_PROFILE=clangd
+	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	wc -l cache/clangd/reldebug/compile_commands.json
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./
