@@ -120,8 +120,7 @@ Dependencies can be installed using `make bp_install_build
 BUILD_PROFILE=<profile>`, which is going to install the following tools and
 profile specific dependencies:
 - `colcon`
-- `wstool` -- much more suitable for `CCWS` workflow than `vcstool` which does
-  not maintain repository states.
+- `yq` -- https://github.com/asherikov/wshandler dependency
 - `cmake`
 - `ccache` -- can be disabled in cmake toolchains
 - `wget`

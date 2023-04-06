@@ -1,0 +1,372 @@
+#!/usr/bin/env bash
+
+set -e
+
+
+help()
+{
+    EXIT_CODE=${1:-"0"}
+    echo "Usage:"
+    echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
+    echo "Common arguments:"
+    echo "  -r|--root <WORKSPACE_ROOT>"
+    echo "  -c|--cache <CACHE_DIR>"
+    echo "  -t|--type rosinstall|repos"
+    echo "  -i|--indent 1|2|3..."
+    echo "  -k|--keep-going"
+    echo "Commands:"
+    echo "  status"
+    echo "  [-j|--jobs <NUM_THREADS>] [-p|--policy shallow] update"
+    echo "  [-j|--jobs <NUM_THREADS>] clean"
+    echo "  [-p|--policy ask|add|show] scrape"
+    echo "  add git <NAME> <URL> <VERSION>"
+    echo "  remove <NAME>"
+    echo "  [-p|--policy keep|replace] merge <FILENAME>"
+    exit "${EXIT_CODE}"
+}
+
+
+backup()
+{
+    mkdir -p "${WSH_CACHE_DIR}"
+    cp "${WSH_REPOLIST}" "${WSH_CACHE_DIR}/repolist.back"
+}
+
+
+rosinstall_git_repo_triplets()
+{
+    "${WSH_YQ[@]}" '.[].git | (.local-name + " " + .uri + " " + ((select(has("version") and .version != null) // {"version": "-"}) | .version))' < "${WSH_REPOLIST}"
+}
+
+repos_git_repo_triplets()
+{
+    "${WSH_YQ[@]}" '.repositories.* | select(. | has("type") and .type == "git") | (key + " " + .url + " " + ((select(has("version") and .version != null) // {"version": "-"}) | .version))' < "${WSH_REPOLIST}"
+}
+
+rosinstall_git_repo_names()
+{
+    "${WSH_YQ[@]}" '.[].git | (.local-name)' < "${WSH_REPOLIST}"
+}
+
+repos_git_repo_names()
+{
+    "${WSH_YQ[@]}" '.repositories.* | select(. | has("type") and .type == "git") | key' < "${WSH_REPOLIST}"
+}
+
+git_status()
+{
+    {
+        echo "name|version (actual)|repository";
+        echo "----|----------------|----------";
+        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" sh -c "${WSHANDLER} dir_git_status {}";
+    } | column -t -s '|'
+
+    echo
+
+    WSH_COMMAND_POLICY=show
+    git_scrape
+}
+
+git_update()
+{
+    "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" --max-procs="${WSH_JOBS}" sh -c "${WSHANDLER} dir_git_update {} ${WSH_COMMAND_SUFFIX}"
+}
+
+git_clean()
+{
+    "${WSH_WORKSPACE_TYPE}_git_repo_names" | "${WSH_XARGS[@]}" --max-procs="${WSH_JOBS}" rm -rf "${WSH_WORKSPACE_ROOT}/{}"
+}
+
+git_scrape()
+{
+    GIT_DIRS=$(find "${WSH_WORKSPACE_ROOT}" -type d -name ".git" -printf "%P\n" | sed "s=/.git==g" | sort)
+    UKNOWN_GIT_DIRS=$(comm -2 -3 <(echo "${GIT_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_git_repo_names" | sort))
+
+    for GIT_DIR in ${UKNOWN_GIT_DIRS}
+    do
+        echo "Processing ${GIT_DIR}"
+        cd "${WSH_WORKSPACE_ROOT}/${GIT_DIR}"
+        GIT_REPO=$(git remote get-url origin | tr -d '\n')
+
+        if [ "${GIT_REPO}" == "" ]
+        then
+            GIT_REPO=$(pwd)
+        fi
+
+        GIT_VERSION=$(git branch --show-current | tr -d '\n')
+        GIT_VERSION=${GIT_VERSION:-"$(git describe --tags | tr -d '\n')"}
+        GIT_VERSION=${GIT_VERSION:-"$(git rev-parse HEAD | tr -d '\n')"}
+
+        echo "Found unmanaged git repository:  ${GIT_DIR}  ${GIT_REPO}  ${GIT_VERSION}"
+
+        while true
+        do
+            case "${WSH_COMMAND_POLICY}" in
+                ask|default)
+                    read -r -p "Add? (Y/n)" yn
+                    yn=${yn:-"Y"};;
+                show)
+                    yn='N';;
+                add)
+                    yn='Y';;
+                *)
+                    help 20;;
+            esac
+            case $yn in
+                [Yy])
+                    execute_add git "${GIT_DIR}" "${GIT_REPO}" "${GIT_VERSION}"
+                    break;;
+                [Nn])
+                    break;;
+                *)
+                    echo "Please answer y or n for yes or no.";;
+            esac
+        done
+    done
+}
+
+dir_git_status()
+{
+    NAME="$1"
+    GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
+    GIT_REPO="$2"
+    GIT_VERSION="$3"
+
+    GIT_ACTUAL_VERSION="-"
+    if [ -d "${GIT_DIR}/.git" ]
+    then
+        cd "${GIT_DIR}"
+        # git status --porcelain | awk '{print $1}' | sort | uniq | tr -d '\n'
+        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long | tr -d '\n')
+    fi
+
+    echo "${NAME}|${GIT_VERSION} (${GIT_ACTUAL_VERSION})|${GIT_REPO}"
+}
+
+dir_git_update()
+{
+    GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
+    GIT_REPO="$2"
+    GIT_VERSION="$3"
+
+    mkdir -p "${GIT_DIR}"
+    cd "${GIT_DIR}"
+    echo "Processing ${GIT_DIR}"
+    if [ -d ".git" ]
+    then
+        git fetch
+        if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
+        then
+            if [ "${GIT_VERSION}" != '-' ]
+            then
+                git checkout "${GIT_VERSION}"
+            fi
+            if ! (git show-ref --tags "${GIT_VERSION}" --quiet)
+            then
+                git pull
+            fi
+        fi
+    else
+        rm -rf "${GIT_DIR:?}/*"
+
+        CLONE_ARGS=(--recurse-submodules)
+        if [ "${WSH_COMMAND_POLICY}" == "shallow" ]
+        then
+            CLONE_ARGS+=(--depth 1 --shallow-submodules)
+        fi
+
+        if [ "${GIT_VERSION}" == '-' ]
+        then
+            git clone "${CLONE_ARGS[@]}" "${GIT_REPO}" ./
+        else
+            if ! (git clone "${CLONE_ARGS[@]}" --branch "${GIT_VERSION}" "${GIT_REPO}" ./)
+            then
+                # GIT_VERSION is a hash
+                git clone --recurse-submodules "${GIT_REPO}" ./
+                git checkout "${GIT_VERSION}"
+            fi
+        fi
+    fi
+}
+
+
+check_workspace()
+{
+    command -v yq > /dev/null || (echo "'yq' is not installed" && false)
+    WSH_YQ=(yq --indent "${WSH_INDENT}")
+
+    WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
+    test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
+    WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT}")/"
+
+    WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"rosinstall"}
+    WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
+    WSH_CACHE_DIR=${WSH_CACHE_DIR:-"${WSH_WORKSPACE_ROOT}/.wshandler"}
+
+    if [ ! -f "${WSH_REPOLIST}" ]
+    then
+        case $1 in
+            scrape|add)
+                touch "${WSH_REPOLIST}";;
+            *)
+                echo "'${WSH_REPOLIST}' is not a repository list"
+                exit 20;;
+        esac
+    fi
+
+    WSHANDLER="\"$(realpath "${BASH_SOURCE[0]}")\" -r \"${WSH_WORKSPACE_ROOT}\" -c \"${WSH_CACHE_DIR}\" -t \"${WSH_WORKSPACE_TYPE}\""
+}
+
+
+execute_command()
+{
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        echo ">>> wshandler $1 ${WSH_WORKSPACE_ROOT}: ${SOURCE_TYPE} sources ---"
+        "${SOURCE_TYPE}_$1"
+        echo "<<< wshandler $1 ${WSH_WORKSPACE_ROOT}: ${SOURCE_TYPE} sources ---"
+    done
+}
+
+
+rosinstall_merge()
+{
+    case "${WSH_COMMAND_POLICY}" in
+        keep|default)
+            INPUT_FILE=$1;;
+        replace)
+            backup
+            cp "$1" "${WSH_REPOLIST}"
+            INPUT_FILE="${WSH_CACHE_DIR}/repolist.back";;
+        *)
+            help 11;;
+    esac
+
+    REMOVE_LIST=$("${WSH_YQ[@]}" '.[].* | (".*.local-name == \"" +.local-name + "\" or ")' < "${WSH_REPOLIST}" | tr -d '\n' | sed -e 's/or $//')
+    # shellcheck disable=SC2094
+    "${WSH_YQ[@]}" "del(.[] | select(${REMOVE_LIST}))" < "${INPUT_FILE}" | "${WSH_YQ[@]}" 'del(. | select(length==0))' >> "${WSH_REPOLIST}"
+}
+
+repos_merge()
+{
+    backup
+    case "${WSH_COMMAND_POLICY}" in
+        keep|default)
+            # shellcheck disable=SC2016
+            "${WSH_YQ[@]}" eval-all '. as $item ireduce ({}; . * $item)' <(cat "$1") <(cat "${WSH_CACHE_DIR}/repolist.back") > "${WSH_REPOLIST}";;
+        replace)
+            # shellcheck disable=SC2016
+            "${WSH_YQ[@]}" eval-all '. as $item ireduce ({}; . * $item)' <(cat "${WSH_CACHE_DIR}/repolist.back") <(cat "$1") > "${WSH_REPOLIST}";;
+        *)
+            help 12;;
+    esac
+}
+
+execute_merge()
+{
+    INPUT_FILE=$1
+    if [ -f "${INPUT_FILE}" ] && [ ! "${WSH_REPOLIST}" -ef "${INPUT_FILE}" ]
+    then
+        "${WSH_WORKSPACE_TYPE}_merge" "${INPUT_FILE}"
+    else
+        help 10;
+    fi
+}
+
+
+rosinstall_remove()
+{
+    "${WSH_YQ[@]}" "del(.[] | select(.*.local-name == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+repos_remove()
+{
+    "${WSH_YQ[@]}" "del(.repositories.$1)" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+execute_remove()
+{
+    backup
+    "${WSH_WORKSPACE_TYPE}_remove"
+}
+
+
+rosinstall_git_add()
+{
+    ENTRY="[{\"$1\": {\"local-name\": \"$2\", \"uri\": \"$3\", \"version\": \"$4\"}}]"
+    backup
+    "${WSH_YQ[@]}" "del(.[] | select(.*.local-name == \"$2\"))" < "${WSH_CACHE_DIR}/repolist.back" | "${WSH_YQ[@]}" ". + ${ENTRY}" > "${WSH_REPOLIST}"
+}
+
+repos_git_add()
+{
+    ENTRY="{\"$2\": {\"type\": \"$1\", \"url\": \"$3\", \"version\": \"$4\"}}"
+    backup
+    "${WSH_YQ[@]}" "del(.repositories.$2)" < "${WSH_CACHE_DIR}/repolist.back" | "${WSH_YQ[@]}" ". * {\"repositories\": ${ENTRY}}" > "${WSH_REPOLIST}"
+}
+
+execute_add()
+{
+    "${WSH_WORKSPACE_TYPE}_$1_add" "$@"
+}
+
+
+
+WSH_SOURCE_TYPES="git"
+WSH_COMMAND_POLICY=default
+WSH_JOBS=1
+WSH_INDENT=4
+WSH_XARGS=(xargs --no-run-if-empty -I {})
+WSH_COMMAND_SUFFIX=""
+
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        -r|--root)
+            WSH_WORKSPACE_ROOT=$2
+            shift; shift;;
+
+        -c|--cache)
+            WSH_CACHE_DIR=$2
+            shift; shift;;
+
+        -t|--type)
+            WSH_WORKSPACE_TYPE=$2
+            shift; shift;;
+
+        -j|--jobs)
+            WSH_JOBS=$2
+            shift; shift;;
+
+        -i|--indent)
+            WSH_INDENT=$2
+            shift; shift;;
+
+        -p|--policy)
+            WSH_COMMAND_POLICY=$2
+            shift; shift;;
+
+        -k|--keep-going)
+            WSH_COMMAND_SUFFIX="|| true"
+            shift;;
+
+        status|update|clean|scrape)
+            check_workspace "$1"
+            execute_command "$1"
+            exit;;
+
+        add|remove|merge)
+            check_workspace "$1"
+            "execute_$1" "${@:2}"
+            exit;;
+
+        dir_*)
+            "$1" "${@:2}"
+            exit;;
+
+        *)
+            help 1;;
+    esac
+done
+
+help 2

@@ -18,7 +18,7 @@ private_dep_install: private_dep_resolve
 private_dep_to_repolist: private_dep_list
 	bash -c "${SETUP_SCRIPT}; cat '${DEPLIST_FILE}' | paste -s -d ' ' \
 		| xargs rosinstall_generator --deps > ${DEPLIST_FILE}.rosinstall"
-	cd src; wstool merge -y ${DEPLIST_FILE}.rosinstall
+	${CMD_WSHANDLER} merge ${DEPLIST_FILE}.rosinstall
 
 # generate list of dependencies which are not present in the workspace
 private_dep_list:

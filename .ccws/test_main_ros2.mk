@@ -7,6 +7,7 @@ test:
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
+	${MAKE} wsupdate
 	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 	# static checks
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks

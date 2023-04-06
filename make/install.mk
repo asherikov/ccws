@@ -7,6 +7,7 @@ install_ccws_deps:
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
+	./scripts/wshandler/install.sh
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
@@ -32,7 +33,6 @@ install_ccws_deps_bionic: install_ccws_deps_ros1 install_ccws_deps_ros2
 		python-rosdep \
 		python-rospkg \
 		python-empy
-	${APT_INSTALL} python-rosinstall python-wstool
 
 #ubuntu20
 install_ccws_deps_focal: install_ccws_deps_ros1 install_ccws_deps_ros2
@@ -40,7 +40,6 @@ install_ccws_deps_focal: install_ccws_deps_ros1 install_ccws_deps_ros2
 		python3-rosinstall-generator \
 		python3-rosdep \
 		python3-rospkg
-	${APT_INSTALL} python3-rosinstall python3-wstool
 
 #ubuntu22
 install_ccws_deps_jammy: install_ccws_deps_ros2
@@ -48,7 +47,6 @@ install_ccws_deps_jammy: install_ccws_deps_ros2
 		python3-rosinstall-generator \
 		python3-rosdep \
 		python3-rospkg
-	${APT_INSTALL} python3-rosinstall python3-wstool
 
 
 bp_install_build:

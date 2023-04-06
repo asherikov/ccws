@@ -6,8 +6,3 @@ ccws_rebase:
 grab_video:
 	test "${NAME}" != ""
 	ffmpeg -f x11grab -s 1920:1080 -i :1.0 -r 25 -vcodec libx264 ${ARTIFACTS_DIR}/`date +%Y_%m_%d__`${NAME}.mkv
-
-wssetversion:
-	test "${MATCH}" != ""
-	test "${NEW_VERSION}" != ""
-	${MAKE} wsstatuspkg | grep ${MATCH} | cut -f 2 -d ' ' | xargs -I '{}' wstool set {} --version-new="${NEW_VERSION}" --target-workspace=./src --confirm

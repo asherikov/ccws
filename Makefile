@@ -39,6 +39,7 @@ CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-o
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot --dot-cluster
+CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_DIR}/src/ -t rosinstall -c ${CCWS_CACHE}/wshandler
 
 
 ##
@@ -83,7 +84,7 @@ wslist:
 wsinit:
 	test ! -f src/.rosinstall
 	mkdir -p src
-	cd src; wstool init
+	touch src/.rosinstall
 	cd src; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
 	-${MAKE} wsscrape_all
 	${MAKE} wsupdate
@@ -94,14 +95,14 @@ wsstatus:
 	${MAKE} wsstatuspkg
 
 wsstatuspkg:
-	cd src; wstool info
+	cd src; ${CMD_WSHANDLER} status
 
 # Add new packages to the workspace
 wsscrape:
-	cd src; wstool scrape
+	${CMD_WSHANDLER} scrape
 
 wsscrape_all:
-	cd src; wstool scrape -y
+	${CMD_WSHANDLER} -p add scrape
 
 # Update workspace & all packages
 wsupdate:
@@ -114,11 +115,10 @@ wsupdate_shallow:
 
 # Update workspace & all packages
 wsupdate_pkgs:
-	cd src; wstool update -j${JOBS} --continue-on-error
+	${CMD_WSHANDLER} -j ${JOBS} -k update
 
 wsupdate_pkgs_shallow:
-	mv src/.rosinstall src/.rosinstall.orig
-	cd src; wstool init -j${JOBS} --shallow ./ .rosinstall.orig
+	${CMD_WSHANDLER} -j ${JOBS} -p shallow update
 
 
 show_vendor_files:
@@ -181,7 +181,7 @@ add:
 	test -f src/.rosinstall || ${MAKE} wsinit
 	cd src; bash -c "\
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
-		wstool set \$${DIR} --git ${REPO} --version-new=${VERSION} --confirm --update"
+		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"
 
 
 ##
