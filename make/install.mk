@@ -7,7 +7,7 @@ install_ccws_deps:
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
-	./scripts/wshandler/install.sh
+	./scripts/wshandler/install.sh deps
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
@@ -25,6 +25,7 @@ install_ccws_deps_ros1:
 install_ccws_deps_ros2:
 	sh -c 'test -f /etc/apt/sources.list.d/ros2-latest.list \
 		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" > /etc/apt/sources.list.d/ros2-latest.list && apt update)'
+
 
 #ubuntu18
 install_ccws_deps_bionic: install_ccws_deps_ros1 install_ccws_deps_ros2

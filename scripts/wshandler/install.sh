@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -e
 
 apt_install()
 {
@@ -38,6 +39,9 @@ case $1 in
     script)
         install_deps
         install_script
+        ;;
+    deps)
+        install_deps
         ;;
     *)
         ;;

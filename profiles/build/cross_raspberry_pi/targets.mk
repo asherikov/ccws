@@ -40,7 +40,8 @@ bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_p
             echo 'main'                                   >> /tmp/ros-latest.list; \
             cat /tmp/ros-latest.list | paste -s -d ' ' > /etc/apt/sources.list.d/ros-latest.list; \
             rm  /tmp/ros-latest.list; \
-			apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server; \
+			apt purge --yes chromium-browser libgl1-mesa-dri git realvnc-vnc-server libx11-6 gdb libcups2; \
+			apt autoremove --yes; \
 			apt clean; \
 			apt update; \
 			apt --yes upgrade; \

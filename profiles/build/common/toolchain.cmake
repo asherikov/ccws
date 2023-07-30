@@ -28,6 +28,9 @@ set(CMAKE_INSTALL_PREFIX        $ENV{CCWS_INSTALL_DIR_HOST} CACHE STRING "" FORC
 # https://github.com/colcon/colcon-ros/issues/119
 set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORCE)
 
+# ccws cmake utilities
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+
 
 ###############################################################################
 # compilation flags

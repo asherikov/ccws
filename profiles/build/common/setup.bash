@@ -252,6 +252,14 @@ export ROS_LANG_DISABLE
 
 
 ##########################################################################################
+# conan
+#
+# https://docs.conan.io/2/reference/environment.html#conan-home
+CCWS_CONAN_HOME=${CONAN_HOME:-"${CCWS_CACHE}/conan/${BUILD_PROFILE}"}
+export CCWS_CONAN_HOME
+
+
+##########################################################################################
 # other
 #
 MAKEFLAGS="-j${JOBS}"

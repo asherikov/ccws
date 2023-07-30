@@ -12,12 +12,12 @@ jobs:
             - uses: actions/checkout@v3
             - run: make -f .ccws/test_main.mk ROS_DISTRO=noetic
 
-    focal_ros2:
-        runs-on: ubuntu-20.04
-
-        steps:
-            - uses: actions/checkout@v3
-            - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=foxy
+    #focal_ros2:
+    #    runs-on: ubuntu-20.04
+    #
+    #    steps:
+    #        - uses: actions/checkout@v3
+    #        - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=foxy
 
     jammy_ros2:
         runs-on: ubuntu-22.04
@@ -25,6 +25,13 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=humble
+
+    jammy_conan:
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v3
+            - run: make -f .ccws/test_conan.mk
 
     cross_raspi:
         runs-on: ubuntu-20.04
