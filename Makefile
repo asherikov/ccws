@@ -39,7 +39,7 @@ CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-o
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot --dot-cluster
-CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_DIR}/src/ -t rosinstall -c ${CCWS_CACHE}/wshandler
+CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_DIR}/src/ -t rosinstall -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
 
 
 ##

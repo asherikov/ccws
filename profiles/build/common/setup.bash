@@ -55,6 +55,22 @@ CCWS_TRIPLE=${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}-${CCWS_TRIPLE_ABI}
 export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI
 
 
+case "${CCWS_TRIPLE_ARCH}" in
+    # fixes 'package architecture (aarch64) does not match system (arm64)', deb
+    # architecture naming conventions are different
+    aarch64) CCWS_DEB_ARCH=arm64;;
+    x86_64) CCWS_DEB_ARCH=amd64;;
+    arm)
+        case "${CCWS_TRIPLE_ABI}" in
+            gnueabihf) CCWS_DEB_ARCH=armhf;;
+            *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
+        esac;;
+    *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
+esac
+
+export CCWS_DEB_ARCH
+
+
 ##########################################################################################
 # cross compilation
 #

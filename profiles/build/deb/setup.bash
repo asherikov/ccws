@@ -49,21 +49,6 @@ CMAKE_TOOLCHAIN_FILE=${BUILD_PROFILES_DIR}/${BASE_BUILD_PROFILE}/toolchain.cmake
 ##########################################################################################
 source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:2}" ""
 
-case "${CCWS_TRIPLE_ARCH}" in
-    # fixes 'package architecture (aarch64) does not match system (arm64)', deb
-    # architecture naming conventions are different
-    aarch64) CCWS_DEB_ARCH=arm64;;
-    x86_64) CCWS_DEB_ARCH=amd64;;
-    arm)
-        case "${CCWS_TRIPLE_ABI}" in
-            gnueabihf) CCWS_DEB_ARCH=armhf;;
-            *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
-        esac;;
-    *) CCWS_DEB_ARCH=${CCWS_TRIPLE_ARCH};;
-esac
-
-export CCWS_DEB_ARCH
-
 
 ##########################################################################################
 CCWS_DEBIAN_DIR="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/"

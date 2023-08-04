@@ -9,6 +9,7 @@ help()
     echo "Usage:"
     echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
     echo "Common arguments:"
+    echo "  -y|--yq <YQ_BINARY>"
     echo "  -r|--root <WORKSPACE_ROOT>"
     echo "  -c|--cache <CACHE_DIR>"
     echo "  -t|--type rosinstall|repos"
@@ -192,8 +193,8 @@ dir_git_update()
 
 check_workspace()
 {
-    command -v yq > /dev/null || (echo "'yq' is not installed" && false)
-    WSH_YQ=(yq --indent "${WSH_INDENT}")
+    command -v "${WSH_YQ_BINARY}" > /dev/null || (echo "'yq' is not installed" && false)
+    WSH_YQ=("${WSH_YQ_BINARY}" --indent "${WSH_INDENT}")
 
     WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
     test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
@@ -318,10 +319,15 @@ WSH_JOBS=1
 WSH_INDENT=4
 WSH_XARGS=(xargs --no-run-if-empty -I {})
 WSH_COMMAND_SUFFIX=""
+WSH_YQ_BINARY="yq"
 
 while [[ $# -gt 0 ]]
 do
     case $1 in
+        -y|--yq)
+            WSH_YQ_BINARY=$2
+            shift; shift;;
+
         -r|--root)
             WSH_WORKSPACE_ROOT=$2
             shift; shift;;

@@ -6,3 +6,4 @@
 /make/config.mk
 /pkg_template/vendor*
 .clangd
+scripts/wshandler/yq

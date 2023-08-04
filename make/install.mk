@@ -7,7 +7,7 @@ install_ccws_deps:
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
-	./scripts/wshandler/install.sh deps
+	${MAKE} wswraptarget TARGET="install_yq"
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
@@ -25,6 +25,12 @@ install_ccws_deps_ros1:
 install_ccws_deps_ros2:
 	sh -c 'test -f /etc/apt/sources.list.d/ros2-latest.list \
 		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" > /etc/apt/sources.list.d/ros2-latest.list && apt update)'
+
+install_yq:
+	# ./scripts/wshandler/install.sh deps # requires snap
+	${MAKE} download FILES="https://github.com/mikefarah/yq/releases/download/v4.34.2/yq_linux_${CCWS_DEB_ARCH}.tar.gz"
+	tar -xf '${CCWS_CACHE}/yq_linux_${CCWS_DEB_ARCH}.tar.gz' -O > "${WORKSPACE_DIR}/scripts/wshandler/yq"
+	chmod +x "${WORKSPACE_DIR}/scripts/wshandler/yq"
 
 
 #ubuntu18
@@ -51,6 +57,7 @@ install_ccws_deps_jammy: install_ccws_deps_ros2
 
 
 bp_install_build:
+	echo "CCWS/bp_install_build: ${BUILD_PROFILE}"
 	${MAKE} bp_${BUILD_PROFILE}_install_build
 
 bp_%_install_build: assert_BUILD_PROFILE_must_exist bp_common_install_build
