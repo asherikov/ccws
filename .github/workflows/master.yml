@@ -33,6 +33,13 @@ jobs:
             - uses: actions/checkout@v3
             - run: make -f .ccws/test_conan.mk
 
+    jammy_vcpkg:
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v3
+            - run: make -f .ccws/test_vcpkg.mk
+
     cross_raspi:
         runs-on: ubuntu-20.04
 

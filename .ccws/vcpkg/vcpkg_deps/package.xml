@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>vcpkg_deps</name>
+    <version>0.1.0</version>
+    <description>The vcpkg_deps package</description>
+    <maintainer email="alexander@sherikov.net">Alexander Sherikov</maintainer>
+    <license>Apache 2.0</license>
+
+    <buildtool_depend>cmake</buildtool_depend>
+</package>
