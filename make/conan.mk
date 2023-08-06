@@ -2,6 +2,7 @@
 # see profiles/build/common/cmake/ccws_conan_install.cmake
 # using conan doesn't seem to be a good option: 
 # 	packages are not very fresh and there are plenty of dependency conflicts
+# 	conflict resolution is fragile and inconvenient https://docs.conan.io/2/tutorial/versioning/conflicts.html
 
 install_conan: install_python3
 	${PIP3_INSTALL} conan

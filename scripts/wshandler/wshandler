@@ -6,20 +6,21 @@ set -e
 help()
 {
     EXIT_CODE=${1:-"0"}
-    echo "Usage:"
+    echo "Usage (default values are shown in curly braces):"
     echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
     echo "Common arguments:"
-    echo "  -y|--yq <YQ_BINARY>"
-    echo "  -r|--root <WORKSPACE_ROOT>"
-    echo "  -c|--cache <CACHE_DIR>"
-    echo "  -t|--type rosinstall|repos"
-    echo "  -i|--indent 1|2|3..."
-    echo "  -k|--keep-going"
+    echo "  -y|--yq <YQ_BINARY>         {yq}"
+    echo "  -r|--root <WORKSPACE_ROOT>  {./}"
+    echo "  -c|--cache <CACHE_DIR>      {<WORKSPACE_ROOT>}"
+    echo "  -t|--type rosinstall|repos  {rosinstall}"
+    echo "  -i|--indent 1|2|3...        {4}"
+    echo "  -k|--keep-going             {false}"
+
     echo "Commands:"
     echo "  status"
-    echo "  [-j|--jobs <NUM_THREADS>] [-p|--policy shallow] update"
-    echo "  [-j|--jobs <NUM_THREADS>] clean"
-    echo "  [-p|--policy ask|add|show] scrape"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow] update"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
+    echo "  [-p|--policy {ask}|add|show] scrape"
     echo "  add git <NAME> <URL> <VERSION>"
     echo "  remove <NAME>"
     echo "  [-p|--policy keep|replace] merge <FILENAME>"
@@ -193,7 +194,11 @@ dir_git_update()
 
 check_workspace()
 {
-    command -v "${WSH_YQ_BINARY}" > /dev/null || (echo "'yq' is not installed" && false)
+    if ! command -v "${WSH_YQ_BINARY}" > /dev/null
+    then
+        WSH_YQ_BINARY=yq
+        command -v "${WSH_YQ_BINARY}" > /dev/null || (echo "'yq' is not installed" && false)
+    fi
     WSH_YQ=("${WSH_YQ_BINARY}" --indent "${WSH_INDENT}")
 
     WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
