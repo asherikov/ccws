@@ -32,11 +32,14 @@ then
     source "${COLCON_CURRENT_PREFIX}/local_setup.sh"
 fi
 
-# TODO is this still necessary?
-# sometimes packages cannot be located, this should fix such issues
-if type rospack > /dev/null;
+if command -v "rospack" > /dev/null
 then
-    rospack profile
+    # TODO is this still necessary?
+    # sometimes packages cannot be located, this should fix such issues
+    if type rospack > /dev/null;
+    then
+        rospack profile
+    fi
 fi
 
 
