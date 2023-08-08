@@ -1,3 +1,6 @@
+# see profiles/build/common/cmake/ccws_vcpkg_install.cmake
+# not supported:
+#	some packages have issues on Linux
 export CCWS_VCPKG_VERSION?=2023.07.21
 export CCWS_VCPKG_ROOT?="${CCWS_CACHE}/vcpkg_${CCWS_VCPKG_VERSION}"
 

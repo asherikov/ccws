@@ -268,11 +268,54 @@ export ROS_LANG_DISABLE
 
 
 ##########################################################################################
-# conan
+# nix
 #
-# https://docs.conan.io/2/reference/environment.html#conan-home
-CCWS_CONAN_HOME=${CONAN_HOME:-"${CCWS_CACHE}/conan/${BUILD_PROFILE}"}
-export CCWS_CONAN_HOME
+
+if test -f "${CCWS_SOURCE_DIR}/flake.nix"
+then
+    source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
+
+    CCWS_BUILD_DIR_NIX="${CCWS_BUILD_DIR}/nix"
+
+    mkdir -p "${CCWS_BUILD_DIR_NIX}"
+    ${CCWS_NIX} develop "${CCWS_SOURCE_DIR}" --command env > "${CCWS_BUILD_DIR_NIX}/env"
+
+    #PATH="$(grep '^PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^PATH=//'):${PATH}"
+
+
+    # nix compilers mess up CMAKE_LIBRARY_ARCHITECTURE
+    if [ -z "${CC}" ]
+    then
+        CC=/usr/bin/gcc
+        export CC
+    fi
+    if [ -z "${CXX}" ]
+    then
+        CXX=/usr/bin/g++
+        export CXX
+    fi
+
+
+    NIX_CMAKE_PREFIX_PATH="$(grep '^CMAKE_PREFIX_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_PREFIX_PATH=//')"
+    NIX_CMAKE_LIBRARY_PATH="$(grep '^CMAKE_LIBRARY_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_LIBRARY_PATH=//')"
+    NIX_CMAKE_INCLUDE_PATH="$(grep '^CMAKE_INCLUDE_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_INCLUDE_PATH=//')"
+
+    if [ -n "${NIX_CMAKE_PREFIX_PATH}" ]
+    then
+        CMAKE_PREFIX_PATH="${NIX_CMAKE_PREFIX_PATH}:${CMAKE_PREFIX_PATH}"
+        export CMAKE_PREFIX_PATH
+    fi
+    if [ -n "${NIX_CMAKE_LIBRARY_PATH}" ]
+    then
+        CMAKE_LIBRARY_PATH="${NIX_CMAKE_LIBRARY_PATH}:${CMAKE_LIBRARY_PATH}"
+        export CMAKE_LIBRARY_PATH
+    fi
+    if [ -n "${NIX_CMAKE_INCLUDE_PATH}" ]
+    then
+        CMAKE_INCLUDE_PATH="${NIX_CMAKE_INCLUDE_PATH}:${CMAKE_INCLUDE_PATH}"
+        export CMAKE_INCLUDE_PATH
+    fi
+fi
 
 
 ##########################################################################################
