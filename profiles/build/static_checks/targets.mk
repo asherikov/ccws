@@ -164,6 +164,6 @@ mypy:
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${WORKSPACE_DIR}/src==g'); \
 		find ${WORKSPACE_DIR}/src/ -iname '*\.py' > ${WORKSPACE_DIR}/build/$@/input; \
 		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
-		test `cat ${WORKSPACE_DIR}/build/$@/input.filtered | wc -l` -eq 0 \
+		test -e ${WORKSPACE_DIR}/build/$@/input.filtered -a ! -s ${WORKSPACE_DIR}/build/$@/input.filtered \
 			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
 
