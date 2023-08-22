@@ -8,8 +8,12 @@ jobs:
     focal:
         runs-on: ubuntu-20.04
 
+        # gcc -> 10: https://github.com/orgs/community/discussions/63391
         steps:
             - uses: actions/checkout@v3
+            - run: find /usr/lib/gcc -iname libtsan_preinit.o 
+            - run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+            - run: sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
             - run: make -f .ccws/test_main.mk ROS_DISTRO=noetic
 
     #focal_ros2:
@@ -39,6 +43,13 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - run: make -f .ccws/test_vcpkg.mk
+
+    jammy_nix:
+        runs-on: ubuntu-22.04
+
+        steps:
+            - uses: actions/checkout@v3
+            - run: make -f .ccws/test_nix.mk
 
     cross_raspi:
         runs-on: ubuntu-20.04

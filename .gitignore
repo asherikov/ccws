@@ -7,3 +7,5 @@
 /pkg_template/vendor*
 .clangd
 scripts/wshandler/yq
+!/src/flake.nix
+!/src/flake.lock
