@@ -273,6 +273,9 @@ export ROS_LANG_DISABLE
 
 if test -f "${CCWS_SOURCE_DIR}/flake.nix"
 then
+    CCWS_NIX="nix --extra-experimental-features nix-command --extra-experimental-features flakes"
+    export CCWS_NIX
+
     source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 
     CCWS_BUILD_DIR_NIX="${CCWS_BUILD_DIR}/nix"
@@ -296,9 +299,9 @@ then
     fi
 
 
-    NIX_CMAKE_PREFIX_PATH="$(grep '^CMAKE_PREFIX_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_PREFIX_PATH=//')"
-    NIX_CMAKE_LIBRARY_PATH="$(grep '^CMAKE_LIBRARY_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_LIBRARY_PATH=//')"
-    NIX_CMAKE_INCLUDE_PATH="$(grep '^CMAKE_INCLUDE_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" || echo -n '' | sed 's/^CMAKE_INCLUDE_PATH=//')"
+    NIX_CMAKE_PREFIX_PATH="$(grep '^CMAKE_PREFIX_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_PREFIX_PATH=//' || echo -n '')"
+    NIX_CMAKE_LIBRARY_PATH="$(grep '^CMAKE_LIBRARY_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_LIBRARY_PATH=//' || echo -n '')"
+    NIX_CMAKE_INCLUDE_PATH="$(grep '^CMAKE_INCLUDE_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_INCLUDE_PATH=//' || echo -n '')"
 
     if [ -n "${NIX_CMAKE_PREFIX_PATH}" ]
     then
@@ -309,6 +312,8 @@ then
     then
         CMAKE_LIBRARY_PATH="${NIX_CMAKE_LIBRARY_PATH}:${CMAKE_LIBRARY_PATH}"
         export CMAKE_LIBRARY_PATH
+        LD_LIBRARY_PATH="${NIX_CMAKE_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+        export LD_LIBRARY_PATH
     fi
     if [ -n "${NIX_CMAKE_INCLUDE_PATH}" ]
     then

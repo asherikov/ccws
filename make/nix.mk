@@ -1,4 +1,7 @@
-export CCWS_NIX=nix --extra-experimental-features nix-command --extra-experimental-features flakes
+# not supported:
+#	due to possible conflicts with system libraries, e.g., glibc, it is
+#	necessary to install *everything* via nix packages, which currently
+#	not interesting for me
 CCWS_NIX_VERSION?=2.17.0
 CCWS_NIX_PKG_VERSION?=23.05
 
