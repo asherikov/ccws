@@ -11,7 +11,7 @@ function(ccws_vcpkg_install)
     add_custom_target(
         ccws_vcpkg_install_${PROJECT_NAME} ALL
         COMMAND ${CMAKE_COMMAND} -E echo "CCWS: installing dependencies using vcpkg"
-        COMMAND ${CMAKE_COMMAND} -E env "$ENV{CCWS_VCPKG_ROOT}/vcpkg" install
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKELEVEL --unset=MAKEFLAGS --unset=MFLAGS "$ENV{CCWS_VCPKG_ROOT}/vcpkg" install
             --x-install-root=${CMAKE_INSTALL_PREFIX}
             --triplet=${VCPKG_TRIPLET}
             ${OVERLAY}
