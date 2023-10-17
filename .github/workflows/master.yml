@@ -56,6 +56,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v3
-            - run: sudo apt update
-            - run: sudo apt upgrade --yes
+            #- run: sudo apt update
+            #- run: sudo apt upgrade --yes
             - run: make -f .ccws/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic

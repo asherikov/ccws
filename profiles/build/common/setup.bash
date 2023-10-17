@@ -152,7 +152,7 @@ case "${OS_DISTRO_HOST}" in
     focal)
         CCWS_LLVM_VERSION=12;;
     jammy)
-        CCWS_LLVM_VERSION=12;;
+        CCWS_LLVM_VERSION=14;;
 esac
 export CCWS_LLVM_VERSION
 
