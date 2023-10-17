@@ -50,6 +50,7 @@ cppcheck:
 	# 	uninitMemberVar -- triggers on a lot of valid code, e.g., when initializing in SetUp()
 	# 	syntaxError -- has issues with templated methods and test fixtures.
 	# 	useInitializationList -- initialization in the body of the constructor is ok
+	# 	unknownMacro -- too much hassle
 	#
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
@@ -71,6 +72,7 @@ cppcheck:
 			--suppress=uninitMemberVar \
 			--suppress=syntaxError \
 			--suppress=useInitializationList \
+			--suppress=unknownMacro \
 			\$${EXCEPTIONS} \
 			3>&1 1>&2 2>&3 \
 			| tee '${WORKSPACE_DIR}/build/$@/cppcheck.err' "
