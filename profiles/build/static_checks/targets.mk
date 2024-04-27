@@ -51,15 +51,23 @@ cppcheck:
 	# 	syntaxError -- has issues with templated methods and test fixtures.
 	# 	useInitializationList -- initialization in the body of the constructor is ok
 	# 	unknownMacro -- too much hassle
+	# 	useStlAlgorithm -- not nocessarily makes code cleaner and easier to read
 	#
 	# --inconclusive -- can be used to catch some extra issues
 	# --error-exitcode=1 -- fails with no errors printed
-	mkdir -p ${WORKSPACE_DIR}/build/$@
+	#
+	# Header files are specified explicitly since cppcheck ignores them if
+	# directory is provided as an input, the correct way is probably to specify
+	# header paths with `-I` flags but that is not trivial in a workspace,
+	# might require parsing compilation commands from cmake.
+	${MAKE} static_checks_generic_dir_filter TARGET=$@
+	find ${WORKSPACE_DIR}/src -type f -iname '*.hpp' -or -iname "*.cpp" -or -iname "*.h" > ${WORKSPACE_DIR}/build/$@/input
+	rm -f '${WORKSPACE_DIR}/build/$@/cppcheck.err'
 	bash -c "${SETUP_SCRIPT}; \
-		EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ -i /g'); \
+		source ${WORKSPACE_DIR}/build/$@/filter > ${WORKSPACE_DIR}/build/$@/input.filtered; \
+		cat ${WORKSPACE_DIR}/build/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
 		cppcheck \
-			${WORKSPACE_DIR}/src \
-			-j ${JOBS} \
+			-j 1 \
 			--relative-paths \
 			--quiet --verbose --force \
 			--template='[{file}:{line}]  {severity}  {id}  {message}' \
@@ -73,9 +81,10 @@ cppcheck:
 			--suppress=syntaxError \
 			--suppress=useInitializationList \
 			--suppress=unknownMacro \
-			\$${EXCEPTIONS} \
+			--suppress=useStlAlgorithm \
 			3>&1 1>&2 2>&3 \
-			| tee '${WORKSPACE_DIR}/build/$@/cppcheck.err' "
+			{} \
+			| tee --append '${WORKSPACE_DIR}/build/$@/cppcheck.err' "
 	test ! -s '${WORKSPACE_DIR}/build/$@/cppcheck.err' || exit 1
 
 
@@ -153,7 +162,7 @@ catkin_lint:
 pylint:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/://' -e 's/:/,/g'); \
-		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src'"
+		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_DIR}/src'"
 
 flake8:
 	bash -c "${SETUP_SCRIPT}; \

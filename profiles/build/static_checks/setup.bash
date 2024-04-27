@@ -14,9 +14,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 #
 
 # popl.hpp
-CCWS_STATIC_DIR_EXCEPTIONS="${CCWS_STATIC_DIR_EXCEPTIONS}:${CCWS_SOURCE_DIR}/staticoma/src/3rdparty"
+CCWS_STATIC_DIR_EXCEPTIONS="${CCWS_STATIC_DIR_EXCEPTIONS}$(ccws_read_exceptions paths)"
 # shellcheck disable=SC2269
-CCWS_STATIC_PKG_EXCEPTIONS="${CCWS_STATIC_PKG_EXCEPTIONS}"
+CCWS_STATIC_PKG_EXCEPTIONS="${CCWS_STATIC_PKG_EXCEPTIONS}$(ccws_read_exceptions packages)"
 export CCWS_STATIC_DIR_EXCEPTIONS CCWS_STATIC_PKG_EXCEPTIONS
 
 

@@ -335,3 +335,12 @@ umask u=rwx,g=rx,o=rx
 DEBIAN_FRONTEND=noninteractive
 export DEBIAN_FRONTEND
 
+ccws_read_exceptions()
+{
+    FILE="${CCWS_SOURCE_DIR}/.ccws/${BUILD_PROFILE}.exceptions.${1}"
+
+    if [ -f "${FILE}" ]
+    then
+        sed -e 's=^=:${CCWS_SOURCE_DIR}/=' < "${FILE}" | tr -d '\n'
+    fi
+}

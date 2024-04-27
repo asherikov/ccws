@@ -51,6 +51,14 @@ test:
 	${MAKE} wstest PKG=staticoma EXEC_PROFILE="core_pattern valgrind"
 	# static checks & documentation
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
+	#  must fail without exceptions
+	! ${MAKE} BUILD_PROFILE=static_checks
+	#  must succeed with exceptions
+	cp -R examples/.ccws ./src/
+	${MAKE} BUILD_PROFILE=static_checks
+	#  must succeed without package exceptions
+	rm ./src/.ccws/static_checks.exceptions.packages
+	cp -R examples/.ccws src/
 	${MAKE} BUILD_PROFILE=static_checks
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} PKG=staticoma BUILD_PROFILE=doxygen
