@@ -14,6 +14,9 @@ wspurge: wsclean artifacts_clean
 	rm -Rf src
 	rm -Rf "${BUILD_PROFILES_DIR}/*/rosdep"
 
+cache_clean:
+	find ${CCWS_CACHE} -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
+
 bp_purge:
 	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_purge
 

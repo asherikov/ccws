@@ -56,6 +56,7 @@ test:
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} PKG=staticoma BUILD_PROFILE=doxygen
 	${MAKE} BUILD_PROFILE=doxygen
+	${MAKE} cache_clean
 
 build_with_profile:
 	${MAKE} wsclean
