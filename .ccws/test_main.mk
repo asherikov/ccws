@@ -32,7 +32,6 @@ test:
 	# clangd
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
-	wc -l cache/clangd/reldebug/compile_commands.json
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./

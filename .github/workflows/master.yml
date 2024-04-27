@@ -10,8 +10,8 @@ jobs:
 
         # gcc -> 10: https://github.com/orgs/community/discussions/63391
         steps:
-            - uses: actions/checkout@v3
-            - run: find /usr/lib/gcc -iname libtsan_preinit.o 
+            - uses: actions/checkout@v4
+            - run: find /usr/lib/gcc -iname libtsan_preinit.o
             - run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
             - run: sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
             - run: make -f .ccws/test_main.mk ROS_DISTRO=noetic
@@ -20,42 +20,42 @@ jobs:
     #    runs-on: ubuntu-20.04
     #
     #    steps:
-    #        - uses: actions/checkout@v3
+    #        - uses: actions/checkout@v4
     #        - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=foxy
 
     jammy_ros2:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - run: make -f .ccws/test_main_ros2.mk ROS_DISTRO=humble
 
     jammy_conan:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - run: make -f .ccws/test_conan.mk
 
     jammy_vcpkg:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - run: make -f .ccws/test_vcpkg.mk
 
     jammy_nix:
         runs-on: ubuntu-22.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - run: make -f .ccws/test_nix.mk
 
     cross_raspi:
         runs-on: ubuntu-20.04
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             #- run: sudo apt update
             #- run: sudo apt upgrade --yes
             - run: make -f .ccws/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic

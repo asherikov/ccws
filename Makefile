@@ -26,7 +26,13 @@ export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
-export CCWS_CACHE?=${WORKSPACE_DIR}/cache
+
+# Cache directory
+# 1. keep cache in ccws root directory, old behavior, restore using config.mk if necessary
+#export CCWS_CACHE?=${WORKSPACE_DIR}/cache
+# 2. follow XDG specification
+XDG_CACHE_HOME?=${HOME}/.cache
+export CCWS_CACHE?=${XDG_CACHE_HOME}/ccws
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
