@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2317
 
 set -e
+set -o pipefail
 
 
 help()
@@ -22,6 +24,8 @@ help()
     echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
     echo "  [-p|--policy {ask}|add|show] scrape"
     echo "  add git <NAME> <URL> <VERSION>"
+    echo "  set_version_by_url <URL> <VERSION>"
+    echo "  set_version_by_name <NAME> <VERSION>"
     echo "  remove <NAME>"
     echo "  [-p|--policy keep|replace] merge <FILENAME>"
     exit "${EXIT_CODE}"
@@ -60,7 +64,7 @@ git_status()
     {
         echo "name|version (actual)|repository";
         echo "----|----------------|----------";
-        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" sh -c "${WSHANDLER} dir_git_status {}";
+        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done
     } | column -t -s '|'
 
     echo
@@ -71,24 +75,24 @@ git_status()
 
 git_update()
 {
-    "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" --max-procs="${WSH_JOBS}" sh -c "${WSHANDLER} dir_git_update {} ${WSH_COMMAND_SUFFIX}"
+    "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" "${WSHANDLER[@]}" dir_git_update
 }
 
 git_clean()
 {
-    "${WSH_WORKSPACE_TYPE}_git_repo_names" | "${WSH_XARGS[@]}" --max-procs="${WSH_JOBS}" rm -rf "${WSH_WORKSPACE_ROOT}/{}"
+    "${WSH_WORKSPACE_TYPE}_git_repo_names" | while read -r NAME; do rm -rf "${WSH_WORKSPACE_ROOT:?}/${NAME}"; done
 }
 
 git_scrape()
 {
-    GIT_DIRS=$(find "${WSH_WORKSPACE_ROOT}" -type d -name ".git" -printf "%P\n" | sed "s=/.git==g" | sort)
+    GIT_DIRS=$(cd "${WSH_WORKSPACE_ROOT}" && find ./ -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
     UKNOWN_GIT_DIRS=$(comm -2 -3 <(echo "${GIT_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_git_repo_names" | sort))
 
     for GIT_DIR in ${UKNOWN_GIT_DIRS}
     do
         echo "Processing ${GIT_DIR}"
         cd "${WSH_WORKSPACE_ROOT}/${GIT_DIR}"
-        GIT_REPO=$(git remote get-url origin | tr -d '\n')
+        GIT_REPO=$(git remote get-url origin | tr -d '\n' || true)
 
         if [ "${GIT_REPO}" == "" ]
         then
@@ -139,7 +143,7 @@ dir_git_status()
     then
         cd "${GIT_DIR}"
         # git status --porcelain | awk '{print $1}' | sort | uniq | tr -d '\n'
-        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long | tr -d '\n')
+        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
     fi
 
     echo "${NAME}|${GIT_VERSION} (${GIT_ACTUAL_VERSION})|${GIT_REPO}"
@@ -163,7 +167,8 @@ dir_git_update()
             then
                 git checkout "${GIT_VERSION}"
             fi
-            if ! (git show-ref --tags "${GIT_VERSION}" --quiet)
+            # if we are on a branch make sure that it is updated
+            if (git branch --show-current | grep "${GIT_VERSION}")
             then
                 git pull
             fi
@@ -220,7 +225,11 @@ check_workspace()
         esac
     fi
 
-    WSHANDLER="\"$(realpath "${BASH_SOURCE[0]}")\" -r \"${WSH_WORKSPACE_ROOT}\" -c \"${WSH_CACHE_DIR}\" -t \"${WSH_WORKSPACE_TYPE}\""
+    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}")
+    if [ -n "${WSH_KEEP_GOING}" ]
+    then
+        WSHANDLER+=("${WSH_KEEP_GOING}")
+    fi
 }
 
 
@@ -316,14 +325,40 @@ execute_add()
     "${WSH_WORKSPACE_TYPE}_$1_add" "$@"
 }
 
+set_version()
+{
+    TARGET_MATCH="$2"
+    TARGET_VERSION="$3"
+
+    case $1 in
+        set_version_by_url) TYPE=REPO;;
+        set_version_by_name) TYPE=NAME;;
+        *) help 1;;
+    esac
+
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        "${WSH_WORKSPACE_TYPE}_${SOURCE_TYPE}_repo_triplets" \
+            | while read -r NAME REPO VERSION; \
+            do \
+                if [ "${TARGET_MATCH}" = "${!TYPE}" ];\
+                then \
+                    echo "${NAME}: changing '${VERSION}' to '${TARGET_VERSION}'"; \
+                    "${WSH_WORKSPACE_TYPE}_${SOURCE_TYPE}_add" "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}"; \
+                    exit; \
+                fi; \
+            done
+    done
+}
+
 
 
 WSH_SOURCE_TYPES="git"
 WSH_COMMAND_POLICY=default
 WSH_JOBS=1
 WSH_INDENT=4
-WSH_XARGS=(xargs --no-run-if-empty -I {})
-WSH_COMMAND_SUFFIX=""
+WSH_XARGS=(xargs --no-run-if-empty -L 1 -P "${WSH_JOBS}")
+WSH_KEEP_GOING=""
 WSH_YQ_BINARY="yq"
 
 while [[ $# -gt 0 ]]
@@ -358,7 +393,7 @@ do
             shift; shift;;
 
         -k|--keep-going)
-            WSH_COMMAND_SUFFIX="|| true"
+            WSH_KEEP_GOING="-k"
             shift;;
 
         status|update|clean|scrape)
@@ -369,6 +404,20 @@ do
         add|remove|merge)
             check_workspace "$1"
             "execute_$1" "${@:2}"
+            exit;;
+
+        set_version_by_url|set_version_by_name)
+            check_workspace "$1"
+            set_version "$1" "${@:2}"
+            exit;;
+
+        dir_*_update)
+            if [ -n "${WSH_KEEP_GOING}" ]
+            then
+                "$1" "${@:2}" || true
+            else
+                "$1" "${@:2}"
+            fi
             exit;;
 
         dir_*)

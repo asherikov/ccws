@@ -1,3 +1,6 @@
+#include <gtest/gtest.h>
+#include <ros/ros.h>
+
 TEST(TestDemo, Test)
 {
     EXPECT_TRUE(true);

@@ -27,4 +27,4 @@ if (NOT DISABLE_EXTENDED_TESTS)
     add_rostest(launch/demo_rostest_parametrized.test
                 DEPENDENCIES test_demo_gtest
                 ARGS parameter1:=parameter2 parameter2:=parameter1)
-endif
+endif()
