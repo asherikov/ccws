@@ -6,7 +6,6 @@ WORKSPACE_DIR=${WORKSPACE_DIR:-"$(pwd)"}
 BUILD_PROFILES_DIR=${BUILD_PROFILES_DIR:-"${WORKSPACE_DIR}/profiles/build"}
 export WORKSPACE_DIR BUILD_PROFILES_DIR
 
-
 if [ -z "${BUILD_PROFILE}" ]
 then
     echo "Profile is not defined"
@@ -15,6 +14,19 @@ else
     echo "Selected profile: '${BUILD_PROFILE}'"
     export BUILD_PROFILE
 fi
+
+# some profiles can be used as wrappers
+#if [ -z "${SOURCED_BUILD_PROFILE}" ]
+#then
+#    SOURCED_BUILD_PROFILE="${BUILD_PROFILE}"
+#    export SOURCED_BUILD_PROFILE
+#else
+#    if [ "${SOURCED_BUILD_PROFILE}" != "${BUILD_PROFILE}" ]
+#    then
+#        echo "CCWS: cannot source '${BUILD_PROFILE}' profile, '${SOURCED_BUILD_PROFILE}' is already in use."
+#        return 0
+#    fi
+#fi
 
 if [ -z "${CCWS_ARTIFACTS_DIR}" ]
 then
@@ -341,6 +353,11 @@ ccws_read_exceptions()
 
     if [ -f "${FILE}" ]
     then
-        sed -e 's=^=:${CCWS_SOURCE_DIR}/=' < "${FILE}" | tr -d '\n'
+        if [ "$1" = "paths" ]
+        then
+            sed -e 's=^=:${CCWS_SOURCE_DIR}/=' < "${FILE}" | tr -d '\n'
+        else
+            sed -e 's=^=:=' < "${FILE}" | tr -d '\n'
+        fi
     fi
 }
