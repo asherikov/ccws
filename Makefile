@@ -189,6 +189,10 @@ add:
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
 		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"
 
+graph:
+	@test -z "${PKG}" || ${CMD_PKG_GRAPH} --packages-up-to ${PKG}
+	@test -n "${PKG}" || ${CMD_PKG_GRAPH}
+
 
 ##
 ## Other targets

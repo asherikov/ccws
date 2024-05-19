@@ -12,7 +12,8 @@ install_ccws_deps:
 		python3-colcon-ros \
 		python3-colcon-package-selection \
 		python3-colcon-package-information \
-		python3-colcon-bash
+		python3-colcon-bash \
+		python3-colcon-cmake
 	test -d /etc/ros/rosdep/sources.list.d/ || rosdep init
 
 install_python3:

@@ -42,6 +42,13 @@ ctest: assert_PKG_arg_must_be_specified
 		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_${PKG}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
+test_with_deps: assert_PKG_arg_must_be_specified
+	${MAKE} --quiet wstest_generic CMD_PKG_NAME_LIST="${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}" TEST_TARGET=test EXIT_STATUS=1
+
+ctest_with_deps: assert_PKG_arg_must_be_specified
+	${MAKE} --quiet wstest_generic CMD_PKG_NAME_LIST="${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}" TEST_TARGET=ctest EXIT_STATUS=1
+
+
 # compatibility
 showtestresults: test_results
 

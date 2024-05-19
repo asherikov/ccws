@@ -27,6 +27,7 @@ help()
     echo "  set_version_by_url <URL> <VERSION>"
     echo "  set_version_by_name <NAME> <VERSION>"
     echo "  remove <NAME>"
+    echo "  remove_by_url <URL>"
     echo "  [-p|--policy keep|replace] merge <FILENAME>"
     exit "${EXIT_CODE}"
 }
@@ -302,7 +303,24 @@ repos_remove()
 execute_remove()
 {
     backup
-    "${WSH_WORKSPACE_TYPE}_remove"
+    "${WSH_WORKSPACE_TYPE}_remove" "$@"
+}
+
+
+rosinstall_remove_by_url()
+{
+    "${WSH_YQ[@]}" "del(.[] | select(.*.uri == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+repos_remove_by_url()
+{
+    "${WSH_YQ[@]}" "del(.repositories.* | select(.url == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+execute_remove_by_url()
+{
+    backup
+    "${WSH_WORKSPACE_TYPE}_remove_by_url" "$@"
 }
 
 
@@ -401,7 +419,7 @@ do
             execute_command "$1"
             exit;;
 
-        add|remove|merge)
+        add|remove|merge|remove_by_url)
             check_workspace "$1"
             "execute_$1" "${@:2}"
             exit;;

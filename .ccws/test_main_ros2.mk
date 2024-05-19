@@ -4,6 +4,21 @@ export ROS_DISTRO?=foxy
 
 
 test:
+	# package & profile creation
+	${MAKE} wspurge
+	rm -Rf profiles/build/test_profile/
+	${MAKE} bp_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
+	${MAKE} bp_install_build BUILD_PROFILE=test_profile
+	${MAKE} wsinit
+	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
+	${MAKE} wsscrape_all
+	#${MAKE} dep_to_repolist PKG=test_pkg
+	${MAKE} wsupdate
+	${MAKE} log_output TARGET=wsstatus
+	#${MAKE} dep_install PKG=test_pkg
+	#${MAKE} test_pkg BUILD_PROFILE=test_profile
+	# build
+	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
@@ -20,9 +35,20 @@ test:
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
+	# check valgrind exec profile
+	${MAKE} ep_install EXEC_PROFILE=valgrind
+	${MAKE} wstest EXEC_PROFILE=valgrind
+	# check core_pattern exec profile
+	${MAKE} ep_install EXEC_PROFILE=core_pattern
+	${MAKE} wstest EXEC_PROFILE="core_pattern valgrind"
+	# clangd
+	${MAKE} bp_install_build BUILD_PROFILE=clangd
+	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
 	# documentation
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} BUILD_PROFILE=doxygen
+	${MAKE} graph PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} graph
 	${MAKE} cache_clean
 
 
@@ -30,5 +56,9 @@ build_with_profile:
 	${MAKE} wsclean
 	${MAKE} bp_install_build
 	${MAKE} examples_rclcpp_minimal_subscriber
-	${MAKE} test PKG=examples_rclcpp_minimal_subscriber
-	${MAKE} ctest PKG=examples_rclcpp_minimal_subscriber
+	# workspace test
+	${MAKE} wstest
+	${MAKE} wsctest
+	# test recursively
+	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber

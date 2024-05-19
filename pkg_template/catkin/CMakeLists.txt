@@ -239,6 +239,8 @@ include_directories(
 #    if (NOT TARGET gmock)
 #        find_package(GMock REQUIRED)
 #    endif()
-#    add_subdirectory(test)
+#    if (CATKIN_ENABLE_TESTING) # redundant "if" to make catkin_lint happy
+#        add_subdirectory(test)
+#    endif()
 #endif()
 #----------------------------------------------

@@ -29,9 +29,6 @@ test:
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep staticoma | cut -f 1 |  xargs sudo apt purge --yes
-	# clangd
-	${MAKE} bp_install_build BUILD_PROFILE=clangd
-	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./
@@ -43,26 +40,31 @@ test:
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
+	# clangd
+	${MAKE} bp_install_build BUILD_PROFILE=clangd
+	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
-	${MAKE} wstest PKG=staticoma EXEC_PROFILE=valgrind
+	${MAKE} wstest EXEC_PROFILE=valgrind
 	# check core_pattern exec profile
 	${MAKE} ep_install EXEC_PROFILE=core_pattern
-	${MAKE} wstest PKG=staticoma EXEC_PROFILE="core_pattern valgrind"
+	${MAKE} wstest EXEC_PROFILE="core_pattern valgrind"
 	# static checks & documentation
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
-	#  must fail without exceptions
+	# must fail without exceptions
 	! ${MAKE} BUILD_PROFILE=static_checks
-	#  must succeed with exceptions
+	# must succeed with exceptions
 	cp -R examples/.ccws ./src/
 	${MAKE} BUILD_PROFILE=static_checks
-	#  must succeed without package exceptions
+	# must succeed without package exceptions
 	rm ./src/.ccws/static_checks.exceptions.packages
 	cp -R examples/.ccws src/
 	${MAKE} BUILD_PROFILE=static_checks
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} PKG=staticoma BUILD_PROFILE=doxygen
 	${MAKE} BUILD_PROFILE=doxygen
+	${MAKE} graph PKG=staticoma
+	${MAKE} graph
 	${MAKE} cache_clean
 
 build_with_profile:
@@ -71,3 +73,6 @@ build_with_profile:
 	${MAKE} staticoma
 	${MAKE} wstest
 	${MAKE} wsctest
+	# test recursively
+	${MAKE} test_with_deps PKG=staticoma
+	${MAKE} ctest_with_deps PKG=staticoma
