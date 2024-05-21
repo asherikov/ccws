@@ -60,3 +60,23 @@ CCWS_CATKIN_LINT_EXCEPTIONS="\
 --ignore missing_directory"
 export CCWS_CATKIN_LINT_EXCEPTIONS
 
+
+##########################################################################################
+# cppcheck
+#
+# suppressions:
+# 	uninitMemberVar -- triggers on a lot of valid code, e.g., when initializing in SetUp()
+# 	syntaxError -- has issues with templated methods and test fixtures.
+# 	useInitializationList -- initialization in the body of the constructor is ok
+# 	unknownMacro -- too much hassle
+# 	useStlAlgorithm -- not nocessarily makes code cleaner and easier to read
+# 	unusedStructMember -- false positives
+#
+CCWS_CPPCHECK_EXCEPTIONS="\
+--suppress=uninitMemberVar \
+--suppress=syntaxError \
+--suppress=useInitializationList \
+--suppress=unknownMacro \
+--suppress=useStlAlgorithm \
+--suppress=unusedStructMember"
+export CCWS_CPPCHECK_EXCEPTIONS

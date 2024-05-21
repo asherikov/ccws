@@ -355,7 +355,7 @@ ccws_read_exceptions()
     then
         if [ "$1" = "paths" ]
         then
-            sed -e 's=^=:${CCWS_SOURCE_DIR}/=' < "${FILE}" | tr -d '\n'
+            sed -e "s=^=:${CCWS_SOURCE_DIR}/=" < "${FILE}" | tr -d '\n'
         else
             sed -e 's=^=:=' < "${FILE}" | tr -d '\n'
         fi

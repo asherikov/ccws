@@ -43,6 +43,11 @@ test:
 	# clangd
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	# cppcheck
+	cp -R examples/.ccws ./src/
+	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
+	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
+	rm -Rf ./src/.ccws
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
 	${MAKE} wstest EXEC_PROFILE=valgrind
