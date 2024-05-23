@@ -70,7 +70,7 @@ cppcheck:
 			--enable=performance \
 			--enable=portability \
 			--inline-suppr \
-			${CCWS_CPPCHECK_EXCEPTIONS} \
+			\$${CCWS_CPPCHECK_EXCEPTIONS} \
 			3>&1 1>&2 2>&3 \
 			{} \
 			| tee --append '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/cppcheck.err' "

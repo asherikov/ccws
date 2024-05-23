@@ -20,7 +20,7 @@ bp_cppcheck_build: assert_BASE_BUILD_PROFILE_must_exist
 			--enable=portability \
 			--inline-suppr \
 			-i /usr \
-			${CCWS_CPPCHECK_EXCEPTIONS} \
+			\$${CCWS_CPPCHECK_EXCEPTIONS} \
 			--suppressions-list='${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions' \
 			--project='${WORKSPACE_DIR}/build/${BASE_BUILD_PROFILE}/compile_commands.json' \
 			3>&1 1>&2 2>&3 \
