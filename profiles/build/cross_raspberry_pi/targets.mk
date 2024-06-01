@@ -32,8 +32,7 @@ bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_p
 		cd \"\$${CCWS_SYSROOT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
 		sudo update-binfmts --enable qemu-arm; \
-       	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc \
-	        | sudo chroot ./ apt-key add -; \
+		wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee ./etc/apt/trusted.gpg.d/ros.asc; \
     	sudo chroot ./ /bin/sh -c \"\
             echo 'deb http://packages.ros.org/ros/ubuntu' > /tmp/ros-latest.list; \
             lsb_release -sc                               >> /tmp/ros-latest.list; \

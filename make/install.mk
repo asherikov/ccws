@@ -4,7 +4,7 @@ PIP3_INSTALL?=python3 -m pip install
 install_ccws_deps:
 	# moreutils: ts (timestamping utility)
 	${APT_INSTALL} wget gnupg2 moreutils ca-certificates
-	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
 	command -v "yq" > /dev/null || test -x "${WORKSPACE_DIR}/scripts/wshandler/yq" || ${MAKE} wswraptarget TARGET="install_yq"

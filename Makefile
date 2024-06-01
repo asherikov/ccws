@@ -19,7 +19,6 @@ export VENDOR?=ccws
 # default new package license
 export LICENSE?=Apache 2.0
 
-
 export WORKSPACE_DIR=$(shell pwd)
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
@@ -36,10 +35,15 @@ export CCWS_CACHE?=${XDG_CACHE_HOME}/ccws
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
+# default package to build can be specified in source directory or via command line,
+# when not provided usually all packages in the workspace are processed
+export PKG?=$(shell (cat "${WORKSPACE_DIR}/src/.ccws/package" 2> /dev/null | paste -d ' ' -s) || echo "")
+
 
 # helpers
 export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
 export EXEC_PROFILES_DIR=${WORKSPACE_DIR}/profiles/exec/
+MAKE_QUIET=${MAKE} --quiet --no-print-directory
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
@@ -84,7 +88,9 @@ wswraptarget:
 	bash -c "time (${SETUP_SCRIPT}; ${MAKE} ${TARGET})"
 
 wslist:
-	@${CMD_PKG_NAME_LIST}
+	@test -z "${PKG}" || ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}
+	@test -n "${PKG}" || ${CMD_PKG_NAME_LIST}
+
 
 # Reset & initialize workspace
 wsinit:

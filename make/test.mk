@@ -2,21 +2,21 @@ TEST_REGEX?=.*
 
 # generic test target, it is recommended to use more specific targets below
 wstest_generic:
-	${CMD_PKG_NAME_LIST} | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
+	${MAKE_QUIET} wslist | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
 
 # stops on first error
 wstest_faststop:
-	${MAKE} wstest_generic TEST_TARGET=test EXIT_STATUS=255
+	${MAKE_QUIET} wstest_generic TEST_TARGET=test EXIT_STATUS=255
 
 # stops on first error
 wsctest_faststop:
-	${MAKE} wstest_generic TEST_TARGET=ctest EXIT_STATUS=255
+	${MAKE_QUIET} wstest_generic TEST_TARGET=ctest EXIT_STATUS=255
 
 wstest:
-	${MAKE} --quiet wstest_generic TEST_TARGET=test EXIT_STATUS=1
+	${MAKE_QUIET} wstest_generic TEST_TARGET=test EXIT_STATUS=1
 
 wsctest:
-	${MAKE} --quiet wstest_generic TEST_TARGET=ctest EXIT_STATUS=1
+	${MAKE_QUIET} wstest_generic TEST_TARGET=ctest EXIT_STATUS=1
 
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
@@ -43,10 +43,10 @@ ctest: assert_PKG_arg_must_be_specified
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
 test_with_deps: assert_PKG_arg_must_be_specified
-	${MAKE} --quiet wstest_generic CMD_PKG_NAME_LIST="${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}" TEST_TARGET=test EXIT_STATUS=1
+	${MAKE_QUIET} wstest_generic TEST_TARGET=test EXIT_STATUS=1
 
 ctest_with_deps: assert_PKG_arg_must_be_specified
-	${MAKE} --quiet wstest_generic CMD_PKG_NAME_LIST="${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}" TEST_TARGET=ctest EXIT_STATUS=1
+	${MAKE_QUIET} wstest_generic TEST_TARGET=ctest EXIT_STATUS=1
 
 
 # compatibility

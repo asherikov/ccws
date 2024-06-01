@@ -40,7 +40,7 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
-	${MAKE} --quiet private_info_with_deps \
+	${MAKE_QUIET} private_info_with_deps \
 		| grep "^path:" | sed 's/path: //' | sort \
 		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
 	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all

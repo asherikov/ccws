@@ -23,8 +23,8 @@ private_dep_to_repolist: private_dep_list
 # generate list of dependencies which are not present in the workspace
 private_dep_list:
 	mkdir -p ${DEPLIST_DIR}
-	${CMD_PKG_NAME_LIST} | sort > ${DEPLIST_DIR}/ccws.list
-	${MAKE} --quiet private_info_with_deps \
+	${MAKE_QUIET} wslist | sort > ${DEPLIST_DIR}/ccws.list
+	${MAKE_QUIET} private_info_with_deps \
 		| grep '\(build:\)\|\(run:\)\|\(test:\)' \
 		| sed -e 's/build://' -e 's/run://' -e 's/test://' -e 's/ /\n/g' \
 		| sort | uniq | grep -v '^$$' > ${DEPLIST_FILE}.all
@@ -34,6 +34,5 @@ private_dep_list:
 
 # `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
 private_info_with_deps:
-	@test -z "${PKG}" || ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG} | xargs ${CMD_PKG_INFO} --packages-select
-	@test -n "${PKG}" || ${CMD_PKG_NAME_LIST} | xargs ${CMD_PKG_INFO} --packages-select
+	${MAKE_QUIET} wslist | xargs ${CMD_PKG_INFO} --packages-select
 

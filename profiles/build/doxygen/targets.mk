@@ -6,26 +6,24 @@ doxclean:
 		rm -Rf \$${CCWS_DOXYGEN_OUTPUT_DIR}/doxygen; \
 		rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}"
 
-bp_doxygen_build:
-	test "${PKG}" = "" || ${MAKE} dox
-	test "${PKG}" != "" || ${MAKE} doxall
-
-assert_doxygen_installed:
-	type doxygen > /dev/null
-
-doxall: doxclean assert_doxygen_installed
+bp_doxygen_build: doxclean assert_doxygen_installed
 	bash -c "${SETUP_SCRIPT}; \
-        ${CMD_PKG_NAME_LIST} | xargs -I {} bash -c '${MAKE} dox PKG={}' || true; \
+        ${MAKE_QUIET} wslist | xargs -I {} bash -c '${MAKE} dox PKG={}' || true; \
+		${MAKE_QUIET} wslist | wc -l > \$${CCWS_DOXYGEN_WORKING_DIR}/package_num; \
 		${CMD_PKG_GRAPH} | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/pkg_dependency_graph.svg; \
         cd \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
-        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > \$${CCWS_DOXYGEN_OUTPUT_DIR}/index.html; \
+        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > index.html; \
 		echo '<ul>' >> index.html; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
 			| sed -e 's|./\(.*\)/index.html|<li><a href=\"./\1/index.html\">\1</a></li>|' >> index.html; \
 		echo '</ul><h3>Summary</h3><ul><li>packages: ' >> index.html; \
-		${CMD_PKG_NAME_LIST} | wc -l >> index.html; \
+		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.html; \
 		echo '</li>' >> index.html; \
-        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.html >> \$${CCWS_DOXYGEN_OUTPUT_DIR}/index.html"
+        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.html >> index.html"
+
+assert_doxygen_installed:
+	type doxygen > /dev/null
+
 
 # documentation for dependencies should be generated first for cross linking
 dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
