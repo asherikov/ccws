@@ -7,7 +7,7 @@ install_ccws_deps:
 	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
-	${MAKE} wswraptarget TARGET="install_yq"
+	command -v "yq" > /dev/null || test -x "${WORKSPACE_DIR}/scripts/wshandler/yq" || ${MAKE} wswraptarget TARGET="install_yq"
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
