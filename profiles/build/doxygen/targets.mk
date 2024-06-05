@@ -10,12 +10,12 @@ bp_doxygen_build: doxclean assert_doxygen_installed
 	bash -c "${SETUP_SCRIPT}; \
         ${MAKE_QUIET} wslist | xargs -I {} bash -c '${MAKE} dox PKG={}' || true; \
 		${MAKE_QUIET} wslist | wc -l > \$${CCWS_DOXYGEN_WORKING_DIR}/package_num; \
-		${CMD_PKG_GRAPH} | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/pkg_dependency_graph.svg; \
+		${MAKE_QUIET} graph | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/pkg_dependency_graph.svg; \
         cd \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
         cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > index.html; \
 		echo '<ul>' >> index.html; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
-			| sed -e 's|./\(.*\)/index.html|<li><a href=\"./\1/index.html\">\1</a></li>|' >> index.html; \
+			| sed -e 's|./\(.*\)/index.html|<li><a href=\"./\1/index.html\">\1</a>   <a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></li>|' >> index.html; \
 		echo '</ul><h3>Summary</h3><ul><li>packages: ' >> index.html; \
 		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.html; \
 		echo '</li>' >> index.html; \
@@ -38,8 +38,7 @@ dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
             | xargs -I {} find \$${CCWS_DOXYGEN_WORKING_DIR} -mindepth 2 -maxdepth 2 -ipath '*{}/Doxyfile.append' >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/deps; \
         cat \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/deps | xargs -I {} cat {} >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
         mkdir -p \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}; \
-		${CMD_PKG_GRAPH} --packages-up-to ${PKG} \
-			| sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"../\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}/pkg_dependency_graph.svg; \
+		${MAKE_QUIET} graph | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"../\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}/pkg_dependency_graph.svg; \
         cd `${CMD_PKG_LIST} | grep '^${PKG}[[:blank:]]' | sed 's/.*\t\(.*\)\t.*/\1/'`; \
         echo 'TAGFILES+=\"\$$(CCWS_DOXYGEN_WORKING_DIR)/${PKG}/tags.xml=../${PKG}/\"' > \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile.append; \
         find ~+ -path '*include/*' -type d | sed -e 's/\(.*\)/INCLUDE_PATH+=\"\1\"/' >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile.append; \
