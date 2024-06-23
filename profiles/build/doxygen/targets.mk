@@ -13,10 +13,10 @@ bp_doxygen_build: doxclean assert_doxygen_installed
 		${MAKE_QUIET} graph | sed 's@  \"\\(.*\\)\";@  "\\1" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/pkg_dependency_graph.svg; \
         cd \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
         cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > index.html; \
-		echo '<ul>' >> index.html; \
+		echo '<table border="1">' >> index.html; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
-			| sed -e 's|./\(.*\)/index.html|<li><a href=\"./\1/index.html\">\1</a>   <a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></li>|' >> index.html; \
-		echo '</ul><h3>Summary</h3><ul><li>packages: ' >> index.html; \
+			| sed -e 's|./\(.*\)/index.html|<tr><td><a href=\"./\1/index.html\">\1</a></td><td><a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></td><tr>|' >> index.html; \
+		echo '</table><h3>Summary</h3><ul><li>packages: ' >> index.html; \
 		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.html; \
 		echo '</li>' >> index.html; \
         cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.html >> index.html"
