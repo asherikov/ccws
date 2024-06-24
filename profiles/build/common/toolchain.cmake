@@ -63,3 +63,10 @@ set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE S
 #set(Boost_DEBUG ON CACHE STRING "" FORCE)
 #set(Protobuf_DEBUG ON CACHE STRING "" FORCE)
 
+
+###############################################################################
+# workspace specific cmake parameters
+###
+
+include("$ENV{CCWS_SOURCE_EXTRAS}/toolchain.cmake" OPTIONAL)
+

@@ -1,6 +1,7 @@
 THIS_MAKEFILE=.ccws/test_main.mk
 
 test:
+	# ---
 	# package & profile creation
 	${MAKE} wspurge
 	rm -Rf profiles/build/test_profile/
@@ -14,10 +15,12 @@ test:
 	${MAKE} log_output TARGET=wsstatus
 	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile
+	# ---
 	# reset
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
+	# ---
 	# add dependencies to the workspace and build deb package
 	${MAKE} dep_to_repolist PKG=staticoma
 	${MAKE} dep_to_repolist
@@ -29,32 +32,46 @@ test:
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep staticoma | cut -f 1 |  xargs sudo apt purge --yes
+	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
 	mv src/staticoma ./
 	rm -Rf ./src/*
 	mv staticoma ./src/
 	${MAKE} dep_install PKG=staticoma
+	# ---
+	# workspace cmake toolchain
+	mkdir -p ./src/.ccws/
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > ./src/.ccws/toolchain.cmake
+	# should fail
+	! ${MAKE} staticoma
+	rm -Rf ./src/.ccws
+	# ---
 	# test various build profiles
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
+	# ---
 	# clangd
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	# ---
 	# cppcheck
 	cp -R examples/.ccws ./src/
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
 	rm -Rf ./src/.ccws
+	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
 	${MAKE} wstest EXEC_PROFILE=valgrind
+	# ---
 	# check core_pattern exec profile
 	${MAKE} ep_install EXEC_PROFILE=core_pattern
 	${MAKE} wstest EXEC_PROFILE="core_pattern valgrind"
-	# static checks & documentation
+	# ---
+	# static checks
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
 	# must fail without exceptions
 	! ${MAKE} BUILD_PROFILE=static_checks
@@ -63,14 +80,16 @@ test:
 	${MAKE} BUILD_PROFILE=static_checks
 	# must succeed without package exceptions
 	rm ./src/.ccws/static_checks.exceptions.packages
-	cp -R examples/.ccws src/
 	${MAKE} BUILD_PROFILE=static_checks
+	# ---
+	# documentation
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} PKG=staticoma BUILD_PROFILE=doxygen
 	${MAKE} BUILD_PROFILE=doxygen
 	${MAKE} graph PKG=staticoma
 	${MAKE} graph
 	${MAKE} cache_clean
+	${MAKE} wsclean
 
 build_with_profile:
 	${MAKE} wsclean

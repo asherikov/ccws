@@ -4,6 +4,7 @@ export ROS_DISTRO?=foxy
 
 
 test:
+	# ---
 	# package & profile creation
 	${MAKE} wspurge
 	rm -Rf profiles/build/test_profile/
@@ -17,33 +18,48 @@ test:
 	${MAKE} log_output TARGET=wsstatus
 	#${MAKE} dep_install PKG=test_pkg
 	#${MAKE} test_pkg BUILD_PROFILE=test_profile
-	# build
+	# ---
+	# dependencies
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
 	${MAKE} wsupdate
 	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
+	# ---
+	# workspace cmake toolchain
+	cp -R examples/.ccws ./src/
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > ./src/.ccws/toolchain.cmake
+	# should fail
+	! ${MAKE} examples_rclcpp_minimal_subscriber
+	rm -Rf ./src/.ccws
+	# ---
 	# static checks
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
+	# ---
 	# deb
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
+	# ---
 	# test various build profiles
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
+	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
 	${MAKE} wstest EXEC_PROFILE=valgrind
+	# ---
 	# check core_pattern exec profile
 	${MAKE} ep_install EXEC_PROFILE=core_pattern
 	${MAKE} wstest EXEC_PROFILE="core_pattern valgrind"
+	# ---
 	# clangd
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	# ---
 	# documentation
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} BUILD_PROFILE=doxygen
