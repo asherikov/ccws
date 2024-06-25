@@ -86,7 +86,7 @@ git_clean()
 
 git_scrape()
 {
-    GIT_DIRS=$(cd "${WSH_WORKSPACE_ROOT}" && find ./ -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
+    GIT_DIRS=$(cd "${WSH_WORKSPACE_ROOT}" && find ./ -mindepth 2 -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
     UKNOWN_GIT_DIRS=$(comm -2 -3 <(echo "${GIT_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_git_repo_names" | sort))
 
     for GIT_DIR in ${UKNOWN_GIT_DIRS}
