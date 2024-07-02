@@ -1,6 +1,7 @@
 THIS_MAKEFILE=.ccws/test_nix.mk
 GIT_AUTHOR_NAME=nix_test
 GIT_AUTHOR_EMAIL=nix_test
+WORKSPACE_SRC?=src
 
 test:
 	# flakes use git
@@ -10,9 +11,9 @@ test:
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} install_nix
-	cp -R .ccws/nix src
+	cp -R .ccws/nix "${WORKSPACE_SRC}"
 	${MAKE} nix_workspace_flake PKG=eigen
-	git add src/*.nix
+	git add "${WORKSPACE_SRC}"/*.nix
 	git commit -m "nix flake test"
 	${MAKE} nix_test
 

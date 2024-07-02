@@ -1,4 +1,5 @@
 THIS_MAKEFILE=.ccws/test_main.mk
+WORKSPACE_SRC?=src
 
 test:
 	# ---
@@ -35,17 +36,17 @@ test:
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
-	mv src/staticoma ./
-	rm -Rf ./src/*
-	mv staticoma ./src/
+	mv "${WORKSPACE_SRC}/staticoma" ./
+	rm -Rf "${WORKSPACE_SRC}"/*
+	mv staticoma "${WORKSPACE_SRC}"
 	${MAKE} dep_install PKG=staticoma
 	# ---
 	# workspace cmake toolchain
-	mkdir -p ./src/.ccws/
-	echo 'message(FATAL_ERROR "toolchain inclusion")' > ./src/.ccws/toolchain.cmake
+	mkdir -p "${WORKSPACE_SRC}/.ccws/"
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
 	# should fail
 	! ${MAKE} staticoma
-	rm -Rf ./src/.ccws
+	rm -Rf "${WORKSPACE_SRC}/.ccws"
 	# ---
 	# test various build profiles
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
@@ -58,10 +59,10 @@ test:
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
 	# ---
 	# cppcheck
-	cp -R examples/.ccws ./src/
+	cp -R examples/.ccws "${WORKSPACE_SRC}"
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
-	rm -Rf ./src/.ccws
+	rm -Rf "${WORKSPACE_SRC}/.ccws"
 	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
@@ -76,10 +77,10 @@ test:
 	# must fail without exceptions
 	! ${MAKE} BUILD_PROFILE=static_checks
 	# must succeed with exceptions
-	cp -R examples/.ccws ./src/
+	cp -R examples/.ccws "${WORKSPACE_SRC}"
 	${MAKE} BUILD_PROFILE=static_checks
 	# must succeed without package exceptions
-	rm ./src/.ccws/static_checks.exceptions.packages
+	rm "${WORKSPACE_SRC}/.ccws/static_checks.exceptions.packages"
 	${MAKE} BUILD_PROFILE=static_checks
 	# ---
 	# documentation

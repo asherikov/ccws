@@ -20,7 +20,7 @@ help()
 
     echo "Commands:"
     echo "  status"
-    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow] update"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow|rebase] update"
     echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
     echo "  [-p|--policy {ask}|add|show] scrape"
     echo "  add git <NAME> <URL> <VERSION>"
@@ -63,10 +63,11 @@ repos_git_repo_names()
 git_status()
 {
     {
-        echo "name|version (actual)|repository";
-        echo "----|----------------|----------";
+        echo "name|version (hash)|actual version|repository";
+        echo "----|--------------|--------------|----------";
         "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done
     } | column -t -s '|'
+    # --table-wrap 2,3 --output-separator ' '
 
     echo
 
@@ -143,11 +144,12 @@ dir_git_status()
     if [ -d "${GIT_DIR}/.git" ]
     then
         cd "${GIT_DIR}"
+        GIT_VERSION_HASH=$(git rev-parse --short "${GIT_VERSION}" || echo -n "unknown")
         # git status --porcelain | awk '{print $1}' | sort | uniq | tr -d '\n'
         GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
     fi
 
-    echo "${NAME}|${GIT_VERSION} (${GIT_ACTUAL_VERSION})|${GIT_REPO}"
+    echo "${NAME}|${GIT_VERSION} (${GIT_VERSION_HASH})|${GIT_ACTUAL_VERSION}|${GIT_REPO}"
 }
 
 dir_git_update()
@@ -155,6 +157,8 @@ dir_git_update()
     GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
     GIT_REPO="$2"
     GIT_VERSION="$3"
+
+    IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
 
     mkdir -p "${GIT_DIR}"
     cd "${GIT_DIR}"
@@ -171,17 +175,28 @@ dir_git_update()
             # if we are on a branch make sure that it is updated
             if (git branch --show-current | grep "${GIT_VERSION}")
             then
-                git pull
+                PULL_ARGS=()
+                for POLICY in "${POLICIES[@]}";
+                do
+                    if [ "${POLICY}" == "rebase" ]
+                    then
+                        PULL_ARGS+=(--rebase)
+                    fi
+                done
+                git pull "${PULL_ARGS[@]}"
             fi
         fi
     else
         rm -rf "${GIT_DIR:?}/*"
 
         CLONE_ARGS=(--recurse-submodules)
-        if [ "${WSH_COMMAND_POLICY}" == "shallow" ]
-        then
-            CLONE_ARGS+=(--depth 1 --shallow-submodules)
-        fi
+        for POLICY in "${POLICIES[@]}";
+        do
+            if [ "${POLICY}" == "shallow" ]
+            then
+                CLONE_ARGS+=(--depth 1 --shallow-submodules)
+            fi
+        done
 
         if [ "${GIT_VERSION}" == '-' ]
         then

@@ -25,12 +25,13 @@ test: assert_PKG_arg_must_be_specified
 		colcon \
 		--log-base \$${CCWS_LOG_DIR} \
 		test \
+		--event-handlers console_direct+ \
 		--merge-install \
 		--executor sequential \
 		--ctest-args --output-on-failure -j ${JOBS} \
 		--build-base \"\$${CCWS_BUILD_DIR}\" \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
-		--base-paths ${WORKSPACE_DIR}/src/ \
+		--base-paths "${WORKSPACE_SRC}" \
 		--test-result-base \$${CCWS_LOG_DIR}/testing \
 		--packages-select ${PKG} )" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults

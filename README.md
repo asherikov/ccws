@@ -344,10 +344,3 @@ TODO
 - Control symbol visibility and verify with
   https://github.com/yugr/ShlibVisibilityChecker.
 - Add `CodeQL` profile (https://github.com/github/codeql).
-
-
-FAQ
-===
-
-- Console output does not show compilation commands: make sure that
-  `colcon-output` is not installed.

@@ -22,6 +22,9 @@ export LICENSE?=Apache 2.0
 export WORKSPACE_DIR=$(shell pwd)
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
+WORKSPACE_SRC?=${WORKSPACE_DIR}/src
+override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
+
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
 export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
@@ -37,7 +40,7 @@ export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
 # default package to build can be specified in source directory or via command line,
 # when not provided usually all packages in the workspace are processed
-export PKG?=$(shell (cat "${WORKSPACE_DIR}/src/.ccws/package" 2> /dev/null | paste -d ' ' -s) || echo "")
+export PKG?=$(shell (cat "${WORKSPACE_SRC}/.ccws/package" 2> /dev/null | paste -d ' ' -s) || echo "")
 
 
 # helpers
@@ -45,11 +48,11 @@ export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
 export EXEC_PROFILES_DIR=${WORKSPACE_DIR}/profiles/exec/
 MAKE_QUIET=${MAKE} --quiet --no-print-directory
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
-CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_DIR}/src/
-CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_DIR}/src/
-CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_DIR}/src/
-CMD_PKG_GRAPH=colcon graph --base-paths src/ --dot --dot-cluster
-CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_DIR}/src/ -t rosinstall -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
+CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_SRC}
+CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
+CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
+CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
+CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t rosinstall -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
 
 
 ##
@@ -94,10 +97,10 @@ wslist:
 
 # Reset & initialize workspace
 wsinit:
-	test ! -f src/.rosinstall
-	mkdir -p src
-	touch src/.rosinstall
-	cd src; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
+	test ! -f "${WORKSPACE_SRC}/.rosinstall"
+	mkdir -p "${WORKSPACE_SRC}"
+	touch "${WORKSPACE_SRC}/.rosinstall"
+	cd ${WORKSPACE_SRC}; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
 	-${MAKE} wsscrape_all
 	${MAKE} wsupdate
 
@@ -107,7 +110,7 @@ wsstatus:
 	${MAKE} wsstatuspkg
 
 wsstatuspkg:
-	cd src; ${CMD_WSHANDLER} status
+	${CMD_WSHANDLER} status
 
 # Add new packages to the workspace
 wsscrape:
@@ -170,9 +173,10 @@ private_build: assert_PKG_arg_must_be_specified
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
 		--log-base ${CCWS_LOG_DIR} \
 		build \
+		--event-handlers console_direct+ \
 		--merge-install \
 		--executor sequential \
-		--base-paths ${WORKSPACE_DIR}/src/ \
+		--base-paths ${WORKSPACE_SRC} \
 		--build-base "${CCWS_BUILD_DIR}" \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
@@ -180,18 +184,18 @@ private_build: assert_PKG_arg_must_be_specified
 
 
 new: assert_PKG_arg_must_be_specified
-	mkdir -p src/
-	cp -R pkg_template/catkin src/${PKG}
-	mkdir -p src/${PKG}/include/${PKG}
-	cd src/${PKG}; git init
-	find src/${PKG} -type f | xargs sed -i "s/@@PACKAGE@@/${PKG}/g"
-	find src/${PKG} -type f | xargs sed -i "s/@@AUTHOR@@/${AUTHOR}/g"
-	find src/${PKG} -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
-	find src/${PKG} -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
+	mkdir -p "${WORKSPACE_SRC}"
+	cp -R pkg_template/catkin "${WORKSPACE_SRC}/${PKG}"
+	mkdir -p "${WORKSPACE_SRC}/${PKG}/include/${PKG}"
+	cd "${WORKSPACE_SRC}/${PKG}"; git init
+	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@PACKAGE@@/${PKG}/g"
+	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@AUTHOR@@/${AUTHOR}/g"
+	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
+	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
 
 add:
-	test -f src/.rosinstall || ${MAKE} wsinit
-	cd src; bash -c "\
+	test -f "${WORKSPACE_SRC}/.rosinstall" || ${MAKE} wsinit
+	bash -c "\
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
 		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"
 

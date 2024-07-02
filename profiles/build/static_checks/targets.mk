@@ -54,7 +54,7 @@ cppcheck:
 	# header paths with `-I` flags but that is not trivial in a workspace,
 	# might require parsing compilation commands from cmake.
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find ${WORKSPACE_DIR}/src -type f -iname '*.hpp' -or -iname "*.cpp" -or -iname "*.h" > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
+	find "${WORKSPACE_SRC}" -type f -iname '*.hpp' -or -iname "*.cpp" -or -iname "*.h" > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
 	rm -f '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/cppcheck.err'
 	bash -c "${SETUP_SCRIPT}; \
 		source ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/filter > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered; \
@@ -83,7 +83,7 @@ cpplint:
 		cpplint \
 		\$${EXCEPTIONS} \
 		--filter=-whitespace,-runtime/casting,-runtime/indentation_namespace,-readability/casting,-runtime/references,-readability/braces,-readability/namespace,-build/include_subdir,-build/header_guard,-build/include_order,-build/namespaces,-build/c++11,-readability/alt_tokens,-readability/todo,-build/include \
-		--quiet --recursive src"
+		--quiet --recursive '${WORKSPACE_SRC}'"
 
 
 # internal target
@@ -97,7 +97,7 @@ static_checks_generic_dir_filter:
 
 flawfinder:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find ${WORKSPACE_DIR}/src -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
+	find "${WORKSPACE_SRC}" -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
 	bash -c " \
 		source ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/filter > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
@@ -105,7 +105,7 @@ flawfinder:
 
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find ${WORKSPACE_DIR}/src -type f -iname '*.yaml' > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
+	find "${WORKSPACE_SRC}" -type f -iname '*.yaml' > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input
 	bash -c "${SETUP_SCRIPT}; \
 		source ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/filter > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
@@ -129,7 +129,7 @@ shellcheck:
 		( find ${WORKSPACE_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${WORKSPACE_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
-			&& find ${WORKSPACE_DIR}/src -iname '*.sh' -or -iname '*.bash' ) \
+			&& find "${WORKSPACE_SRC}" -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input; \
 		source ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/filter > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered; \
 		cat ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
@@ -146,24 +146,24 @@ catkin_lint:
 		\$${CCWS_CATKIN_LINT_EXCEPTIONS} \
 		\$${DIR_EXCEPTIONS} \
 		\$${PKG_EXCEPTIONS} \
-		src/"
+		'${WORKSPACE_SRC}'"
 
 pylint:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/://' -e 's/:/,/g'); \
-		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_DIR}/src'"
+		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_SRC}'"
 
 flake8:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
-		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
+		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
 
 mypy:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${WORKSPACE_DIR}/src==g'); \
-		find ${WORKSPACE_DIR}/src/ -iname '*\.py' > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input; \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${WORKSPACE_SRC}==g'); \
+		find '${WORKSPACE_SRC}' -iname '*\.py' > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input; \
 		source ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/filter > ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered; \
 		test -e ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered -a ! -s ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input.filtered \
-			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_DIR}/src/'"
+			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
 

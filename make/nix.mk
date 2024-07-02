@@ -33,11 +33,11 @@ outputs = {\n\
         };\n\
     }\n\
 );\n\
-}" > "${WORKSPACE_DIR}/src/flake.nix"
-	@echo "Add ${WORKSPACE_DIR}/src/flake.nix to git before using it -> https://github.com/NixOS/nix/issues/6642"
+}" > "${WORKSPACE_SRC}/flake.nix"
+	@echo "Add ${WORKSPACE_SRC}/flake.nix to git before using it -> https://github.com/NixOS/nix/issues/6642"
 
 nix_show:
-	bash -c "${SETUP_SCRIPT}; ${CCWS_NIX} flake show '${WORKSPACE_DIR}/src'"
+	bash -c "${SETUP_SCRIPT}; ${CCWS_NIX} flake show '${WORKSPACE_SRC}'"
 
 nix_develop:
-	bash -c "${SETUP_SCRIPT}; ${CCWS_NIX} develop '${WORKSPACE_DIR}/src'"
+	bash -c "${SETUP_SCRIPT}; ${CCWS_NIX} develop '${WORKSPACE_SRC}'"

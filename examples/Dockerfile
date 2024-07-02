@@ -7,7 +7,10 @@ ARG PIP_INSTALL=X
 ENV PIP_CACHE_DIR=/cache/pip
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN --mount=target=/ccws,rw --mount=type=cache,target=/var/cache/apt,sharing=locked --mount=type=cache,target=/var/lib/apt/lists/ --mount=type=cache,target=/cache/pip \
+RUN --mount=target=/ccws,rw \
+--mount=type=cache,target=/var/cache/apt,sharing=locked \
+--mount=type=cache,target=/var/lib/apt/lists/ \
+--mount=type=cache,target=/cache/pip \
     rm /etc/apt/apt.conf.d/docker-clean \
     && apt update \
     && apt upgrade -y \
@@ -17,3 +20,4 @@ RUN --mount=target=/ccws,rw --mount=type=cache,target=/var/cache/apt,sharing=loc
     && make bp_install_build BUILD_PROFILE=reldebug \
     && mv scripts/wshandler/yq /usr/bin/
 
+WORKDIR /ccws

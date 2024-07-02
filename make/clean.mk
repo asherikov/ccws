@@ -4,14 +4,14 @@ wsclean:
 	rm -Rf devel*
 	rm -Rf install*
 	rm -Rf log*
-	rm -Rf src/.rosinstall.bak
+	rm -Rf "${WORKSPACE_SRC}/.rosinstall.bak"
 
 artifacts_clean:
 	find ${WORKSPACE_DIR}/artifacts -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
 
 # Purge workspace
 wspurge: wsclean artifacts_clean
-	rm -Rf src
+	rm -Rf "${WORKSPACE_SRC}"
 	rm -Rf "${BUILD_PROFILES_DIR}/*/rosdep"
 
 cache_clean:

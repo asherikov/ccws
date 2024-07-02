@@ -1,4 +1,5 @@
 THIS_MAKEFILE=.ccws/test_main_ros2.mk
+WORKSPACE_SRC?=src
 
 export ROS_DISTRO?=foxy
 
@@ -28,11 +29,11 @@ test:
 	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 	# ---
 	# workspace cmake toolchain
-	cp -R examples/.ccws ./src/
-	echo 'message(FATAL_ERROR "toolchain inclusion")' > ./src/.ccws/toolchain.cmake
+	cp -R examples/.ccws "${WORKSPACE_SRC}/"
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
 	# should fail
 	! ${MAKE} examples_rclcpp_minimal_subscriber
-	rm -Rf ./src/.ccws
+	rm -Rf "${WORKSPACE_SRC}/.ccws"
 	# ---
 	# static checks
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
@@ -66,6 +67,7 @@ test:
 	${MAKE} graph PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} graph
 	${MAKE} cache_clean
+	test -z "${WORKSPACE_SRC}" || (test -d "${WORKSPACE_SRC}" && ls "${WORKSPACE_SRC}")
 
 
 build_with_profile:
