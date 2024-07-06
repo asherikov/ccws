@@ -18,6 +18,7 @@ export VERSION?=staging
 export VENDOR?=ccws
 # default new package license
 export LICENSE?=Apache 2.0
+export REPO_LIST_FORMAT?=repos
 
 export WORKSPACE_DIR=$(shell pwd)
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
@@ -52,7 +53,7 @@ CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-o
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
 CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
-CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t rosinstall -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
+CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
 
 
 ##
@@ -97,9 +98,9 @@ wslist:
 
 # Reset & initialize workspace
 wsinit:
-	test ! -f "${WORKSPACE_SRC}/.rosinstall"
+	test ! -f "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}"
 	mkdir -p "${WORKSPACE_SRC}"
-	touch "${WORKSPACE_SRC}/.rosinstall"
+	touch "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}"
 	cd ${WORKSPACE_SRC}; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
 	-${MAKE} wsscrape_all
 	${MAKE} wsupdate
@@ -194,7 +195,7 @@ new: assert_PKG_arg_must_be_specified
 	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
 
 add:
-	test -f "${WORKSPACE_SRC}/.rosinstall" || ${MAKE} wsinit
+	test -f "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}" || ${MAKE} wsinit
 	bash -c "\
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
 		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"
