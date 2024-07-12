@@ -14,7 +14,7 @@ help()
     echo "  -y|--yq <YQ_BINARY>         {yq}"
     echo "  -r|--root <WORKSPACE_ROOT>  {./}"
     echo "  -c|--cache <CACHE_DIR>      {<WORKSPACE_ROOT>}"
-    echo "  -t|--type rosinstall|repos  {rosinstall}"
+    echo "  -t|--type rosinstall|repos  {repos}"
     echo "  -i|--indent 1|2|3...        {4}"
     echo "  -k|--keep-going             {false}"
 
@@ -28,7 +28,7 @@ help()
     echo "  set_version_by_name <NAME> <VERSION>"
     echo "  remove <NAME>"
     echo "  remove_by_url <URL>"
-    echo "  [-p|--policy keep|replace] merge <FILENAME>"
+    echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
     exit "${EXIT_CODE}"
 }
 
@@ -226,7 +226,7 @@ check_workspace()
     test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
     WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT}")/"
 
-    WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"rosinstall"}
+    WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"repos"}
     WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
     WSH_CACHE_DIR=${WSH_CACHE_DIR:-"${WSH_WORKSPACE_ROOT}/.wshandler"}
 
@@ -241,7 +241,7 @@ check_workspace()
         esac
     fi
 
-    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}")
+    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE} -p ${WSH_COMMAND_POLICY}")
     if [ -n "${WSH_KEEP_GOING}" ]
     then
         WSHANDLER+=("${WSH_KEEP_GOING}")

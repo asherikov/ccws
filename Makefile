@@ -1,5 +1,12 @@
 -include make/config.mk
 
+export WORKSPACE_DIR=$(shell pwd)
+WORKSPACE_SRC?=${WORKSPACE_DIR}/src
+override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
+
+-include ${WORKSPACE_SRC}/.ccws/config.mk
+
+
 # obtain from gitconfig by default
 export EMAIL?=$(shell git config --get user.email)
 export AUTHOR?=$(shell git config --get user.name)
@@ -20,11 +27,7 @@ export VENDOR?=ccws
 export LICENSE?=Apache 2.0
 export REPO_LIST_FORMAT?=repos
 
-export WORKSPACE_DIR=$(shell pwd)
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
-
-WORKSPACE_SRC?=${WORKSPACE_DIR}/src
-override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
@@ -69,9 +72,9 @@ default: build
 -include make/*.mk
 
 # make tries to remake missing files, intercept these attempts
-profiles/%/%.mk:
+%.mk:
 	@false
-make/%.mk:
+${WORKSPACE_SRC}/.ccws/config.mk:
 	@false
 
 
@@ -126,7 +129,7 @@ wsupdate:
 	${MAKE} wsupdate_pkgs
 
 wsupdate_shallow:
-	-git pull
+	-git pull --rebase
 	${MAKE} wsupdate_pkgs_shallow
 
 # Update workspace & all packages
@@ -135,6 +138,9 @@ wsupdate_pkgs:
 
 wsupdate_pkgs_shallow:
 	${CMD_WSHANDLER} -j ${JOBS} -p shallow update
+
+wsupdate_pkgs_shallow_rebase:
+	${CMD_WSHANDLER} -j ${JOBS} -p shallow,rebase update
 
 
 show_vendor_files:
