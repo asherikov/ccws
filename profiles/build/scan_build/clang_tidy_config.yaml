@@ -9,7 +9,7 @@
 # member variables can be public/protected
 # -cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes
 # member initialization in constructors -- false positives
-# -cppcoreguidelines-pro-type-member-init,-hicpp-member-init
+# -cppcoreguidelines-pro-type-member-init,-hicpp-member-init,-cppcoreguidelines-prefer-member-initializer
 # default member initialization scatters initializations -- initialization must be done via constructors
 # -modernize-use-default-member-init
 # calling virtual functions from desctructors is well defined and generally safe
@@ -35,7 +35,7 @@
 # -llvmlibc-*
 
 # suppress issues with gtest/gmock macro, alternatively NOLINT can be used for each macro
-# -hicpp-special-member-functions,-cppcoreguidelines-special-member-functions
+# -hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,-bugprone-suspicious-include
 # -cppcoreguidelines-owning-memory
 # -cert-err58-cpp
 #
@@ -51,13 +51,25 @@
 # introduces small discrepancies between declarations and definitions, which is
 # actually making code less readable
 # -readability-avoid-const-params-in-decls
+#
+# #pragma unroll
+# -altera-unroll-loops
+#
+# allow std::bind
+# -modernize-avoid-bind
+#
+# may conflict with cppcoreguidelines-virtual-class-destructor which is more important
+# -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override
+#
+# buggy, clang-tidy gets stuck
+# -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming
 Checks: '*,
 -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
 -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix,
 -fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,
 -cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes,
--cppcoreguidelines-pro-type-member-init,-hicpp-member-init,
+-cppcoreguidelines-pro-type-member-init,-hicpp-member-init,-cppcoreguidelines-prefer-member-initializer
 -modernize-use-default-member-init,
 -clang-analyzer-optin.cplusplus.VirtualCall,
 -cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,
@@ -69,13 +81,17 @@ Checks: '*,
 -fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,-fuchsia-statically-constructed-objects,
 -cppcoreguidelines-macro-usage,
 -llvmlibc-*,
--hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,
+-hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,-bugprone-suspicious-include
 -cppcoreguidelines-owning-memory,
 -cert-err58-cpp,
 -readability-function-cognitive-complexity,
 -misc-no-recursion,
 -llvm-header-guard,
--readability-avoid-const-params-in-decls'
+-readability-avoid-const-params-in-decls,
+-altera-unroll-loops,
+-modernize-avoid-bind,
+-cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
+-bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming'
 
 WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
+#HeaderFilterRegex: '.*'
