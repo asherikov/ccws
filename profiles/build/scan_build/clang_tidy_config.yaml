@@ -63,13 +63,16 @@
 #
 # buggy, clang-tidy gets stuck
 # -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming
+#
+# no library specific stuff
+# -abseil-*
 Checks: '*,
--llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,
+-llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
 -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix,
 -fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,
 -cppcoreguidelines-non-private-member-variables-in-classes,-misc-non-private-member-variables-in-classes,
--cppcoreguidelines-pro-type-member-init,-hicpp-member-init,-cppcoreguidelines-prefer-member-initializer
+-cppcoreguidelines-pro-type-member-init,-hicpp-member-init,-cppcoreguidelines-prefer-member-initializer,
 -modernize-use-default-member-init,
 -clang-analyzer-optin.cplusplus.VirtualCall,
 -cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,
@@ -81,7 +84,7 @@ Checks: '*,
 -fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,-fuchsia-statically-constructed-objects,
 -cppcoreguidelines-macro-usage,
 -llvmlibc-*,
--hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,-bugprone-suspicious-include
+-hicpp-special-member-functions,-cppcoreguidelines-special-member-functions,-bugprone-suspicious-include,
 -cppcoreguidelines-owning-memory,
 -cert-err58-cpp,
 -readability-function-cognitive-complexity,
@@ -91,7 +94,8 @@ Checks: '*,
 -altera-unroll-loops,
 -modernize-avoid-bind,
 -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
--bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming'
+-bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming,
+-abseil-*'
 
 WarningsAsErrors: '*'
 #HeaderFilterRegex: '.*'
