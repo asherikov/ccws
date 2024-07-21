@@ -65,12 +65,13 @@ export CCWS_CATKIN_LINT_EXCEPTIONS
 # cppcheck
 #
 # suppressions:
-# 	uninitMemberVar -- triggers on a lot of valid code, e.g., when initializing in SetUp()
-# 	syntaxError -- has issues with templated methods and test fixtures.
-# 	useInitializationList -- initialization in the body of the constructor is ok
-# 	unknownMacro -- too much hassle
-# 	useStlAlgorithm -- not nocessarily makes code cleaner and easier to read
-# 	unusedStructMember -- false positives
+#   uninitMemberVar -- triggers on a lot of valid code, e.g., when initializing in SetUp()
+#   syntaxError -- has issues with templated methods and test fixtures.
+#   useInitializationList -- initialization in the body of the constructor is ok
+#   unknownMacro -- too much hassle
+#   useStlAlgorithm -- not nocessarily makes code cleaner and easier to read
+#   unusedStructMember -- false positives
+#   constStatement -- "suspicious , operator", https://trac.cppcheck.net/ticket/9766
 #
 CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=uninitMemberVar \
@@ -78,5 +79,6 @@ CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=useInitializationList \
 --suppress=unknownMacro \
 --suppress=useStlAlgorithm \
---suppress=unusedStructMember"
+--suppress=unusedStructMember \
+--suppress=constStatement"
 export CCWS_CPPCHECK_EXCEPTIONS
