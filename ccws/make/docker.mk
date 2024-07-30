@@ -11,9 +11,6 @@ docker_run:
 docker_build:
 	docker build -f ${CCWS_DOCKER_FILE} \
 		--build-arg BASE_IMAGE="${CCWS_DOCKER_BASE_IMAGE}" \
-		--build-arg APT_INSTALL="${APT_INSTALL}" \
-		--build-arg PIP_INSTALL="${PIP_INSTALL}" \
-		--build-arg VENDOR="${VENDOR}" \
 		--tag "${CCWS_DOCKER_TAG}" \
 		./
 

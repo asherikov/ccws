@@ -1,4 +1,11 @@
-on: [push, pull_request]
+on:
+    push:
+        branches:
+            - '**'
+        tags:
+            - 'NEVER' 
+    pull_request:
+        types: [opened, reopened]
 
 env:
     EMAIL: example@example.com
@@ -66,3 +73,4 @@ jobs:
             - run: sudo apt update
             - run: sudo apt upgrade --yes
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
+
