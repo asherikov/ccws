@@ -47,8 +47,8 @@ fi
 # CCWS
 #
 
-# if node launch script respects CCWS_NODE_CRASH_ACTION the crashed nodes
-# are restarted automatically, see pkg_template/catkin/launch/bringup.launch
+# if node launch script respects CCWS_NODE_CRASH_ACTION the crashed nodes are
+# restarted automatically, see ccws/pkg_template/catkin/launch/bringup.launch
 # redundant
 #CCWS_NODE_CRASH_ACTION="respawn"
 #export CCWS_NODE_CRASH_ACTION

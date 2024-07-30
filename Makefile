@@ -1,6 +1,9 @@
--include make/config.mk
+export CURRENT_DIR=$(shell pwd)
+export CCWS_DIR=${CURRENT_DIR}/ccws
 
-export WORKSPACE_DIR=$(shell pwd)
+-include ${CCWS_DIR}/make/config.mk
+
+export WORKSPACE_DIR=${CURRENT_DIR}
 WORKSPACE_SRC?=${WORKSPACE_DIR}/src
 override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 
@@ -31,7 +34,7 @@ export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
-export JOBS?=$(shell ${WORKSPACE_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
+export JOBS?=$(shell ${CCWS_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
 
 # Cache directory
 # 1. keep cache in ccws root directory, old behavior, restore using config.mk if necessary
@@ -48,15 +51,15 @@ export PKG?=$(shell (cat "${WORKSPACE_SRC}/.ccws/package" 2> /dev/null | paste -
 
 
 # helpers
-export BUILD_PROFILES_DIR=${WORKSPACE_DIR}/profiles/build/
-export EXEC_PROFILES_DIR=${WORKSPACE_DIR}/profiles/exec/
+export BUILD_PROFILES_DIR=${CCWS_DIR}/profiles/build/
+export EXEC_PROFILES_DIR=${CCWS_DIR}/profiles/exec/
 MAKE_QUIET=${MAKE} --quiet --no-print-directory
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_SRC}
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
 CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
-CMD_WSHANDLER=${WORKSPACE_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler -y "${WORKSPACE_DIR}/scripts/wshandler/yq"
+CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler -y "${CCWS_DIR}/scripts/wshandler/yq"
 
 
 ##
@@ -68,8 +71,8 @@ default: build
 	make build_glob PKG_NAME_PART=$@
 
 # include after default targets to avoid shadowing them
--include profiles/*/*/*.mk
--include make/*.mk
+-include ${CCWS_DIR}/profiles/*/*/*.mk
+-include ${CCWS_DIR}/make/*.mk
 
 # make tries to remake missing files, intercept these attempts
 %.mk:
@@ -144,7 +147,7 @@ wsupdate_pkgs_shallow_rebase:
 
 
 show_vendor_files:
-	@find ./profiles/*/vendor* ! -type d
+	@find ${CCWS_DIR}/profiles/*/vendor* ! -type d
 
 ccache_stats:
 	bash -c "${SETUP_SCRIPT}; ccache --show-stats"
@@ -192,7 +195,7 @@ private_build: assert_PKG_arg_must_be_specified
 
 new: assert_PKG_arg_must_be_specified
 	mkdir -p "${WORKSPACE_SRC}"
-	cp -R pkg_template/catkin "${WORKSPACE_SRC}/${PKG}"
+	cp -R ${CCWS_DIR}/pkg_template/catkin "${WORKSPACE_SRC}/${PKG}"
 	mkdir -p "${WORKSPACE_SRC}/${PKG}/include/${PKG}"
 	cd "${WORKSPACE_SRC}/${PKG}"; git init
 	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@PACKAGE@@/${PKG}/g"
@@ -216,6 +219,6 @@ graph:
 ##
 
 help:
-	@grep -v "^	" Makefile make/*.mk | grep -v "^ " | grep -v "^$$" | grep -v "^\." | grep -v ".mk:$$"
+	@grep -v "^	" Makefile ${CCWS_DIR}/make/*.mk | grep -v "^ " | grep -v "^$$" | grep -v "^\." | grep -v ".mk:$$"
 
 .PHONY: build clean test install

@@ -126,8 +126,8 @@ yamllint:
 shellcheck:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		( find ${WORKSPACE_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
-			&& find ${WORKSPACE_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
+		( find ${CCWS_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
+			&& find ${CCWS_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find "${WORKSPACE_SRC}" -iname '*.sh' -or -iname '*.bash' ) \
 			> ${WORKSPACE_DIR}/build/${BUILD_PROFILE}/$@/input; \

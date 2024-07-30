@@ -66,8 +66,9 @@ Features
 Build profiles
 --------------
 
-Profile configurations are located in `profiles/build`, `common` subdirectory
-contains default parameters, which can be overriden by specific profiles:
+Profile configurations are located in `ccws/profiles/build`, `common`
+subdirectory contains default parameters, which can be overriden by specific
+profiles:
 - [default] `reldebug` -- default compiler, cmake build type is
   `RelWithDebInfo`
 - `scan_build` -- static checks with `scan_build` and `clang-tidy`.
@@ -90,8 +91,9 @@ Execution profiles
 ------------------
 
 Execution profiles set environment variables that can be used in launch scripts
-to alter run time behavior as demonstrated in `pkg_template/catkin/launch/bringup.launch`,
-currently available profiles are:
+to alter run time behavior as demonstrated in
+`ccws/pkg_template/catkin/launch/bringup.launch`, currently available profiles
+are:
 - `common` -- a set of common ROS parameters, e.g., `ROS_HOME`, it is
   automatically included in binary packages.
 - `test` -- sets `CCWS_NODE_CRASH_ACTION` variable so that nodes that respect
@@ -142,7 +144,7 @@ Initial setup
 - Install dependencies using `make bp_install_build BUILD_PROFILE=<profile>`
   targets, cross compilation profiles would require some extra steps as
   described below. In some minimalistic environments you may need to run
-  `./scripts/bootstrap.sh` before using `bp_install_build` target in order to
+  `./ccws/scripts/bootstrap.sh` before using `bp_install_build` target in order to
   install `make` and other utils.
 - Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
 
@@ -237,14 +239,14 @@ Cross-compilation
 
 Here `<profile>` stands for `cross_raspberry_pi`, `cross_jetson_xavier`,
 `cross_jetson_nano`. Cross-compilation make targets can be found in
-`make/cross.mk` and `profiles/<profile>/targets.mk`
+`ccws/make/cross.mk` and `ccws/profiles/<profile>/targets.mk`
 
 Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
 Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
 container.
 
 The general workflow is documented below, for more technical details see
-`doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`:
+`ccws/doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`:
 
 1. Install profile dependencies with `make bp_install_build
    BUILD_PROFILE=<profile>`
@@ -253,7 +255,7 @@ The general workflow is documented below, for more technical details see
       downloads standard image;
     - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
       these images automatically, you have to manualy copy system partition
-      image to `profiles/cross_jetson_xavier/system.img`.
+      image to `ccws/profiles/cross_jetson_xavier/system.img`.
 3. Initialize source repositories:
     - `make wsinit REPOS="https://github.com/asherikov/staticoma.git"`
     - [when building all ROS packages] add ROS dependencies of all your
@@ -279,9 +281,9 @@ Extending `CCWS`
   profiles starting with `vendor` prefix are ignored by git;
 - by adding execution profiles;
 - `make` targets can be added by creating a
-  `profiles/build/vendor/<filename>.mk` file;
+  `ccws/profiles/build/vendor/<filename>.mk` file;
 - common `cmake` toolchain suffix can be added to
-  `profiles/build/vendor/toolchain_suffix.cmake`.
+  `ccws/profiles/build/vendor/toolchain_suffix.cmake`.
 
 `show_vendor_files` target can be used to list all vendor specific files.
 

@@ -18,7 +18,7 @@ docker_build:
 		./
 
 docker_build_example:
-	${MAKE} docker_build CCWS_DOCKER_FILE="${WORKSPACE_DIR}/examples/Dockerfile" CCWS_DOCKER_TAG=ccws_example
+	${MAKE} docker_build CCWS_DOCKER_FILE="${CCWS_DIR}/examples/Dockerfile" CCWS_DOCKER_TAG=ccws_example
 
 docker_run_example:
 	${MAKE} docker_run CCWS_DOCKER_TAG=ccws_example

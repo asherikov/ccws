@@ -7,7 +7,7 @@ install_ccws_deps:
 	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
 	${APT_INSTALL} build-essential ccache proot
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
-	command -v "yq" > /dev/null || test -x "${WORKSPACE_DIR}/scripts/wshandler/yq" || ${MAKE} wswraptarget TARGET="install_yq"
+	command -v "yq" > /dev/null || test -x "${CCWS_DIR}/scripts/wshandler/yq" || ${MAKE} wswraptarget TARGET="install_yq"
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \
@@ -30,8 +30,8 @@ install_ccws_deps_ros2:
 install_yq:
 	# ./scripts/wshandler/install.sh deps # requires snap
 	${MAKE} download FILES="https://github.com/mikefarah/yq/releases/download/v4.34.2/yq_linux_${CCWS_DEB_ARCH}.tar.gz"
-	tar -xf '${CCWS_CACHE}/yq_linux_${CCWS_DEB_ARCH}.tar.gz' -O > "${WORKSPACE_DIR}/scripts/wshandler/yq"
-	chmod +x "${WORKSPACE_DIR}/scripts/wshandler/yq"
+	tar -xf '${CCWS_CACHE}/yq_linux_${CCWS_DEB_ARCH}.tar.gz' -O > "${CCWS_DIR}/scripts/wshandler/yq"
+	chmod +x "${CCWS_DIR}/scripts/wshandler/yq"
 
 
 #ubuntu18

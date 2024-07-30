@@ -1,4 +1,4 @@
-THIS_MAKEFILE=.ccws/test_main_ros2.mk
+THIS_MAKEFILE=ccws/tests/test_main_ros2.mk
 WORKSPACE_SRC?=src
 
 export ROS_DISTRO?=foxy
@@ -8,7 +8,7 @@ test:
 	# ---
 	# package & profile creation
 	${MAKE} wspurge
-	rm -Rf profiles/build/test_profile/
+	rm -Rf ccws/profiles/build/test_profile/
 	${MAKE} bp_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
 	${MAKE} bp_install_build BUILD_PROFILE=test_profile
 	${MAKE} wsinit
@@ -29,7 +29,7 @@ test:
 	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 	# ---
 	# workspace cmake toolchain
-	cp -R examples/.ccws "${WORKSPACE_SRC}/"
+	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
 	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
 	# should fail
 	! ${MAKE} examples_rclcpp_minimal_subscriber

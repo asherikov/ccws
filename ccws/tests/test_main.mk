@@ -1,11 +1,11 @@
-THIS_MAKEFILE=.ccws/test_main.mk
+THIS_MAKEFILE=ccws/tests/test_main.mk
 WORKSPACE_SRC?=src
 
 test:
 	# ---
 	# package & profile creation
 	${MAKE} wspurge
-	rm -Rf profiles/build/test_profile/
+	rm -Rf ccws/profiles/build/test_profile/
 	${MAKE} bp_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
 	${MAKE} bp_install_build BUILD_PROFILE=test_profile
 	${MAKE} wsinit
@@ -59,7 +59,7 @@ test:
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
 	# ---
 	# cppcheck
-	cp -R examples/.ccws "${WORKSPACE_SRC}"
+	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
 	rm -Rf "${WORKSPACE_SRC}/.ccws"
@@ -77,7 +77,7 @@ test:
 	# must fail without exceptions
 	! ${MAKE} BUILD_PROFILE=static_checks
 	# must succeed with exceptions
-	cp -R examples/.ccws "${WORKSPACE_SRC}"
+	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
 	${MAKE} BUILD_PROFILE=static_checks
 	# must succeed without package exceptions
 	rm "${WORKSPACE_SRC}/.ccws/static_checks.exceptions.packages"
