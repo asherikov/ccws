@@ -18,6 +18,6 @@ RUN --mount=target=/ccws,rw \
     && cd /ccws \
     && ./ccws/scripts/bootstrap.sh \
     && make bp_install_build BUILD_PROFILE=reldebug \
-    && mv ccws/scripts/wshandler/yq /usr/bin/
+    && mv ccws/scripts/wshandler /usr/bin/
 
 WORKDIR /ccws

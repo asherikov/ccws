@@ -3,7 +3,7 @@ export CCWS_DIR=${CURRENT_DIR}/ccws
 
 -include ${CCWS_DIR}/make/config.mk
 
-export WORKSPACE_DIR=${CURRENT_DIR}
+export WORKSPACE_DIR?=${CURRENT_DIR}
 WORKSPACE_SRC?=${WORKSPACE_DIR}/src
 override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 
@@ -59,7 +59,7 @@ CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-o
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
 CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
-CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler -y "${CCWS_DIR}/scripts/wshandler/yq"
+CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
 
 
 ##

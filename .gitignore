@@ -5,6 +5,6 @@
 ccws/make/config.mk
 ccws/pkg_template/vendor*
 .clangd
-ccws/scripts/wshandler/yq
+ccws/scripts/wshandler
 !/src/flake.nix
 !/src/flake.lock
