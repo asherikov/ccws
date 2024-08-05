@@ -22,7 +22,7 @@ solution, but rather a basis for development of a vendor-specific workflow.
 
 `CCWS` is meant to be ROS version agnostic, but is mainly tested with ROS1.
 There are also some technical issues wth ROS2 packages that must be resolved,
-e.g., https://github.com/ament/google_benchmark_vendor/issues/17.
+e.g., <https://github.com/ament/google_benchmark_vendor/issues/17>.
 
 
 Features
@@ -41,14 +41,14 @@ Features
     - Cross compilation to several common platforms.
 
     - Documentation generation for the whole workspace or selected packages
-      using `doxygen`, similar to https://github.com/mikepurvis/catkin_tools_document.
+      using `doxygen`, similar to <https://github.com/mikepurvis/catkin_tools_document>.
 
     - Linting with `clang-tidy` and `scan_build`.
 
-    - Various static checks as in https://github.com/sscpac/statick, in
+    - Various static checks as in <https://github.com/sscpac/statick>, in
       particular:
         - `cppcheck`
-        - `catkin_lint` https://github.com/fkie/catkin_lint
+        - `catkin_lint` <https://github.com/fkie/catkin_lint>
         - `yamllint`
         - `shellcheck`
 
@@ -122,7 +122,7 @@ Dependencies can be installed using `make bp_install_build
 BUILD_PROFILE=<profile>`, which is going to install the following tools and
 profile specific dependencies:
 - `colcon`
-- `yq` -- https://github.com/asherikov/wshandler dependency
+- `yq` -- <https://github.com/asherikov/wshandler> dependency
 - `cmake`
 - `ccache` -- can be disabled in cmake toolchains
 - `wget`
@@ -272,6 +272,22 @@ The general workflow is documented below, for more technical details see
     - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
 
 
+Using `CCWS` docker
+===================
+
+A docker image with preinstalled `CCWS` and dependencies is available for
+testing, but it is recommended to build a tailored image using
+`ccws/examples/Dockerfile` as an example.
+
+The image can be used in the following way:
+
+- `docker pull asherikov/ccws`
+- `mkdir tmp_ws` # sources, build, install, cache will go here
+- `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws bash`
+- `make wsinit REPOS="https://github.com/asherikov/qpmad.git"`
+- `...`
+
+
 Extending `CCWS`
 ================
 
@@ -291,58 +307,58 @@ Extending `CCWS`
 Related software
 ================
 
-- https://github.com/ros-industrial/industrial_ci -- ROS specific CI scripts,
+- <https://github.com/ros-industrial/industrial_ci> -- ROS specific CI scripts,
   noninteractive, "one-shot" design, no sanitizers, emulated cross compilation.
-- https://github.com/ros-tooling/cross_compile/ -- emulated cross compilation
+- <https://github.com/ros-tooling/cross_compile/> -- emulated cross compilation
   for ROS and ROS2.
-- https://github.com/HesselM/rpicross_notes -- cross compilation for Raspberry
-  Pi done in a different way.
-- https://github.com/ros-tooling/action-ros-ci -- `github` action that covers
+- <https://github.com/HesselM/rpicross_notes> -- cross compilation for
+  Raspberry Pi done in a different way.
+- <https://github.com/ros-tooling/action-ros-ci> -- `github` action that covers
   some of `CCWS` functionality.
 
 
 TODO
 ====
 
-- Replace `ccache` with https://github.com/mbitsnbites/buildcache.
-- Integrate https://github.com/oclint/oclint
-- https://github.com/ejfitzgerald/clang-tidy-cache or
-  https://github.com/mbitsnbites/buildcache can be used to cache `clang-tidy`
+- Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
+- Integrate <https://github.com/oclint/oclint>
+- <https://github.com/ejfitzgerald/clang-tidy-cache> or
+  <https://github.com/mbitsnbites/buildcache> can be used to cache `clang-tidy`
   runs.
-- https://github.com/mrtazz/checkmake might be useful for makefile linting.
-- Cache cmake checks with https://github.com/cristianadam/cmake-checks-cache,
-  https://github.com/polysquare/cmake-forward-cache might be useful too.
-- Shell formatter https://github.com/mvdan/sh.
-- https://github.com/myint/cppclean might be useful for unnecessary header
+- <https://github.com/mrtazz/checkmake> might be useful for makefile linting.
+- Cache cmake checks with <https://github.com/cristianadam/cmake-checks-cache>,
+  <https://github.com/polysquare/cmake-forward-cache> might be useful too.
+- Shell formatter <https://github.com/mvdan/sh>.
+- <https://github.com/myint/cppclean> might be useful for unnecessary header
   detection, but looks stale.
-- https://github.com/include-what-you-use/include-what-you-use
-- Build time analysis with clang https://github.com/aras-p/ClangBuildAnalyzer
-  and / or https://github.com/jrmadsen/compile-time-perf.
+- <https://github.com/include-what-you-use/include-what-you-use>
+- Build time analysis with clang <https://github.com/aras-p/ClangBuildAnalyzer>
+  and / or <https://github.com/jrmadsen/compile-time-perf>.
 - Potential replacement for `scan_build`
-  https://github.com/Ericsson/codechecker with extra checks and caching.
-- https://github.com/sscpac/statick is not going to be used, but some of its
+  <https://github.com/Ericsson/codechecker> with extra checks and caching.
+- <https://github.com/sscpac/statick> is not going to be used, but some of its
   linters can be integrated.
-- Source code spellcheck https://github.com/myint/scspell.
-- https://github.com/jordansissel/fpm -- generic binary package generator,
+- Source code spellcheck <https://github.com/myint/scspell>.
+- <https://github.com/jordansissel/fpm> -- generic binary package generator,
   potential replacement for `dpkg-deb`.
-- https://github.com/git-afsantos/haros -- ROS-aware static analysis, might
+- <https://github.com/git-afsantos/haros> -- ROS-aware static analysis, might
   have issues with non `catkin_make` build environments.
-- https://github.com/Tencent/TscanCode -- C++ static analysis tool.
-- https://github.com/DLu/roscompile/tree/main/roscompile -- linter for catkin
+- <https://github.com/Tencent/TscanCode> -- C++ static analysis tool.
+- <https://github.com/DLu/roscompile/tree/main/roscompile> -- linter for catkin
   packages.
-- Use https://libguestfs.org/ or https://github.com/alperakcan/fuse-ext2
+- Use <https://libguestfs.org/> or <https://github.com/alperakcan/fuse-ext2>
   instead of loop devices, to avoid using sudo. There are some issues in Ubuntu
-  though, bug 759725, see https://libguestfs.org/guestfs-faq.1.html. `guestfs`
-  is too slow to be practical.
-- Distributed compilation support with https://github.com/distcc/distcc can be
-  useful.
+  though, bug 759725, see <https://libguestfs.org/guestfs-faq.1.html>.
+  `guestfs` is too slow to be practical.
+- Distributed compilation support with <https://github.com/distcc/distcc> can
+  be useful.
 - Add memory sanitizer profile as an alternative to `valgrind`, `gcc` doesn't
   support it currently.
 - Add code coverage profile.
-- Execution profile with https://github.com/yugr/libdebugme to automatically
+- Execution profile with <https://github.com/yugr/libdebugme> to automatically
   start debugger on a signal.
-- https://github.com/yugr/valgrind-preload as an alternative to `valgrind`
+- <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
   execution profile -- an overkill in general case though.
 - Control symbol visibility and verify with
-  https://github.com/yugr/ShlibVisibilityChecker.
-- Add `CodeQL` profile (https://github.com/github/codeql).
+  <https://github.com/yugr/ShlibVisibilityChecker>.
+- Add `CodeQL` profile (<https://github.com/github/codeql>).

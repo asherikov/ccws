@@ -1,0 +1,529 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2317
+
+set -e
+set -o pipefail
+
+
+help()
+{
+    EXIT_CODE=${1:-"0"}
+    echo "Usage (default values are shown in curly braces):"
+    echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
+    echo "Common arguments:"
+    echo "  -y|--yq <YQ_BINARY>         {yq}"
+    echo "  -r|--root <WORKSPACE_ROOT>  {./}"
+    echo "  -c|--cache <CACHE_DIR>      {<WORKSPACE_ROOT>}"
+    echo "  -t|--type rosinstall|repos  {repos}"
+    echo "  -i|--indent 1|2|3...        {4}"
+    echo "  -k|--keep-going             {false}"
+
+    echo "Commands:"
+    echo "  status"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow|rebase] update"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
+    echo "  [-p|--policy {ask}|add|show] scrape"
+    echo "  add git <NAME> <URL> <VERSION>"
+    echo "  set_version_by_url <URL> <VERSION>"
+    echo "  set_version_by_name <NAME> <VERSION>"
+    echo "  remove <NAME>"
+    echo "  remove_by_url <URL>"
+    echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
+
+    echo "Installation commands:"
+    echo "  install_test_deps"
+    echo "  [-p|--policy {skip_yq}|snap|download] install <BIN_PATH {~/bin}>"
+
+    exit "${EXIT_CODE}"
+}
+
+
+backup()
+{
+    mkdir -p "${WSH_CACHE_DIR}"
+    cp "${WSH_REPOLIST}" "${WSH_CACHE_DIR}/repolist.back"
+}
+
+
+rosinstall_git_repo_triplets()
+{
+    "${WSH_YQ[@]}" '.[].git | (.local-name + " " + .uri + " " + ((select(has("version") and .version != null) // {"version": "-"}) | .version))' < "${WSH_REPOLIST}"
+}
+
+repos_git_repo_triplets()
+{
+    "${WSH_YQ[@]}" '.repositories.* | select(. | has("type") and .type == "git") | (key + " " + .url + " " + ((select(has("version") and .version != null) // {"version": "-"}) | .version))' < "${WSH_REPOLIST}"
+}
+
+rosinstall_git_repo_names()
+{
+    "${WSH_YQ[@]}" '.[].git | (.local-name)' < "${WSH_REPOLIST}"
+}
+
+repos_git_repo_names()
+{
+    "${WSH_YQ[@]}" '.repositories.* | select(. | has("type") and .type == "git") | key' < "${WSH_REPOLIST}"
+}
+
+git_status()
+{
+    DATA=$(
+        echo "name|version (hash)|actual version|repository";
+        echo "----|--------------|--------------|----------";
+        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done
+    )
+
+    MAX_LEN_1=$(cut -f 1 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+    MAX_LEN_2=$(cut -f 2 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+    MAX_LEN_3=$(cut -f 3 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+    MAX_LEN_4=$(cut -f 4 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+
+    IFS=$'\n' readarray -t ROWS <<< "${DATA}"
+    for ROW in "${ROWS[@]}"
+    do
+        IFS='|' read -ra COLS <<< "${ROW}"
+        # use ${COLUMNS} to crop?
+        printf "%-${MAX_LEN_1}.${MAX_LEN_1}s %-${MAX_LEN_2}.${MAX_LEN_2}s %-${MAX_LEN_3}.${MAX_LEN_3}s %-${MAX_LEN_4}.${MAX_LEN_4}s\n" "${COLS[@]}"
+    done
+
+    echo
+
+    WSH_COMMAND_POLICY=show
+    git_scrape
+}
+
+git_update()
+{
+    "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" "${WSHANDLER[@]}" dir_git_update
+}
+
+git_clean()
+{
+    "${WSH_WORKSPACE_TYPE}_git_repo_names" | while read -r NAME; do rm -rf "${WSH_WORKSPACE_ROOT:?}/${NAME}"; done
+}
+
+git_scrape()
+{
+    GIT_DIRS=$(cd "${WSH_WORKSPACE_ROOT}" && find ./ -mindepth 2 -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
+    UKNOWN_GIT_DIRS=$(comm -2 -3 <(echo "${GIT_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_git_repo_names" | sort))
+
+    for GIT_DIR in ${UKNOWN_GIT_DIRS}
+    do
+        echo "Processing ${GIT_DIR}"
+        cd "${WSH_WORKSPACE_ROOT}/${GIT_DIR}"
+        GIT_REPO=$(git remote get-url origin | tr -d '\n' || true)
+
+        if [ "${GIT_REPO}" == "" ]
+        then
+            GIT_REPO=$(pwd)
+        fi
+
+        GIT_VERSION=$(git branch --show-current | tr -d '\n')
+        GIT_VERSION=${GIT_VERSION:-"$(git describe --tags | tr -d '\n')"}
+        GIT_VERSION=${GIT_VERSION:-"$(git rev-parse HEAD | tr -d '\n')"}
+
+        echo "Found unmanaged git repository:  ${GIT_DIR}  ${GIT_REPO}  ${GIT_VERSION}"
+
+        while true
+        do
+            case "${WSH_COMMAND_POLICY}" in
+                ask|default)
+                    read -r -p "Add? (Y/n)" yn
+                    yn=${yn:-"Y"};;
+                show)
+                    yn='N';;
+                add)
+                    yn='Y';;
+                *)
+                    help 20;;
+            esac
+            case $yn in
+                [Yy])
+                    execute_add git "${GIT_DIR}" "${GIT_REPO}" "${GIT_VERSION}"
+                    break;;
+                [Nn])
+                    break;;
+                *)
+                    echo "Please answer y or n for yes or no.";;
+            esac
+        done
+    done
+}
+
+dir_git_status()
+{
+    NAME="$1"
+    GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
+    GIT_REPO="$2"
+    GIT_VERSION="$3"
+
+    GIT_ACTUAL_VERSION="-"
+    if [ -d "${GIT_DIR}/.git" ]
+    then
+        cd "${GIT_DIR}"
+        GIT_VERSION_HASH=$(git rev-parse --short "${GIT_VERSION}" || echo -n "unknown")
+        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
+    fi
+
+    echo "${NAME}|${GIT_VERSION} (${GIT_VERSION_HASH})|${GIT_ACTUAL_VERSION}|${GIT_REPO}"
+}
+
+dir_git_update()
+{
+    GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
+    GIT_REPO="$2"
+    GIT_VERSION="$3"
+
+    IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
+
+    mkdir -p "${GIT_DIR}"
+    cd "${GIT_DIR}"
+    echo "Processing ${GIT_DIR}"
+    if [ -d ".git" ]
+    then
+        git fetch
+        if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
+        then
+            if [ "${GIT_VERSION}" != '-' ]
+            then
+                git checkout "${GIT_VERSION}"
+            fi
+            # if we are on a branch make sure that it is updated
+            if (git branch --show-current | grep "${GIT_VERSION}")
+            then
+                PULL_ARGS=()
+                for POLICY in "${POLICIES[@]}";
+                do
+                    if [ "${POLICY}" == "rebase" ]
+                    then
+                        PULL_ARGS+=(--rebase)
+                    fi
+                done
+                git pull "${PULL_ARGS[@]}"
+            fi
+        fi
+    else
+        rm -rf "${GIT_DIR:?}/*"
+
+        CLONE_ARGS=(--recurse-submodules)
+        for POLICY in "${POLICIES[@]}";
+        do
+            if [ "${POLICY}" == "shallow" ]
+            then
+                CLONE_ARGS+=(--depth 1 --shallow-submodules)
+            fi
+        done
+
+        if [ "${GIT_VERSION}" == '-' ]
+        then
+            git clone "${CLONE_ARGS[@]}" "${GIT_REPO}" ./
+        else
+            if ! (git clone "${CLONE_ARGS[@]}" --branch "${GIT_VERSION}" "${GIT_REPO}" ./)
+            then
+                # GIT_VERSION is a hash
+                git clone --recurse-submodules "${GIT_REPO}" ./
+                git checkout "${GIT_VERSION}"
+            fi
+        fi
+    fi
+}
+
+
+check_workspace()
+{
+    if ! command -v "${WSH_YQ_BINARY}" > /dev/null
+    then
+        WSH_YQ_BINARY=yq
+        if ! command -v "${WSH_YQ_BINARY}" > /dev/null
+        then
+            WSH_YQ_BINARY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/yq" || (echo "'yq' is not installed" && false)
+        fi
+    fi
+    WSH_YQ=("${WSH_YQ_BINARY}" --indent "${WSH_INDENT}")
+
+    WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
+    test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
+    WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT}")/"
+
+    WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"repos"}
+    WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
+    WSH_CACHE_DIR=${WSH_CACHE_DIR:-"${WSH_WORKSPACE_ROOT}/.wshandler"}
+
+    if [ ! -f "${WSH_REPOLIST}" ]
+    then
+        case $1 in
+            scrape|add)
+                touch "${WSH_REPOLIST}";;
+            *)
+                echo "'${WSH_REPOLIST}' is not a repository list"
+                exit 20;;
+        esac
+    fi
+
+    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE} -p ${WSH_COMMAND_POLICY}")
+    if [ -n "${WSH_KEEP_GOING}" ]
+    then
+        WSHANDLER+=("${WSH_KEEP_GOING}")
+    fi
+}
+
+
+execute_command()
+{
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        echo ">>> wshandler $1 ${WSH_WORKSPACE_ROOT}: ${SOURCE_TYPE} sources ---"
+        "${SOURCE_TYPE}_$1"
+        echo "<<< wshandler $1 ${WSH_WORKSPACE_ROOT}: ${SOURCE_TYPE} sources ---"
+    done
+}
+
+
+rosinstall_merge()
+{
+    case "${WSH_COMMAND_POLICY}" in
+        keep|default)
+            INPUT_FILE=$1;;
+        replace)
+            backup
+            cp "$1" "${WSH_REPOLIST}"
+            INPUT_FILE="${WSH_CACHE_DIR}/repolist.back";;
+        *)
+            help 11;;
+    esac
+
+    REMOVE_LIST=$("${WSH_YQ[@]}" '.[].* | (".*.local-name == \"" +.local-name + "\" or ")' < "${WSH_REPOLIST}" | tr -d '\n' | sed -e 's/or $//')
+    # shellcheck disable=SC2094
+    "${WSH_YQ[@]}" "del(.[] | select(${REMOVE_LIST}))" < "${INPUT_FILE}" | "${WSH_YQ[@]}" 'del(. | select(length==0))' >> "${WSH_REPOLIST}"
+}
+
+repos_merge()
+{
+    backup
+    case "${WSH_COMMAND_POLICY}" in
+        keep|default)
+            # shellcheck disable=SC2016
+            "${WSH_YQ[@]}" eval-all '. as $item ireduce ({}; . * $item)' <(cat "$1") <(cat "${WSH_CACHE_DIR}/repolist.back") > "${WSH_REPOLIST}";;
+        replace)
+            # shellcheck disable=SC2016
+            "${WSH_YQ[@]}" eval-all '. as $item ireduce ({}; . * $item)' <(cat "${WSH_CACHE_DIR}/repolist.back") <(cat "$1") > "${WSH_REPOLIST}";;
+        *)
+            help 12;;
+    esac
+}
+
+execute_merge()
+{
+    INPUT_FILE=$1
+    if [ -f "${INPUT_FILE}" ] && [ ! "${WSH_REPOLIST}" -ef "${INPUT_FILE}" ]
+    then
+        "${WSH_WORKSPACE_TYPE}_merge" "${INPUT_FILE}"
+    else
+        help 10;
+    fi
+}
+
+
+rosinstall_remove()
+{
+    "${WSH_YQ[@]}" "del(.[] | select(.*.local-name == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+repos_remove()
+{
+    "${WSH_YQ[@]}" "del(.repositories.$1)" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+execute_remove()
+{
+    backup
+    "${WSH_WORKSPACE_TYPE}_remove" "$@"
+}
+
+
+rosinstall_remove_by_url()
+{
+    "${WSH_YQ[@]}" "del(.[] | select(.*.uri == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+repos_remove_by_url()
+{
+    "${WSH_YQ[@]}" "del(.repositories.* | select(.url == \"$1\"))" < "${WSH_CACHE_DIR}/repolist.back" > "${WSH_REPOLIST}"
+}
+
+execute_remove_by_url()
+{
+    backup
+    "${WSH_WORKSPACE_TYPE}_remove_by_url" "$@"
+}
+
+
+rosinstall_git_add()
+{
+    ENTRY="[{\"$1\": {\"local-name\": \"$2\", \"uri\": \"$3\", \"version\": \"$4\"}}]"
+    backup
+    "${WSH_YQ[@]}" "del(.[] | select(.*.local-name == \"$2\"))" < "${WSH_CACHE_DIR}/repolist.back" | "${WSH_YQ[@]}" ". + ${ENTRY}" > "${WSH_REPOLIST}"
+}
+
+repos_git_add()
+{
+    ENTRY="{\"$2\": {\"type\": \"$1\", \"url\": \"$3\", \"version\": \"$4\"}}"
+    backup
+    "${WSH_YQ[@]}" "del(.repositories.$2)" < "${WSH_CACHE_DIR}/repolist.back" | "${WSH_YQ[@]}" ". * {\"repositories\": ${ENTRY}}" > "${WSH_REPOLIST}"
+}
+
+execute_add()
+{
+    "${WSH_WORKSPACE_TYPE}_$1_add" "$@"
+}
+
+set_version()
+{
+    TARGET_MATCH="$2"
+    TARGET_VERSION="$3"
+
+    case $1 in
+        set_version_by_url) TYPE=REPO;;
+        set_version_by_name) TYPE=NAME;;
+        *) help 1;;
+    esac
+
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        "${WSH_WORKSPACE_TYPE}_${SOURCE_TYPE}_repo_triplets" \
+            | while read -r NAME REPO VERSION; \
+            do \
+                if [ "${TARGET_MATCH}" = "${!TYPE}" ];\
+                then \
+                    echo "${NAME}: changing '${VERSION}' to '${TARGET_VERSION}'"; \
+                    "${WSH_WORKSPACE_TYPE}_${SOURCE_TYPE}_add" "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}"; \
+                    exit; \
+                fi; \
+            done
+    done
+}
+
+
+apt_install()
+{
+    sudo env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install "$@"
+}
+
+snap_install()
+{
+    sudo snap install "$@"
+}
+
+
+WSH_SOURCE_TYPES="git"
+WSH_COMMAND_POLICY=default
+WSH_JOBS=1
+WSH_INDENT=4
+WSH_XARGS=(xargs --no-run-if-empty -L 1 -P "${WSH_JOBS}")
+WSH_KEEP_GOING=""
+WSH_YQ_BINARY="yq"
+
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        -y|--yq)
+            WSH_YQ_BINARY=$2
+            shift; shift;;
+
+        -r|--root)
+            WSH_WORKSPACE_ROOT=$2
+            shift; shift;;
+
+        -c|--cache)
+            WSH_CACHE_DIR=$2
+            shift; shift;;
+
+        -t|--type)
+            WSH_WORKSPACE_TYPE=$2
+            shift; shift;;
+
+        -j|--jobs)
+            WSH_JOBS=$2
+            shift; shift;;
+
+        -i|--indent)
+            WSH_INDENT=$2
+            shift; shift;;
+
+        -p|--policy)
+            WSH_COMMAND_POLICY=$2
+            shift; shift;;
+
+        -k|--keep-going)
+            WSH_KEEP_GOING="-k"
+            shift;;
+
+        status|update|clean|scrape)
+            check_workspace "$1"
+            execute_command "$1"
+            exit;;
+
+        add|remove|merge|remove_by_url)
+            check_workspace "$1"
+            "execute_$1" "${@:2}"
+            exit;;
+
+        set_version_by_url|set_version_by_name)
+            check_workspace "$1"
+            set_version "$1" "${@:2}"
+            exit;;
+
+        dir_*_update)
+            if [ -n "${WSH_KEEP_GOING}" ]
+            then
+                "$1" "${@:2}" || true
+            else
+                "$1" "${@:2}"
+            fi
+            exit;;
+
+        dir_*)
+            "$1" "${@:2}"
+            exit;;
+
+        install_test_deps)
+            apt_install shellcheck
+            exit;;
+
+        install)
+            BIN_PATH=${2:-"${HOME}/bin"}
+
+            mkdir -p "${BIN_PATH}"
+            if [ ! "${BASH_SOURCE[0]}" -ef "${BIN_PATH}/wshandler" ]
+            then
+                cp "${BASH_SOURCE[0]}" "${BIN_PATH}/wshandler"
+            fi
+
+            if ! command -v "yq" > /dev/null
+            then
+                case "${WSH_COMMAND_POLICY}" in
+                    skip_yq|default)
+                        ;;
+                    snap)
+                        apt_install snap
+                        snap_install yq
+                        ;;
+                    download)
+                        apt_install wget
+                        wget -O - "https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_$(dpkg --print-architecture).tar.gz" \
+                            | tar -zxO > "${BIN_PATH}/yq"
+                        chmod +x "${BIN_PATH}/yq"
+                        ;;
+                    *)
+                        echo "Unsupported installation policy.";
+                        exit 4;;
+                esac
+            fi
+            exit;;
+
+        *)
+            help 1;;
+    esac
+done
+
+help 2

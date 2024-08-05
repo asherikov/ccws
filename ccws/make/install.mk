@@ -21,6 +21,7 @@ install_python3:
 
 install_ccws_deps_ros1:
 	sh -c 'test -f /etc/apt/sources.list.d/ros-latest.list \
+		|| test -f /etc/apt/sources.list.d/ros1-latest.list \
 		|| (echo "deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main" > /etc/apt/sources.list.d/ros-latest.list && apt update)'
 
 install_ccws_deps_ros2:
@@ -28,10 +29,7 @@ install_ccws_deps_ros2:
 		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" > /etc/apt/sources.list.d/ros2-latest.list && apt update)'
 
 install_wshandler:
-	# ./scripts/wshandler/install.sh deps # requires snap
-	${MAKE} download FILES="https://github.com/asherikov/wshandler/releases/download/0.1.0/wshandler-${CCWS_TRIPLE_ARCH}.AppImage"
-	mv '${CCWS_CACHE}/wshandler-${CCWS_TRIPLE_ARCH}.AppImage' "${CCWS_DIR}/scripts/wshandler"
-	chmod +x "${CCWS_DIR}/scripts/wshandler"
+	"${CCWS_DIR}/scripts/wshandler" --policy download install "${CCWS_DIR}/scripts/"
 
 
 #ubuntu18

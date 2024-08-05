@@ -2,9 +2,11 @@
 /build
 /install
 /log
+/artifacts
+/cache
 ccws/make/config.mk
 ccws/pkg_template/vendor*
 .clangd
-ccws/scripts/wshandler
+ccws/scripts/yq
 !/src/flake.nix
 !/src/flake.lock

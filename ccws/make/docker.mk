@@ -10,6 +10,7 @@ docker_run:
 
 docker_build:
 	docker build -f ${CCWS_DOCKER_FILE} \
+		--no-cache \
 		--build-arg BASE_IMAGE="${CCWS_DOCKER_BASE_IMAGE}" \
 		--tag "${CCWS_DOCKER_TAG}" \
 		./

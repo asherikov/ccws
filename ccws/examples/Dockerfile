@@ -10,10 +10,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
-    && mkdir -p /ccws \
-    && cp -r .clang-format .git .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/
+    && mkdir -p /ccws/workspace \
+    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/
 
 WORKDIR /ccws
+ENV WORKSPACE_DIR=/ccws/workspace
 
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -24,7 +25,6 @@ RUN \
     && apt upgrade -y \
     && ${APT_INSTALL} neovim screen git ssh \
     && cd /ccws \
-    && ls -la \
     && ./ccws/scripts/bootstrap.sh \
     && make ep_install EXEC_PROFILE=valgrind \
     && make bp_install_build BUILD_PROFILE=addr_undef_sanitizers \
@@ -36,4 +36,4 @@ RUN \
     && make bp_install_build BUILD_PROFILE=reldebug \
     && make bp_install_build BUILD_PROFILE=scan_build \
     && make bp_install_build BUILD_PROFILE=static_checks \
-    && make bp_install_build BUILD_PROFILE=thread_sanitizer \
+    && make bp_install_build BUILD_PROFILE=thread_sanitizer
