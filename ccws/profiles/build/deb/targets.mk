@@ -21,7 +21,7 @@ private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	${MAKE} wsstatus > "${CCWS_DEB_INFO_DIR}/workspace_status.txt"
 	echo "${PKG}" > "${CCWS_DEB_INFO_DIR}/pkg.txt"
 	echo ${CCWS_BUILD_USER} ${CCWS_BUILD_TIME} > "${CCWS_DEB_INFO_DIR}/build_info.txt"
-	cat ${WORKSPACE_DIR}/build/version_hash/${PKG} \
+	cat ${WORKSPACE_DIR}/build/version_hash/${PKG_ID} \
 		| sed -e 's/^/${CCWS_BUILD_TIME}_${ROS_DISTRO}_/' > "${CCWS_DEB_INFO_DIR}/version_hash.txt"
 	echo "${VERSION}" > "${CCWS_DEB_INFO_DIR}/version.txt"
 
@@ -42,9 +42,9 @@ private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
 	${MAKE_QUIET} private_info_with_deps \
 		| grep "^path:" | sed 's/path: //' | sort \
-		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
-	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG}.all
-	cat "${WORKSPACE_DIR}/build/version_hash/${PKG}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG}
+		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all
+	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all
+	cat "${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}
 
 private_deb_lint: assert_PKG_arg_must_be_specified
 	test -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"

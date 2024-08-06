@@ -1,4 +1,4 @@
-set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
+set(CMAKE_BUILD_TYPE            Debug CACHE STRING "" FORCE)
 
 
 ###############################################################################

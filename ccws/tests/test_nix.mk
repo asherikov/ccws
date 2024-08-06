@@ -13,6 +13,7 @@ test:
 	${MAKE} install_nix
 	cp -R ccws/tests/nix "${WORKSPACE_SRC}"
 	${MAKE} nix_workspace_flake PKG=eigen
+	rm .gitignore # src is ignored
 	git add "${WORKSPACE_SRC}"/*.nix
 	git commit -m "nix flake test"
 	${MAKE} nix_test
