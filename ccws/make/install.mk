@@ -5,9 +5,9 @@ install_ccws_deps:
 	# moreutils: ts (timestamping utility)
 	${APT_INSTALL} wget gnupg2 moreutils ca-certificates
 	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
-	${APT_INSTALL} build-essential ccache proot
+	${APT_INSTALL} build-essential ccache proot gdb
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
-	command -v "wshandler" > /dev/null || test -x "${CCWS_DIR}/scripts/wshandler" || ${MAKE} wswraptarget TARGET="install_wshandler"
+	${MAKE} install_wshandler
 	${APT_INSTALL} \
 		python3-colcon-ros \
 		python3-colcon-package-selection \

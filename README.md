@@ -304,6 +304,16 @@ Extending `CCWS`
 `show_vendor_files` target can be used to list all vendor specific files.
 
 
+Known issues
+============
+
+- Segmentation fault during cross-compilation or debian package generation
+  indside docker containers (both require `proot`): presumably due to `seccomp`
+  Linux feature, which can be disabled with `--security-opt seccomp:unconfined`
+  docker parameter. Disabling `seccomp` for `proot` with `PROOT_NO_SECCOMP=1`
+  seems to be unnecessary.
+
+
 Related software
 ================
 
