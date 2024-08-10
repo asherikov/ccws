@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#!/usr/local/bin/bash -x
 # shellcheck disable=SC2317
 
 set -e
@@ -18,7 +19,7 @@ help()
     echo "  -i|--indent 1|2|3...        {4}"
     echo "  -k|--keep-going             {false}"
 
-    echo "Commands:"
+    echo "List commands:"
     echo "  status"
     echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow|rebase] update"
     echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
@@ -29,6 +30,17 @@ help()
     echo "  remove <NAME>"
     echo "  remove_by_url <URL>"
     echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
+
+    echo "Repository commands:"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] [-s|-source {git}] foreach '<COMMAND>'"
+    echo "  prune"
+    echo "  push"
+    echo "  branch show ['<GREP_PATTERN>']"
+    echo "  branch new <BRANCH_NAME>"
+    echo "  branch delete <BRANCH_NAME>"
+    echo "  branch switch <BRANCH_NAME>"
+    echo "  branch merge <BRANCH_NAME> <TARGET_BRANCH {main}>"
+    echo "  commit '<MESSAGE>'"
 
     echo "Installation commands:"
     echo "  install_test_deps"
@@ -68,22 +80,30 @@ repos_git_repo_names()
 git_status()
 {
     DATA=$(
-        echo "name|version (hash)|actual version|repository";
-        echo "----|--------------|--------------|----------";
+        echo "name|version|actual version|HM|repository";
+        echo "----|-------|--------------|--|----------";
         "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done
     )
 
-    MAX_LEN_1=$(cut -f 1 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
-    MAX_LEN_2=$(cut -f 2 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
-    MAX_LEN_3=$(cut -f 3 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
-    MAX_LEN_4=$(cut -f 4 -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+    FORMAT_STRING=""
+    for i in {1..4};
+    do
+        MAX_LEN=$(cut -f "$i" -d '|' <<< "${DATA}" | wc -L | grep -o "[0-9]*")
+        if [ "$i" != "1" ]
+        then
+            FORMAT_STRING+=" "
+        fi
+        FORMAT_STRING+="%-${MAX_LEN}.${MAX_LEN}s"
+    done
 
+    echo "Flags: H - version hash mismatch, M - uncommited changes"
     IFS=$'\n' readarray -t ROWS <<< "${DATA}"
     for ROW in "${ROWS[@]}"
     do
         IFS='|' read -ra COLS <<< "${ROW}"
         # use ${COLUMNS} to crop?
-        printf "%-${MAX_LEN_1}.${MAX_LEN_1}s %-${MAX_LEN_2}.${MAX_LEN_2}s %-${MAX_LEN_3}.${MAX_LEN_3}s %-${MAX_LEN_4}.${MAX_LEN_4}s\n" "${COLS[@]}"
+        # shellcheck disable=SC2059
+        printf "${FORMAT_STRING} %s\n" "${COLS[@]}"
     done
 
     echo
@@ -94,6 +114,30 @@ git_status()
 
 git_update()
 {
+    IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
+
+    if [ -d "${WSH_WORKSPACE_ROOT}/.git" ]
+    then
+        echo "Processing workspace root"
+        git fetch
+        if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
+        then
+            # if we are on a branch make sure that it is updated
+            if (git branch --show-current | grep "${GIT_VERSION}")
+            then
+                PULL_ARGS=()
+                for POLICY in "${POLICIES[@]}";
+                do
+                    if [ "${POLICY}" == "rebase" ]
+                    then
+                        PULL_ARGS+=(--rebase)
+                    fi
+                done
+                git pull "${PULL_ARGS[@]}"
+            fi
+        fi
+    fi
+
     "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" "${WSHANDLER[@]}" dir_git_update
 }
 
@@ -150,6 +194,23 @@ git_scrape()
     done
 }
 
+dir_run()
+{
+    echo ">>> Processing '$1'"
+    if [ -d "${WSH_WORKSPACE_ROOT}/$1/" ]
+    then
+        cd "${WSH_WORKSPACE_ROOT}/$1/" && sh -c "$2"
+    else
+        echo "Missing directory: ${WSH_WORKSPACE_ROOT}/$1/"
+    fi
+}
+
+
+dir_git_uncommitted()
+{
+    git status --porcelain | grep . > /dev/null
+}
+
 dir_git_status()
 {
     NAME="$1"
@@ -161,11 +222,32 @@ dir_git_status()
     if [ -d "${GIT_DIR}/.git" ]
     then
         cd "${GIT_DIR}"
-        GIT_VERSION_HASH=$(git rev-parse --short "${GIT_VERSION}" || echo -n "unknown")
+        GIT_VERSION_HASH=$(git rev-parse --short "${GIT_VERSION}" 2> /dev/null || echo -n "-")
         GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
+        GIT_ACTUAL_HASH=$(git rev-parse --short HEAD || echo -n "-")
     fi
 
-    echo "${NAME}|${GIT_VERSION} (${GIT_VERSION_HASH})|${GIT_ACTUAL_VERSION}|${GIT_REPO}"
+    FLAGS=""
+    if [ "${GIT_VERSION_HASH}" = "${GIT_ACTUAL_HASH}" ]
+    then
+        FLAGS+=" "
+    else
+        if [ "${GIT_VERSION_HASH}" = "-" ] || [ "${GIT_ACTUAL_HASH}" = "-" ]
+        then
+            FLAGS+="?"
+        else
+            FLAGS+="H"
+        fi
+    fi
+
+    if dir_git_uncommitted;
+    then
+        FLAGS+="M"
+    else
+        FLAGS+=" "
+    fi
+
+    echo "${NAME}|${GIT_VERSION}|${GIT_ACTUAL_VERSION}|${FLAGS}|${GIT_REPO}"
 }
 
 dir_git_update()
@@ -228,6 +310,31 @@ dir_git_update()
     fi
 }
 
+dir_git_merge()
+{
+    NAME=$1
+    BRANCH=$2
+    TARGET_BRANCH=$3
+
+    cd "${WSH_WORKSPACE_ROOT:?}/${NAME}";
+    if [ "${BRANCH}" = "$(git rev-parse --abbrev-ref HEAD)" ]
+    then
+        if dir_git_uncommitted
+        then
+            echo "Uncommited changes detected in '${NAME}'"
+            exit 30
+        fi
+
+        if ! git rev-parse --verify "${TARGET_BRANCH}" 2> /dev/null
+        then
+            echo "No target branch '${TARGET_BRANCH}' in '${NAME}'"
+            exit 31
+        fi
+
+        git checkout "${TARGET_BRANCH}"
+        git merge "${BRANCH}"
+    fi
+}
 
 check_workspace()
 {
@@ -260,7 +367,7 @@ check_workspace()
         esac
     fi
 
-    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE} -p ${WSH_COMMAND_POLICY}")
+    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}" -p "${WSH_COMMAND_POLICY}")
     if [ -n "${WSH_KEEP_GOING}" ]
     then
         WSHANDLER+=("${WSH_KEEP_GOING}")
@@ -377,6 +484,64 @@ execute_add()
     "${WSH_WORKSPACE_TYPE}_$1_add" "$@"
 }
 
+
+git_foreach()
+{
+    "${WSH_WORKSPACE_TYPE}_${WSH_SOURCE_TYPE}_repo_names" | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$1"
+}
+
+execute_foreach()
+{
+    "${WSH_SOURCE_TYPE}_foreach" "$@"
+}
+
+execute_prune()
+{
+    git_foreach "git remote | xargs --no-run-if-empty -L 1 -I {} git remote prune {}"
+}
+
+execute_push()
+{
+    git_foreach "git push"
+}
+
+execute_branch()
+{
+    ACTION=$1
+    BRANCH=$2
+
+    case ${ACTION} in
+        new)
+            git_foreach "((git status --porcelain | grep . > /dev/null) && git checkout -b ${BRANCH}) || true";;
+        delete)
+            git_foreach "(git ls-remote --exit-code --heads origin ${BRANCH} > /dev/null && git push origin --delete ${BRANCH}) || true";;
+        show)
+            git_foreach "git branch -a | grep '${BRANCH}'";;
+        merge)
+            TARGET_BRANCH=${3:-"main"}
+            "${WSH_WORKSPACE_TYPE}_git_repo_names" | while read -r NAME; do dir_git_merge "${NAME}" "${BRANCH}" "${TARGET_BRANCH}"; done
+            ;;
+        switch)
+            "${WSH_WORKSPACE_TYPE}_git_repo_names" \
+                | while read -r NAME; \
+                do \
+                    cd "${WSH_WORKSPACE_ROOT:?}/${NAME}"; \
+                    if [ "${BRANCH}" = "$(git rev-parse --abbrev-ref HEAD)" ]; \
+                    then \
+                        "${WSHANDLER[@]}" set_version_by_name "${NAME}" "${BRANCH}"; \
+                    fi \
+                done
+            ;;
+        *) help 1;;
+    esac
+}
+
+execute_commit()
+{
+    git_foreach "((git status --porcelain | grep . > /dev/null) && git commit -a -m '${1}') || true"
+}
+
+
 set_version()
 {
     TARGET_MATCH="$2"
@@ -422,6 +587,7 @@ WSH_INDENT=4
 WSH_XARGS=(xargs --no-run-if-empty -L 1 -P "${WSH_JOBS}")
 WSH_KEEP_GOING=""
 WSH_YQ_BINARY="yq"
+WSH_SOURCE_TYPE="git"
 
 while [[ $# -gt 0 ]]
 do
@@ -458,22 +624,26 @@ do
             WSH_KEEP_GOING="-k"
             shift;;
 
+        -s|--source)
+            WSH_SOURCE_TYPE=$2
+            shift; shift;;
+
         status|update|clean|scrape)
             check_workspace "$1"
             execute_command "$1"
             exit;;
 
-        add|remove|merge|remove_by_url)
+        add|remove|merge|remove_by_url|foreach|prune|push|branch|commit|set_version_branch)
             check_workspace "$1"
             "execute_$1" "${@:2}"
             exit;;
 
         set_version_by_url|set_version_by_name)
             check_workspace "$1"
-            set_version "$1" "${@:2}"
+            set_version "${@}"
             exit;;
 
-        dir_*_update)
+        dir_*_update|dir_run)
             if [ -n "${WSH_KEEP_GOING}" ]
             then
                 "$1" "${@:2}" || true
@@ -505,11 +675,17 @@ do
                     skip_yq|default)
                         ;;
                     snap)
-                        apt_install snap
+                        if ! command -v "snap" > /dev/null
+                        then
+                            apt_install snap
+                        fi
                         snap_install yq
                         ;;
                     download)
-                        apt_install wget
+                        if ! command -v "wget" > /dev/null
+                        then
+                            apt_install wget
+                        fi
                         wget -O - "https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_$(dpkg --print-architecture).tar.gz" \
                             | tar -zxO > "${BIN_PATH}/yq"
                         chmod +x "${BIN_PATH}/yq"
