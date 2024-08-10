@@ -312,6 +312,14 @@ Known issues
   Linux feature, which can be disabled with `--security-opt seccomp:unconfined`
   docker parameter. Disabling `seccomp` for `proot` with `PROOT_NO_SECCOMP=1`
   seems to be unnecessary.
+- Programs compiled with sanitizers (`addr_undef_sanitizers` or
+  `thread_sanitizer` build profiles) output `2: AddressSanitizer:DEADLYSIGNAL`
+  or `FATAL: ThreadSanitizer: unexpected memory mapping` when executed: the
+  reason is tightened memory security with ASLR (address space layout
+  randomization) in modern Linux kernels, see
+  <https://github.com/google/sanitizers/issues/1614>. The issue can be
+  alleviated by setting `sudo sysctl vm.mmap_rnd_bits=28`.
+
 
 
 Related software

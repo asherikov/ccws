@@ -22,7 +22,7 @@ LSAN_OPTIONS=suppressions=${CCWS_BUILD_PROFILE_DIR}/leak.supp
 export LSAN_OPTIONS
 
 # Suppressions dont work on alloc-dealloc-mismatch for some reason
-ASAN_OPTIONS=alloc_dealloc_mismatch=0
+ASAN_OPTIONS=alloc_dealloc_mismatch=0:new_delete_type_mismatch=0:suppressions=${CCWS_BUILD_PROFILE_DIR}/address.supp
 export ASAN_OPTIONS
 
 # address sanitizer

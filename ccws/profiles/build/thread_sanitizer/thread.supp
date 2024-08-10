@@ -3,3 +3,6 @@ deadlock:log4cxx::helpers::synchronized::synchronized
 
 deadlock:libtsan.so.0
 race:libtsan.so.0
+
+#Mutex ... is already destroyed.
+mutex:libfastrtps.so.*
