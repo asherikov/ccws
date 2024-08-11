@@ -11,7 +11,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
-    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/
+    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
+    && cd /ccws \
+    && ((git config --remove-section 'http.https://github.com/') || true)
 
 WORKDIR /ccws
 ENV WORKSPACE_DIR=/ccws/workspace
