@@ -4,6 +4,7 @@
 /log
 /artifacts
 /cache
+/sysroot
 ccws/make/config.mk
 ccws/pkg_template/vendor*
 .clangd

@@ -7,11 +7,14 @@ cross_sysroot_fix_abs_symlinks:
 		find ./usr -lname '/*' -printf 'sudo ln --relative --symbolic --force ./%l %p\n' | /bin/sh"
 
 # internal target, should be called with initialized environment
-private_cross_mount:
+private_cross_mount_loopback:
 	mkdir -p "${CCWS_SYSROOT}"
-	#losetup -j "${CCWS_BUILD_PROFILE_DIR}/system.img" | cut -f 1 -d ':' | xargs --no-run-if-empty -I {} sudo losetup -d {}
-	sudo losetup -PL --find --show "${CCWS_BUILD_PROFILE_DIR}/system.img" \
+	#losetup -j "${CCWS_SYSROOT_DATA}/system.img" | cut -f 1 -d ':' | xargs --no-run-if-empty -I {} sudo losetup -d {}
+	sudo losetup -PL --find --show "${CCWS_SYSROOT_DATA}/system.img" \
 		| xargs -I {} sudo /bin/sh -c 'make private_cross_loopback_initialize LOOPBACK_DEVICE={} && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
+
+# internal target, should be called with initialized environment
+private_cross_mount_specialfs:
 	# resolv.conf can be a symlink to a nonexistent systemd file or an absolute
 	# symlink, in such cases we have to recreate this file in order to use bind
 	# mounting
@@ -23,6 +26,7 @@ private_cross_mount:
 	sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT}/etc/resolv.conf" || true
 	sudo mount --bind /dev "${CCWS_SYSROOT}/dev"
 	sudo mount --bind /tmp "${CCWS_SYSROOT}/tmp"
+	sudo mount --bind /proc "${CCWS_SYSROOT}/proc"
 	# suppress noisy warnings
 	sudo mount --bind /dev/null "${CCWS_SYSROOT}/etc/ld.so.preload" || true
 
@@ -35,7 +39,8 @@ private_cross_loopback_initialize:
 		| /bin/sh
 
 assert_CCWS_SYSROOT_must_be_mounted:
-	mountpoint -q "${CCWS_SYSROOT}"
+	#mountpoint -q "${CCWS_SYSROOT}"
+	test -d "${CCWS_SYSROOT}/etc"
 
 private_cross_build: assert_CCWS_SYSROOT_must_be_mounted
 	# root must still be already mounted in order to determine ROS_DISTRO
@@ -54,7 +59,9 @@ cross_mount:
 	${MAKE} bp_${BUILD_PROFILE}_mount
 
 cross_umount:
-	bash -c "${SETUP_SCRIPT}; ! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\""
+	bash -c "${SETUP_SCRIPT}; \
+		(mount | cut -f 3 -d ' ' | (grep \"\$${CCWS_SYSROOT}\" || true) | xargs --no-run-if-empty -I {} umount {}) \
+		&& (! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\")"
 
 # to be used in docker
 cross_umount_all:
@@ -64,6 +71,7 @@ cross_umount_all:
 cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
 	sudo service binfmt-support restart
+	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DATA}\""
 
 cross_flash:
 	${MAKE} bp_${BUILD_PROFILE}_flash
@@ -71,7 +79,7 @@ cross_flash:
 bp_%_flash:
 	test "${DEVICE}" != ""
 	${MAKE} cross_umount
-	bash -c "${SETUP_SCRIPT}; sudo dd if=\"\$${CCWS_BUILD_PROFILE_DIR}/system.img\" of=${DEVICE} status=progress bs=16M"
+	bash -c "${SETUP_SCRIPT}; sudo dd if=\"\$${CCWS_SYSROOT_DATA}/system.img\" of=${DEVICE} status=progress bs=16M"
 
 cross_get:
 	${MAKE} bp_${BUILD_PROFILE}_get

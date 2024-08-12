@@ -7,7 +7,9 @@ set -o pipefail
 ##########################################################################################
 BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
-CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
+CCWS_SYSROOT_DATA="${WORKSPACE_DIR}/sysroot/$(basename "$(dirname "${BASH_SOURCE[0]}")")/"
+CCWS_SYSROOT="${CCWS_SYSROOT_DATA}/mountpoint"
+export CCWS_SYSROOT_DATA
 
 # target triple
 CCWS_TRIPLE_ARCH=aarch64
@@ -25,7 +27,7 @@ CCWS_GCC_VERSION=8
 
 CXX=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
 CC=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}
-export CXX CC
+export CXX CC CCWS_GCC_VERSION
 
 
 ##########################################################################################

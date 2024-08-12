@@ -7,7 +7,9 @@ set -o pipefail
 ##########################################################################################
 BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
-CCWS_SYSROOT=$(dirname "${BASH_SOURCE[0]}")/sysroot
+CCWS_SYSROOT_DATA="${WORKSPACE_DIR}/sysroot/$(basename "$(dirname "${BASH_SOURCE[0]}")")/"
+CCWS_SYSROOT="${CCWS_SYSROOT_DATA}/mountpoint"
+export CCWS_SYSROOT_DATA
 
 # target triple
 CCWS_TRIPLE_ARCH=arm
@@ -25,7 +27,7 @@ export ROS_OS_OVERRIDE
 ##########################################################################################
 # compiler paths
 #
-CCWS_COMPILER_ROOT_HOST=$(dirname "${BASH_SOURCE[0]}")/cross-pi-gcc
+CCWS_COMPILER_ROOT_HOST="${CCWS_SYSROOT_DATA}/cross-pi-gcc"
 CCWS_COMPILER_ROOT_TARGET=/opt/cross-pi-gcc/
 
 export CCWS_COMPILER_ROOT_HOST CCWS_COMPILER_ROOT_TARGET

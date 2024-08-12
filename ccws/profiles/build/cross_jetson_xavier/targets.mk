@@ -11,7 +11,8 @@ bp_cross_jetson_xavier_install_build: cross_common_install_build bp_common_insta
 
 bp_cross_jetson_xavier_mount: assert_BUILD_PROFILE_must_be_cross_jetson_xavier
 	${MAKE} cross_umount
-	${MAKE} wswraptarget TARGET=private_cross_mount
+	${MAKE} wswraptarget TARGET=private_cross_mount_loopback
+	${MAKE} wswraptarget TARGET=private_cross_mount_specialfs
 
 bp_cross_jetson_xavier_build: private_cross_build
 	# redirection
@@ -19,8 +20,9 @@ bp_cross_jetson_xavier_build: private_cross_build
 
 cross_jetson_install_build_bionic:
 	${MAKE} nvidia_install_build_repos DISTRO=ubuntu1804 REPO_PKG=cuda-repo-ubuntu1804_10.2.89-1_amd64.deb KEYRING_PKG=cuda-keyring_1.0-1_all.deb
-	sudo apt update
-	sudo ${APT_INSTALL} g++-8-aarch64-linux-gnu cuda-nvcc-10-2 device-tree-compiler cpio
+	bash -c "${SETUP_SCRIPT}; \
+		sudo apt update;
+		sudo ${APT_INSTALL} g++-\$${CCWS_GCC_VERSION}-aarch64-linux-gnu cuda-nvcc-10-2 device-tree-compiler cpio"
 
 private_cross_jetson_initialize_bionic:
 	# XXX NVIDIA overrides OpenCV package with version 4, but ROS melodic needs
