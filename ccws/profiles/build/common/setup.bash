@@ -51,7 +51,7 @@ export CCWS_PROOT_BIN
 ##########################################################################################
 # Host OS & arch
 #
-if [ -z "${CCWS_SYSROOT}" ]
+if [ -z "${CROSS_PROFILE}" ]
 then
     OS_DISTRO_HOST=${OS_DISTRO_BUILD}
     export OS_DISTRO_HOST
@@ -88,10 +88,12 @@ export CCWS_DEB_ARCH
 # cross compilation
 #
 
-if [ -n "${CCWS_SYSROOT}" ]
+if [ -n "${CROSS_PROFILE}" ]
 then
+    CCWS_SYSROOT_DATA="${WORKSPACE_DIR}/sysroot/${CROSS_PROFILE}"
+    CCWS_SYSROOT="$(realpath --canonicalize-missing "${CCWS_SYSROOT_DATA}/mountpoint")"
     CCWS_CHROOT="chroot ${CCWS_SYSROOT}"
-    export CCWS_SYSROOT CCWS_CHROOT
+    export CCWS_SYSROOT_DATA CCWS_SYSROOT CCWS_CHROOT
 
     # host root in emulation
     CCWS_BUILD_ROOTFS=/host-rootfs/

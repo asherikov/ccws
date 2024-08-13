@@ -35,7 +35,7 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/make \
     --bind=/usr/bin/ccache \
     ${IFS# python bindings (only if the same ROS distro is installed on the build system)} \
-    $(test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
+    ${IFS# (test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ')} \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \
     $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \

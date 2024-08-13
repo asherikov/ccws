@@ -7,9 +7,8 @@ set -o pipefail
 ##########################################################################################
 BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
-CCWS_SYSROOT_DATA="${WORKSPACE_DIR}/sysroot/$(basename "$(dirname "${BASH_SOURCE[0]}")")/"
-CCWS_SYSROOT="${CCWS_SYSROOT_DATA}/mountpoint"
-export CCWS_SYSROOT_DATA
+CROSS_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
+export CROSS_PROFILE
 
 # target triple
 CCWS_TRIPLE_ARCH=arm

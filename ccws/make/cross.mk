@@ -60,8 +60,9 @@ cross_mount:
 
 cross_umount:
 	bash -c "${SETUP_SCRIPT}; \
-		(mount | cut -f 3 -d ' ' | (grep \"\$${CCWS_SYSROOT}\" || true) | xargs --no-run-if-empty -I {} umount {}) \
-		&& (! mountpoint -q \"\$${CCWS_SYSROOT}\" || sudo umount --recursive \"\$${CCWS_SYSROOT}\")"
+		test -n \"\$${CCWS_SYSROOT}\" \
+		&& ((mountpoint -q \"\$${CCWS_SYSROOT}\" && sudo umount --recursive \"\$${CCWS_SYSROOT}\") \
+		|| (mount | cut -f 3 -d ' ' | (grep \"\$${CCWS_SYSROOT}\" || true) | xargs --no-run-if-empty -I {} sudo umount {}))"
 
 # to be used in docker
 cross_umount_all:
