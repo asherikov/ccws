@@ -15,6 +15,7 @@ private_cross_mount_loopback:
 
 # internal target, should be called with initialized environment
 private_cross_mount_specialfs:
+	test -n "${CCWS_SYSROOT}"
 	# resolv.conf can be a symlink to a nonexistent systemd file or an absolute
 	# symlink, in such cases we have to recreate this file in order to use bind
 	# mounting

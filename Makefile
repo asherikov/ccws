@@ -1,3 +1,6 @@
+GNUMAKEFLAGS+= --no-print-directory
+export GNUMAKEFLAGS
+
 export CURRENT_DIR=$(shell pwd)
 export CCWS_DIR=${CURRENT_DIR}/ccws
 
