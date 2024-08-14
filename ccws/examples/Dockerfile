@@ -12,8 +12,7 @@ RUN --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
     && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
-    && cd /ccws \
-    && ((git config --remove-section 'http.https://github.com/') || true)
+    && cd /ccws
 
 WORKDIR /ccws
 ENV WORKSPACE_DIR=/ccws/workspace
