@@ -31,6 +31,10 @@ help()
     echo "  remove_by_url <URL>"
     echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
 
+    echo "List initialization commands:"
+    echo "  [-p|--policy {default}|shallow|rebase] clone git <URL> [<BRANCH>]"
+    echo "  [-p|--policy {default}|shallow] init [git <URL1> ...]"
+
     echo "Repository commands:"
     echo "  [-j|--jobs <NUM_THREADS> {1}] [-s|-source {git}] foreach '<COMMAND>'"
     echo "  prune"
@@ -194,6 +198,44 @@ git_scrape()
     done
 }
 
+git_clone()
+{
+    GIT_REPO=$1
+    VERSION=$2
+    DIR=$3
+
+    CLONE_ARGS=(--recurse-submodules)
+    for POLICY in "${POLICIES[@]}";
+    do
+        if [ "${POLICY}" == "shallow" ]
+        then
+            CLONE_ARGS+=(--depth 1 --shallow-submodules)
+        fi
+    done
+
+    SOURCE_DESTINATION=("${GIT_REPO}")
+    if [ -n "${DIR}" ]
+    then
+        SOURCE_DESTINATION+=("${DIR}")
+    fi
+
+    if [ "${VERSION}" == '-' ] || [ -z "${VERSION}" ]
+    then
+        git clone "${CLONE_ARGS[@]}" "${SOURCE_DESTINATION[@]}"
+    else
+        if ! (git clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
+        then
+            # GIT_VERSION is a hash
+            # clone with history to be able to find it
+            git clone --recurse-submodules "${SOURCE_DESTINATION[@]}"
+            pushd "${DIR}"
+            git checkout "${VERSION}"
+            popd
+        fi
+    fi
+}
+
+
 dir_run()
 {
     echo ">>> Processing '$1'"
@@ -204,7 +246,6 @@ dir_run()
         echo "Missing directory: ${WSH_WORKSPACE_ROOT}/$1/"
     fi
 }
-
 
 dir_git_uncommitted()
 {
@@ -287,26 +328,7 @@ dir_git_update()
     else
         rm -rf "${GIT_DIR:?}/*"
 
-        CLONE_ARGS=(--recurse-submodules)
-        for POLICY in "${POLICIES[@]}";
-        do
-            if [ "${POLICY}" == "shallow" ]
-            then
-                CLONE_ARGS+=(--depth 1 --shallow-submodules)
-            fi
-        done
-
-        if [ "${GIT_VERSION}" == '-' ]
-        then
-            git clone "${CLONE_ARGS[@]}" "${GIT_REPO}" ./
-        else
-            if ! (git clone "${CLONE_ARGS[@]}" --branch "${GIT_VERSION}" "${GIT_REPO}" ./)
-            then
-                # GIT_VERSION is a hash
-                git clone --recurse-submodules "${GIT_REPO}" ./
-                git checkout "${GIT_VERSION}"
-            fi
-        fi
+        git_clone "${GIT_REPO}" "${GIT_VERSION}" "./"
     fi
 }
 
@@ -359,7 +381,7 @@ check_workspace()
     if [ ! -f "${WSH_REPOLIST}" ]
     then
         case $1 in
-            scrape|add)
+            scrape|add|init)
                 touch "${WSH_REPOLIST}";;
             *)
                 echo "'${WSH_REPOLIST}' is not a repository list"
@@ -541,6 +563,36 @@ execute_commit()
     git_foreach "((git status --porcelain | grep . > /dev/null) && git commit -a -m '${1}') || true"
 }
 
+execute_clone()
+{
+    "$1_clone" "$2" "$3" "${WSH_WORKSPACE_ROOT}"
+
+    check_workspace update
+    execute_command update
+}
+
+execute_init()
+{
+    mkdir -p "${WSH_WORKSPACE_ROOT}"
+
+    if [ "$1" == "git" ]
+    then
+        shift
+        pushd "${WSH_WORKSPACE_ROOT}"
+        while [[ $# -gt 0 ]]
+        do
+            git_clone "$1"
+            shift
+        done
+        popd
+
+        check_workspace init
+        "${WSHANDLER[@]}" -p add scrape
+    else
+        check_workspace init
+    fi
+}
+
 
 set_version()
 {
@@ -627,6 +679,10 @@ do
         -s|--source)
             WSH_SOURCE_TYPE=$2
             shift; shift;;
+
+        clone|init)
+            "execute_$1" "${@:2}"
+            exit;;
 
         status|update|clean|scrape)
             check_workspace "$1"
