@@ -20,9 +20,8 @@ generation. It is intended to be used both as a CI/CD backbone and a working
 environment for developers. Note that `CCWS` is not intended to be a complete
 solution, but rather a basis for development of a vendor-specific workflow.
 
-`CCWS` is meant to be ROS version agnostic, but is mainly tested with ROS1.
-There are also some technical issues wth ROS2 packages that must be resolved,
-e.g., <https://github.com/ament/google_benchmark_vendor/issues/17>.
+`CCWS` is ROS version agnostic, and should work in most cases for both ROS1 and
+ROS2.
 
 
 Features
@@ -312,6 +311,7 @@ Known issues
   Linux feature, which can be disabled with `--security-opt seccomp:unconfined`
   docker parameter. Disabling `seccomp` for `proot` with `PROOT_NO_SECCOMP=1`
   seems to be unnecessary.
+
 - Programs compiled with sanitizers (`addr_undef_sanitizers` or
   `thread_sanitizer` build profiles) output `2: AddressSanitizer:DEADLYSIGNAL`
   or `FATAL: ThreadSanitizer: unexpected memory mapping` when executed: the
@@ -320,6 +320,8 @@ Known issues
   <https://github.com/google/sanitizers/issues/1614>. The issue can be
   alleviated by setting `sudo sysctl vm.mmap_rnd_bits=28`.
 
+- Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
+  e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
 
 
 Related software

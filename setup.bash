@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WORKSPACE_DIR=$(dirname "${BASH_SOURCE[0]}" | xargs realpath)
-PROFILES_DIR="${CCWS_DIR}/profiles/"
+PROFILES_DIR="${WORKSPACE_DIR}/ccws/profiles/"
 
 if [ -z "${BUILD_PROFILE}" ];
 then

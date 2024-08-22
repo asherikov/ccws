@@ -44,6 +44,7 @@ test:
 	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	# ---
 	# test various build profiles
+	sudo apt install ros-${ROS_DISTRO}-ros2cli # used to test setup.bash
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
@@ -70,6 +71,7 @@ test:
 	test -z "${WORKSPACE_SRC}" || (test -d "${WORKSPACE_SRC}" && ls "${WORKSPACE_SRC}")
 
 
+
 build_with_profile:
 	${MAKE} wsclean
 	${MAKE} bp_install_build
@@ -80,3 +82,4 @@ build_with_profile:
 	# test recursively
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
+	bash -c "source setup.bash && ros2"
