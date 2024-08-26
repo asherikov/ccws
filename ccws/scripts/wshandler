@@ -122,7 +122,8 @@ git_update()
 
     if [ -d "${WSH_WORKSPACE_ROOT}/.git" ]
     then
-        echo "Processing workspace root"
+        echo "Processing workspace root ${WSH_WORKSPACE_ROOT}"
+        pushd "${WSH_WORKSPACE_ROOT}"
         git fetch
         if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
         then
@@ -140,6 +141,7 @@ git_update()
                 git pull "${PULL_ARGS[@]}"
             fi
         fi
+        popd
     fi
 
     "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | "${WSH_XARGS[@]}" "${WSHANDLER[@]}" dir_git_update

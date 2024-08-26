@@ -9,6 +9,8 @@ export CCWS_DIR=${CURRENT_DIR}/ccws
 export WORKSPACE_DIR?=${CURRENT_DIR}
 WORKSPACE_SRC?=${WORKSPACE_DIR}/src
 override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
+WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install
+override export WORKSPACE_INSTALL::=$(shell realpath "${WORKSPACE_INSTALL}")
 
 -include ${WORKSPACE_SRC}/.ccws/config.mk
 
