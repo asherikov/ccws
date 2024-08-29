@@ -185,7 +185,7 @@ if [ -z "${CCWS_PKG_FULL_NAME}" ] # can be set elsewhere
 then
     CCWS_PKG_FULL_NAME=${PKG}
     # CCWS_INSTALL_DIR_BUILD = CCWS_INSTALL_DIR_HOST
-    CCWS_INSTALL_DIR_BUILD="${WORKSPACE_INSTALL}/${BUILD_PROFILE}"
+    CCWS_INSTALL_DIR_BUILD="${WORKSPACE_INSTALL}"
     CCWS_INSTALL_DIR_HOST="${CCWS_INSTALL_DIR_BUILD}"
 fi
 
@@ -224,6 +224,7 @@ export CCWS_CACHE
 CCACHE_DIR=${CCACHE_DIR:-"${CCWS_CACHE}/ccache"}
 # should help with absolute include paths
 CCACHE_BASEDIR="${WORKSPACE_DIR}"
+# CCACHE_BASEDIR="${CCWS_INSTALL_DIR_HOST}"?
 # TODO can mess up debug info paths, needs testing
 CCACHE_NOHASHDIR="YES"
 CCACHE_MAXSIZE=${CCACHE_MAXSIZE:-"8G"}
@@ -336,6 +337,17 @@ then
         export CMAKE_INCLUDE_PATH
     fi
 fi
+
+
+##########################################################################################
+# deterministic/reproducible builds
+#
+
+# clang only?
+export ZERO_AR_DATE=1
+
+# https://reproducible-builds.org/docs/source-date-epoch/
+#export SOURCE_DATE_EPOCH=???
 
 
 ##########################################################################################

@@ -340,6 +340,7 @@ Related software
 TODO
 ====
 
+- Reproducible builds <https://reproducible-builds.org/>.
 - Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
 - Integrate <https://github.com/oclint/oclint>
 - <https://github.com/ejfitzgerald/clang-tidy-cache> or

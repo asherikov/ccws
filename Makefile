@@ -9,8 +9,6 @@ export CCWS_DIR=${CURRENT_DIR}/ccws
 export WORKSPACE_DIR?=${CURRENT_DIR}
 WORKSPACE_SRC?=${WORKSPACE_DIR}/src
 override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
-WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install
-override export WORKSPACE_INSTALL::=$(shell realpath "${WORKSPACE_INSTALL}")
 
 -include ${WORKSPACE_SRC}/.ccws/config.mk
 
@@ -35,6 +33,7 @@ export VENDOR?=ccws
 export LICENSE?=Apache 2.0
 export REPO_LIST_FORMAT?=repos
 
+export WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install/${BUILD_PROFILE}
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit

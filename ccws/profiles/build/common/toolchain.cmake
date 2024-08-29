@@ -35,8 +35,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 ###############################################################################
 # compilation flags
 ###
-set(CMAKE_CXX_FLAGS     "-fdiagnostics-color -fPIC" CACHE STRING "" FORCE)
-set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fPIC -fstack-protector-strong" CACHE STRING "" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# -ffile-prefix-map: rewrite absolute paths to avoid leaks and reproduce builds, use `set substitue-path` in gdb if needed
+set(CMAKE_C_FLAGS "-fdiagnostics-color '-ffile-prefix-map=$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "-fdiagnostics-color '-ffile-prefix-map=$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
+set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-strong" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 
@@ -52,6 +55,10 @@ set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE S
 # information. Combining -flto with -g is currently experimental and
 # expected to produce unexpected results."
 
+# https://stackoverflow.com/questions/67802356/how-to-make-cmake-pass-d-argument-to-ar-for-reproducible-build-of-a-static-libra
+# deterministic flag seems to be enabled by default now
+#set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcD <TARGET> <LINK_FLAGS> <OBJECTS>")
+#set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -D <TARGET>")
 
 ###############################################################################
 # cmake debug

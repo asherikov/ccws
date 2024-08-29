@@ -15,6 +15,7 @@ proot --rootfs="${CCWS_SYSROOT}" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \
     ${IFS# workspace and compiler} \
+    --bind="${CCWS_DIR}" \
     --bind="${WORKSPACE_DIR}" \
     ${IFS# installation paths} \
     --bind="${CCWS_INSTALL_DIR_BUILD}:${CCWS_INSTALL_DIR_HOST}" \
