@@ -36,7 +36,10 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/make \
     --bind=/usr/bin/ccache \
     ${IFS# python bindings (only if the same ROS distro is installed on the build system)} \
-    ${IFS# (test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ')} \
+    ${IFS# Note that architecture-specific libraries may be installed to python paths -- } \
+    ${IFS# in such cases this breaks compilation. The performance gain, however is quite} \
+    ${IFS# substantial, so the binding is enabled by default} \
+    $(test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \
     $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \
