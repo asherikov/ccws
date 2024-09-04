@@ -13,6 +13,7 @@ test:
 	${MAKE} cross_purge
 	${MAKE} cross_unpack
 	${MAKE} cross_mount
+	${MAKE} cross_python_soabi
 	${MAKE} staticoma
 	${MAKE} wsclean
 	${MAKE} bp_install_build BUILD_PROFILE=deb

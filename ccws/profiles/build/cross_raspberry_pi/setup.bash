@@ -19,6 +19,12 @@ CCWS_TRIPLE_ABI=gnueabihf
 source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 
 
+# https://docs.ros.org/en/eloquent/Tutorials/Cross-compilation.html
+# https://github.com/ros2/python_cmake_module/blob/humble/cmake/Modules/FindPythonExtra.cmake
+# https://github.com/ros2/rosidl_python/issues/111
+PYTHON_SOABI=cpython-310-${CCWS_TRIPLE}
+export PYTHON_SOABI
+
 ROS_OS_OVERRIDE=debian:10:buster
 export ROS_OS_OVERRIDE
 

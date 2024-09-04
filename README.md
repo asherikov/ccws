@@ -335,11 +335,16 @@ Related software
   Raspberry Pi done in a different way.
 - <https://github.com/ros-tooling/action-ros-ci> -- `github` action that covers
   some of `CCWS` functionality.
+- <https://github.com/ros-infrastructure/ros_buildfarm>,
+  <http://wiki.ros.org/buildfarm> -- the core of ROS packaging infrastructure.
+  Complicated, specialized on handling of individual packages rather than
+  workspaces, not suitable for quick field redeployments.
 
 
 TODO
 ====
 
+- Investigate generation of debug and development packages.
 - Reproducible builds <https://reproducible-builds.org/>.
 - Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
 - Integrate <https://github.com/oclint/oclint>

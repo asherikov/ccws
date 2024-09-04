@@ -107,3 +107,6 @@ cross_purge:
 	${MAKE} cross_umount
 	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_purge
 
+cross_python_soabi: assert_CCWS_SYSROOT_must_be_mounted
+	printf "from sysconfig import get_config_var\nprint(get_config_var('SOABI'))\n" \
+		| bash -c "${SETUP_SCRIPT}; sudo chroot \"\$${CCWS_SYSROOT}\" python3"
