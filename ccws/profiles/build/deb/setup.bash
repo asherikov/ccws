@@ -21,20 +21,23 @@ fi
 
 CCWS_BUILD_DIR="${WORKSPACE_DIR}/build/${BUILD_PROFILE}_${BASE_BUILD_PROFILE}"
 
-case "${PKG}" in
-    *\ *)
-        # contains spaces = multiple packages provided
-        if [ -n "${VENDOR}" ]
-        then
-            INSTALL_PKG_PREFIX="${VENDOR}__"
-        fi
-        ;;
-    *)
-        INSTALL_PKG_PREFIX="${PKG}__"
-        ;;
-esac
+if [ -z "${INSTALL_PKG_PREFIX}" ]
+then
+    case "${PKG}" in
+        *\ *)
+            # contains spaces = multiple packages provided
+            if [ -n "${VENDOR}" ]
+            then
+                INSTALL_PKG_PREFIX="${VENDOR}"
+            fi
+            ;;
+        *)
+            INSTALL_PKG_PREFIX="${PKG}"
+            ;;
+    esac
+fi
 
-CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}${BASE_BUILD_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
+CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}__${BASE_BUILD_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
 CCWS_INSTALL_DIR_HOST="/opt/${VENDOR}/${CCWS_PKG_FULL_NAME}"
 CCWS_INSTALL_DIR_BUILD_ROOT="${WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
