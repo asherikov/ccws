@@ -198,16 +198,6 @@ private_build: assert_PKG_arg_must_be_specified
 		--packages-up-to ${PKG}
 
 
-new: assert_PKG_arg_must_be_specified
-	mkdir -p "${WORKSPACE_SRC}"
-	cp -R ${CCWS_DIR}/pkg_template/catkin "${WORKSPACE_SRC}/${PKG}"
-	mkdir -p "${WORKSPACE_SRC}/${PKG}/include/${PKG}"
-	cd "${WORKSPACE_SRC}/${PKG}"; git init
-	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@PACKAGE@@/${PKG}/g"
-	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@AUTHOR@@/${AUTHOR}/g"
-	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@EMAIL@@/${EMAIL}/g"
-	find "${WORKSPACE_SRC}/${PKG}" -type f | xargs sed -i "s/@@LICENSE@@/${LICENSE}/g"
-
 add:
 	test -f "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}" || ${MAKE} wsinit
 	bash -c "\
