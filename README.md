@@ -344,6 +344,10 @@ Related software
 TODO
 ====
 
+- Fuzzing <https://github.com/rosin-project/ros2_fuzz>,
+  <https://github.com/sslab-gatech/RoboFuzz>,
+  <https://github.com/AFLplusplus/AFLplusplus>,
+  <https://github.com/google/clusterfuzzlite>.
 - Investigate generation of debug and development packages.
 - Reproducible builds <https://reproducible-builds.org/>.
 - Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
