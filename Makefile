@@ -1,12 +1,12 @@
 GNUMAKEFLAGS+= --no-print-directory
 export GNUMAKEFLAGS
 
-export CURRENT_DIR=$(shell pwd)
-export CCWS_DIR=${CURRENT_DIR}/ccws
+export CCWS_ROOT=$(shell pwd)
+export CCWS_DIR=${CCWS_ROOT}/ccws
 
 -include ${CCWS_DIR}/make/config.mk
 
-export WORKSPACE_DIR?=${CURRENT_DIR}
+export WORKSPACE_DIR?=${CCWS_ROOT}
 WORKSPACE_SRC?=${WORKSPACE_DIR}/src
 override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 

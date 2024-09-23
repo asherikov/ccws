@@ -21,7 +21,7 @@ wsctest:
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
+	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		colcon \
 		--log-base \$${CCWS_LOG_DIR} \
 		test \
@@ -38,7 +38,7 @@ test: assert_PKG_arg_must_be_specified
 
 ctest: assert_PKG_arg_must_be_specified
 	echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} bash -c \
-		"time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
+		"time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
 		cd \"\$${CCWS_BUILD_DIR}/{}\"; \
 		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_{}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
@@ -66,6 +66,6 @@ private_test_results_pkg: assert_PKG_arg_must_be_specified
 	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_DIR}/${PKG}
 
 test_list: assert_PKG_arg_must_be_specified
-	bash -c "time ( source ${WORKSPACE_DIR}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE} \
+	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE} \
 		&& echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} ctest --show-only --test-dir \"\$${CCWS_BUILD_DIR}/{}\")"
 
