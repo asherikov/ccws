@@ -1,21 +1,21 @@
 # Clean workspace
 wsclean:
-	rm -Rf "${WORKSPACE_DIR}"/build*
-	rm -Rf "${WORKSPACE_DIR}"/devel*
-	rm -Rf "${WORKSPACE_DIR}"/install*
-	rm -Rf "${WORKSPACE_DIR}"/log*
-	rm -Rf "${WORKSPACE_SRC}/.rosinstall.bak"
+	rm -rf "${WORKSPACE_DIR}"/build*
+	rm -rf "${WORKSPACE_DIR}"/devel*
+	rm -rf "${WORKSPACE_DIR}"/install*
+	rm -rf "${WORKSPACE_DIR}"/log*
+	rm -rf "${WORKSPACE_SRC}/.rosinstall.bak"
 
 artifacts_clean:
-	find "${WORKSPACE_DIR}/artifacts" -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
+	rm -rf "${WORKSPACE_DIR}/artifacts"
 
 # Purge workspace
 wspurge: wsclean artifacts_clean
-	rm -Rf "${WORKSPACE_SRC}"
-	rm -Rf "${BUILD_PROFILES_DIR}/*/rosdep"
+	rm -rf "${WORKSPACE_SRC}"
+	rm -rf "${BUILD_PROFILES_DIR}/*/rosdep"
 
 cache_clean:
-	find ${CCWS_CACHE} -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -Rf
+	find ${CCWS_CACHE} -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -rf
 
 cmake_cfg_clean:
 	${MAKE} wswraptarget TARGET=cmake_cfg_clean
@@ -33,5 +33,5 @@ bp_clean:
 	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_clean
 
 bp_%_clean: assert_BUILD_PROFILE_must_exist
-	rm -Rf "${WORKSPACE_DIR}/build/${BUILD_PROFILE}"
-	rm -Rf "${WORKSPACE_DIR}/install/${BUILD_PROFILE}"
+	rm -rf "${WORKSPACE_DIR}/build/${BUILD_PROFILE}"
+	rm -rf "${WORKSPACE_DIR}/install/${BUILD_PROFILE}"
