@@ -155,8 +155,8 @@ pylint:
 
 flake8:
 	bash -c "${SETUP_SCRIPT}; \
-		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g'); \
-		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/^://' -e 's/:/,/g'); \
+		flake8 --config \$${CCWS_BUILD_PROFILE_DIR}/flake8 --exclude \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_SRC}'"
 
 mypy:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
