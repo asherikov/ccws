@@ -21,7 +21,7 @@ help()
 
     echo "List commands:"
     echo "  status"
-    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy {default}|shallow|rebase] update"
+    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy policy1[,policy2] ({default}|shallow|nolfs|rebase)] update"
     echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
     echo "  [-p|--policy {ask}|add|show] scrape"
     echo "  add git <NAME> <URL> <VERSION>"
@@ -32,8 +32,8 @@ help()
     echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
 
     echo "List initialization commands:"
-    echo "  [-p|--policy {default}|shallow|rebase] clone git <URL> [<BRANCH>]"
-    echo "  [-p|--policy {default}|shallow] init [git <URL1> ...]"
+    echo "  [-p|--policy policy1[,policy2] ({default}|shallow|nolfs)] clone git <URL> [<BRANCH>]"
+    echo "  [-p|--policy policy1[,policy2] ({default}|shallow|nolfs)] init [git <URL1> ...]"
 
     echo "Repository commands:"
     echo "  [-j|--jobs <NUM_THREADS> {1}] [-s|-source {git}] foreach '<COMMAND>'"
@@ -122,23 +122,31 @@ git_update()
 
     if [ -d "${WSH_WORKSPACE_ROOT}/.git" ]
     then
-        echo "Processing workspace root ${WSH_WORKSPACE_ROOT}"
         pushd "${WSH_WORKSPACE_ROOT}"
-        git fetch
-        if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
+        if [ -n "$(git remote show)" ]
         then
-            # if we are on a branch make sure that it is updated
-            if (git branch --show-current | grep "${GIT_VERSION}")
+            echo "Processing workspace root ${WSH_WORKSPACE_ROOT}"
+            git fetch
+            if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
             then
-                PULL_ARGS=()
-                for POLICY in "${POLICIES[@]}";
-                do
-                    if [ "${POLICY}" == "rebase" ]
-                    then
-                        PULL_ARGS+=(--rebase)
-                    fi
-                done
-                git pull "${PULL_ARGS[@]}"
+                # if we are on a branch make sure that it is updated
+                if (git branch --show-current | grep "${GIT_VERSION}")
+                then
+                    PULL_ENV=(env)
+                    PULL_ARGS=()
+                    for POLICY in "${POLICIES[@]}";
+                    do
+                        case ${POLICY} in
+                            rebase)
+                                PULL_ARGS+=(--rebase)
+                                ;;
+                            nolfs)
+                                PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
+                                ;;
+                        esac
+                    done
+                    "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
+                fi
             fi
         fi
         popd
@@ -206,13 +214,20 @@ git_clone()
     VERSION=$2
     DIR=$3
 
+    CLONE_ENV=(env)
     CLONE_ARGS=(--recurse-submodules)
     for POLICY in "${POLICIES[@]}";
     do
-        if [ "${POLICY}" == "shallow" ]
-        then
-            CLONE_ARGS+=(--depth 1 --shallow-submodules)
-        fi
+        case ${POLICY} in
+            shallow)
+                # --no-tags -- we need tags
+                # --single-branch -- implied by --depth
+                CLONE_ARGS+=(--depth 1 --shallow-submodules)
+                ;;
+            nolfs)
+                CLONE_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
+                ;;
+        esac
     done
 
     SOURCE_DESTINATION=("${GIT_REPO}")
@@ -223,15 +238,15 @@ git_clone()
 
     if [ "${VERSION}" == '-' ] || [ -z "${VERSION}" ]
     then
-        git clone "${CLONE_ARGS[@]}" "${SOURCE_DESTINATION[@]}"
+        "${CLONE_ENV[@]}" git clone "${CLONE_ARGS[@]}" "${SOURCE_DESTINATION[@]}"
     else
-        if ! (git clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
+        if ! ("${CLONE_ENV[@]}" git clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
         then
             # GIT_VERSION is a hash
             # clone with history to be able to find it
-            git clone --recurse-submodules "${SOURCE_DESTINATION[@]}"
+            "${CLONE_ENV[@]}" git clone --recurse-submodules "${SOURCE_DESTINATION[@]}"
             pushd "${DIR}"
-            git checkout "${VERSION}"
+            "${CLONE_ENV[@]}" git checkout "${VERSION}"
             popd
         fi
     fi
@@ -316,15 +331,20 @@ dir_git_update()
             # if we are on a branch make sure that it is updated
             if (git branch --show-current | grep "${GIT_VERSION}")
             then
+                PULL_ENV=(env)
                 PULL_ARGS=()
                 for POLICY in "${POLICIES[@]}";
                 do
-                    if [ "${POLICY}" == "rebase" ]
-                    then
-                        PULL_ARGS+=(--rebase)
-                    fi
+                    case ${POLICY} in
+                        rebase)
+                            PULL_ARGS+=(--rebase)
+                            ;;
+                        nolfs)
+                            PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
+                            ;;
+                    esac
                 done
-                git pull "${PULL_ARGS[@]}"
+                "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
             fi
         fi
     else
@@ -744,7 +764,7 @@ do
                         then
                             apt_install wget
                         fi
-                        wget -O - "https://github.com/mikefarah/yq/releases/download/v4.44.2/yq_linux_$(dpkg --print-architecture).tar.gz" \
+                        wget -O - "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_$(dpkg --print-architecture).tar.gz" \
                             | tar -zxO > "${BIN_PATH}/yq"
                         chmod +x "${BIN_PATH}/yq"
                         ;;

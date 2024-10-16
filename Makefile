@@ -151,9 +151,6 @@ wsupdate_pkgs_shallow_rebase:
 	${CMD_WSHANDLER} -j ${JOBS} -p shallow,rebase update
 
 
-show_vendor_files:
-	@find ${CCWS_DIR}/profiles/*/vendor* ! -type d
-
 ccache_stats:
 	bash -c "${SETUP_SCRIPT}; ccache --show-stats"
 

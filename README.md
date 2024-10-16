@@ -77,13 +77,14 @@ profiles:
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
-- `static_checkers` -- static checkers and their configuration.
+- `static_checks` -- static checkers and their configuration.
 - `doxygen` -- doxygen and its configuration.
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
 - `cross_jetson_nano` -- cross-compilation for Jetson Nano.
 - `clangd` -- collects compilation commands for a given `BASE_BUILD_PROFILE`
   and generates clangd configuration file in the workspace root.
+- `deb` -- debian package generation (see below).
 
 
 Execution profiles
@@ -299,8 +300,6 @@ Extending `CCWS`
   `ccws/profiles/build/vendor/<filename>.mk` file;
 - common `cmake` toolchain suffix can be added to
   `ccws/profiles/build/vendor/toolchain_suffix.cmake`.
-
-`show_vendor_files` target can be used to list all vendor specific files.
 
 
 Known issues
