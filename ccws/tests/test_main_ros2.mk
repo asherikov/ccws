@@ -21,12 +21,7 @@ test:
 	#${MAKE} test_pkg BUILD_PROFILE=test_profile
 	# ---
 	# dependencies
-	${MAKE} bp_purge
-	${MAKE} wspurge
-	${MAKE} bp_install_build
-	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
-	${MAKE} wsupdate
-	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} -f ${THIS_MAKEFILE} test_dependencies
 	# ---
 	# workspace cmake toolchain
 	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
@@ -70,7 +65,17 @@ test:
 	${MAKE} cache_clean
 	test -z "${WORKSPACE_SRC}" || (test -d "${WORKSPACE_SRC}" && ls "${WORKSPACE_SRC}")
 
-
+test_dependencies:
+	${MAKE} bp_purge
+	${MAKE} wspurge
+	${MAKE} bp_install_build
+	${MAKE} new PKG=test_dependencies
+	cp -R ccws/tests/dependencies/package.xml "${WORKSPACE_SRC}/test_dependencies"
+	${MAKE} dep_install PKG=test_dependencies
+	${MAKE} wspurge
+	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
+	${MAKE} wsupdate
+	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 
 build_with_profile:
 	${MAKE} wsclean

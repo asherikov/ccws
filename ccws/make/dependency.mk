@@ -9,11 +9,25 @@ dep_%:
 private_dep_resolve: private_dep_list
 	mkdir -p '${CCWS_ROSDEP_CACHE}/rosdep'
 	test -d '${CCWS_ROSDEP_CACHE}/rosdep/sources.cache/' || env ROS_HOME='${CCWS_ROSDEP_CACHE}' rosdep update
-	cat '${DEPLIST_FILE}' | env ROS_HOME='${CCWS_ROSDEP_CACHE}' xargs rosdep resolve \
-		| grep -v '^#' | sed 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.deb'
+	${MAKE} private_dep_resolve_list
+	${MAKE} private_dep_resolve_deb
+	${MAKE} private_dep_resolve_pip
+
+private_dep_resolve_list:
+	cat '${DEPLIST_FILE}' | env ROS_HOME='${CCWS_ROSDEP_CACHE}' xargs -I {} sh -c "rosdep resolve {} 2> /dev/null | tr '\n' ' ' && echo '\n'" > '${DEPLIST_FILE}.list'
+
+private_dep_resolve_deb:
+	cat '${DEPLIST_FILE}.list' \
+		| grep '^#apt' | sed -e 's/^#apt//g' -e 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.deb'
+
+private_dep_resolve_pip:
+	cat '${DEPLIST_FILE}.list' \
+		| grep '^#pip' | sed -e 's/^#pip//g' -e 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.pip'
 
 private_dep_install: private_dep_resolve
-	cat '${DEPLIST_FILE}.deb' | xargs sudo ${CCWS_CHROOT} ${APT_INSTALL}
+	# we dont use "rosdep install" since we need lists of dependencies, e.g., for binary packages
+	cat '${DEPLIST_FILE}.deb' | xargs --no-run-if-empty sudo ${CCWS_CHROOT} ${APT_INSTALL}
+	cat '${DEPLIST_FILE}.pip' | xargs --no-run-if-empty sudo ${CCWS_CHROOT} ${PIP3_INSTALL}
 
 private_dep_to_repolist: private_dep_list
 	bash -c "${SETUP_SCRIPT}; cat '${DEPLIST_FILE}' | paste -s -d ' ' \

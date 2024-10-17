@@ -100,7 +100,7 @@ log_output_to_file:
 
 # warning: MAKEFLAGS set in setup scripts is overriden by make
 wswraptarget:
-	bash -c "time (${SETUP_SCRIPT}; ${MAKE} ${TARGET})"
+	bash -c "time (${SETUP_SCRIPT}; ${MAKE} --no-print-directory ${TARGET})"
 
 wslist:
 	@test -z "${PKG}" || ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}
