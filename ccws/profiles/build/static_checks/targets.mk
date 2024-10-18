@@ -150,7 +150,7 @@ catkin_lint:
 
 pylint:
 	bash -c "${SETUP_SCRIPT}; \
-		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/://' -e 's/:/,/g'); \
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/^://' -e 's/:/,/g'); \
 		pylint --rcfile \$${CCWS_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_SRC}'"
 
 flake8:
