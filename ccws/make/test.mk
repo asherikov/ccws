@@ -1,8 +1,12 @@
 TEST_REGEX?=.*
+TEST_PKG_LIST=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.packages
+TEST_PKG_LIST_EXCEPT=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.exceptions.packages
 
 # generic test target, it is recommended to use more specific targets below
 wstest_generic:
-	${MAKE_QUIET} wslist | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
+	${MAKE_QUIET} wslist | sort > "${TEST_PKG_LIST}"
+	(cat "${WORKSPACE_SRC}/.ccws/ccws.tests.exceptions.packages" 2> /dev/null || true) | sort > "${TEST_PKG_LIST_EXCEPT}"
+	comm -23 "${TEST_PKG_LIST}" "${TEST_PKG_LIST_EXCEPT}" | xargs -I '{}' sh -c "${MAKE} ${TEST_TARGET} PKG={} || exit ${EXIT_STATUS}"
 
 # stops on first error
 wstest_faststop:

@@ -87,4 +87,9 @@ build_with_profile:
 	# test recursively
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
+	# test exceptions
+	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
+	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
+	rm -Rf "${WORKSPACE_SRC}/.ccws"
 	bash -c "source setup.bash && ros2"
