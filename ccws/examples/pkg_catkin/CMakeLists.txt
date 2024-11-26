@@ -191,12 +191,10 @@ include_directories(
 #    # myfile2
 #    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 #)
-#foreach(DIR launch config)
-#    install(DIRECTORY ${DIR}
-#        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#        USE_SOURCE_PERMISSIONS
-#    )
-#endforeach()
+#install(DIRECTORY launch config
+#    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#    USE_SOURCE_PERMISSIONS
+#)
 #file(GLOB_RECURSE ${PROJECT_NAME}_scripts RELATIVE ${CMAKE_SOURCE_DIR} "scripts/*")
 #if (${PROJECT_NAME}_scripts)
 #    install(PROGRAMS ${${PROJECT_NAME}_scripts}
