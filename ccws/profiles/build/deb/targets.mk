@@ -36,7 +36,8 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	# generate package
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
-	dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
+	# TODO: --threads-max= (since 1.21.9)
+	time dpkg-deb -Zzstd -z9 --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
@@ -51,8 +52,8 @@ private_deb_lint: assert_PKG_arg_must_be_specified
 	lintian --pedantic --suppress-tags-from-file ${CCWS_BUILD_PROFILE_DIR}/lintian_${OS_DISTRO_BUILD}.supp "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 bp_deb_build: assert_BASE_BUILD_PROFILE_must_exist
-	${MAKE} private_deb_compile
-	${MAKE} private_deb_pack
+	time ${MAKE} private_deb_compile
+	time ${MAKE} private_deb_pack
 
 bp_deb_install_build: bp_common_install_build
 	sudo ${APT_INSTALL} dpkg lintian
