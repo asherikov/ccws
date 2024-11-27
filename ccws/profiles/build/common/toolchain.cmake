@@ -36,9 +36,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 # compilation flags
 ###
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-# -ffile-prefix-map: rewrite absolute paths to avoid leaks and reproduce builds, use `set substitue-path` in gdb if needed
-set(CMAKE_C_FLAGS "-fdiagnostics-color '-ffile-prefix-map=$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "-fdiagnostics-color '-ffile-prefix-map=$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
+# -ffile-prefix-map: rewrite absolute paths to avoid leaks and reproduce builds, use `set substitute-path` in gdb if needed
+set(CMAKE_C_FLAGS "-fdiagnostics-color -ffile-prefix-map='$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "-fdiagnostics-color -ffile-prefix-map='$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-strong" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
