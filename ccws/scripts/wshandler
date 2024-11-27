@@ -277,6 +277,7 @@ dir_git_status()
     GIT_VERSION="$3"
 
     GIT_ACTUAL_VERSION="-"
+    GIT_ACTUAL_HASH="-"
     if [ -d "${GIT_DIR}/.git" ]
     then
         cd "${GIT_DIR}"
@@ -298,7 +299,7 @@ dir_git_status()
         fi
     fi
 
-    if dir_git_uncommitted;
+    if [ "${GIT_ACTUAL_HASH}" != "-" ] && dir_git_uncommitted;
     then
         FLAGS+="M"
     else
