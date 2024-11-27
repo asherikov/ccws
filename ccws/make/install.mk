@@ -54,6 +54,9 @@ install_ccws_deps_jammy: install_ccws_deps_ros2
 		python3-rosdep \
 		python3-rospkg
 
+install_ccws_deps_noble: install_ccws_deps_jammy
+	#ubuntu24
+
 
 bp_install_build:
 	echo "CCWS/bp_install_build: ${BUILD_PROFILE}"

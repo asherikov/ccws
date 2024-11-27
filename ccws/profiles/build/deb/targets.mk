@@ -36,8 +36,20 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	# generate package
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
-	# TODO: --threads-max= (since 1.21.9)
+	time ${MAKE} private_dpkg_deb_${OS_DISTRO_BUILD}
+
+private_dpkg_deb_bionic:
+	time dpkg-deb --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
+
+private_dpkg_deb_focal: private_dpkg_deb_bionic
+	#
+
+private_dpkg_deb_jammy:
 	time dpkg-deb -Zzstd -z9 --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
+
+private_dpkg_deb_noble: private_dpkg_deb_jammy
+	# TODO: --threads-max= (since 1.21.9)
+
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${WORKSPACE_DIR}/build/version_hash
