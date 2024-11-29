@@ -109,7 +109,7 @@ wslist:
 
 # Reset & initialize workspace
 wsinit:
-	test ! -f "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}"
+	! ${CMD_WSHANDLER} is_source_space
 	mkdir -p "${WORKSPACE_SRC}"
 	touch "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}"
 	cd ${WORKSPACE_SRC}; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
@@ -196,7 +196,7 @@ private_build: assert_PKG_arg_must_be_specified
 
 
 add:
-	test -f "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}" || ${MAKE} wsinit
+	${CMD_WSHANDLER} is_source_space || ${MAKE} wsinit
 	bash -c "\
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
 		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"

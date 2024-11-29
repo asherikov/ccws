@@ -5,48 +5,66 @@
 set -e
 set -o pipefail
 
+WSH_VERSION=
 
 help()
 {
     EXIT_CODE=${1:-"0"}
     echo "Usage (default values are shown in curly braces):"
     echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
+    if [ -n "${WSH_VERSION}" ]
+    then
+        echo "  wshandler -v|--version"
+    fi
+    echo ""
+    echo "Notation:"
+    echo "  <REQUIRED ARGUMENT>"
+    echo "  {DEFAULT VALUE}"
+    echo "  [OPTIONAL ARGUMENT]"
+    echo "  (VALID OPTIONS IN A LIST)"
+    echo ""
     echo "Common arguments:"
-    echo "  -y|--yq <YQ_BINARY>         {yq}"
-    echo "  -r|--root <WORKSPACE_ROOT>  {./}"
-    echo "  -c|--cache <CACHE_DIR>      {<WORKSPACE_ROOT>}"
-    echo "  -t|--type rosinstall|repos  {repos}"
-    echo "  -i|--indent 1|2|3...        {4}"
-    echo "  -k|--keep-going             {false}"
-
+    echo "  -y|--yq <YQ_BINARY>         {yq}                    # override yq path"
+    echo "  -r|--root <WORKSPACE_ROOT>  {./}                    # parent of --list if it is a path"
+    echo "  -c|--cache <CACHE_DIR>      {<WORKSPACE_ROOT>}      # temporary files created here"
+    echo "  -t|--type rosinstall|repos  {repos}                 # repository list format"
+    echo "  -i|--indent 1|2|3...        {4}                     # default indentation in yaml repository list"
+    echo "  -k|--keep-going             {false}                 # do not stop on errors"
+    echo "  -l|--list <FILENAME>        {.rosinstall|.repos}    # default depends on --type"
+    echo ""
     echo "List commands:"
-    echo "  status"
-    echo "  [-j|--jobs <NUM_THREADS> {1}] [-p|--policy policy1[,policy2] ({default}|shallow|nolfs|rebase)] update"
-    echo "  [-j|--jobs <NUM_THREADS> {1}] clean"
-    echo "  [-p|--policy {ask}|add|show] scrape"
-    echo "  add git <NAME> <URL> <VERSION>"
-    echo "  set_version_by_url <URL> <VERSION>"
-    echo "  set_version_by_name <NAME> <VERSION>"
-    echo "  remove <NAME>"
-    echo "  remove_by_url <URL>"
-    echo "  [-p|--policy {keep}|replace] merge <FILENAME>"
-
-    echo "List initialization commands:"
-    echo "  [-p|--policy policy1[,policy2] ({default}|shallow|nolfs)] clone git <URL> [<BRANCH>]"
-    echo "  [-p|--policy policy1[,policy2] ({default}|shallow|nolfs)] init [git <URL1> ...]"
-
-    echo "Repository commands:"
-    echo "  [-j|--jobs <NUM_THREADS> {1}] [-s|-source {git}] foreach '<COMMAND>'"
-    echo "  prune"
-    echo "  push"
-    echo "  branch show ['<GREP_PATTERN>']"
-    echo "  branch new <BRANCH_NAME>"
-    echo "  branch delete <BRANCH_NAME>"
-    echo "  branch switch <BRANCH_NAME>"
-    echo "  branch merge <BRANCH_NAME> <TARGET_BRANCH {main}>"
-    echo "  commit '<MESSAGE>'"
-
-    echo "Installation commands:"
+    echo "  Information:"
+    echo "    status"
+    echo "    is_source_space"
+    echo "  Initialization:"
+    echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs)] clone git <LIST_REPOSITORY> [<BRANCH>]"
+    echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs)] init [git <PACKAGE_REPOSITORY> ...]"
+    echo "  Modification:"
+    echo "    [-p|--policy {ask}|add|show] scrape"
+    echo "    add git <PACKAGE_NAME> <PACKAGE_URL> <PACKAGE_VERSION>"
+    echo "    set_version_by_url <PACKAGE_URL> <PACKAGE_VERSION>"
+    echo "    set_version_by_name <PACKAGE_NAME> <PACKAGE_VERSION>"
+    echo "    remove <PACKAGE_NAME>"
+    echo "    remove_by_url <PACKAGE_URL>"
+    echo "    [-p|--policy {keep}|replace] merge <LIST_FILENAME>"
+    echo ""
+    echo "Package repository commands:"
+    echo "  Global:"
+    echo "    [-j|--jobs <NUM_THREADS> {1}] [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs|rebase)] update"
+    echo "    [-j|--jobs <NUM_THREADS> {1}] clean"
+    echo "    [-j|--jobs <NUM_THREADS> {1}] [-s|-source {git}] foreach '<COMMAND>'"
+    echo "    prune"
+    echo "    push"
+    echo "    branch show ['<GREP_PATTERN>']"
+    echo "    branch new <BRANCH_NAME>"
+    echo "    branch delete <BRANCH_NAME>"
+    echo "    branch switch <BRANCH_NAME>"
+    echo "    branch merge <BRANCH_NAME> <TARGET_BRANCH {main}>"
+    echo "    commit '<MESSAGE>'"
+    echo "  Local:"
+    echo "    unshallow <PACKAGE_NAME>"
+    echo ""
+    echo "wshandler installation commands:"
     echo "  install_test_deps"
     echo "  [-p|--policy {skip_yq}|snap|download] install <BIN_PATH {~/bin}>"
 
@@ -393,12 +411,26 @@ check_workspace()
     fi
     WSH_YQ=("${WSH_YQ_BINARY}" --indent "${WSH_INDENT}")
 
-    WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
-    test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
-    WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT}")/"
 
     WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"repos"}
-    WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
+    if [ -n "${WSH_REPOLIST}" ] && [ -f "${WSH_REPOLIST}" ]
+    then
+        WSH_WORKSPACE_ROOT=$(realpath "$(dirname "${WSH_REPOLIST}")")
+        WSH_REPOLIST=$(realpath "${WSH_REPOLIST}")
+    else
+        WSH_WORKSPACE_ROOT=${WSH_WORKSPACE_ROOT:-"./"}
+        WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT}")/"
+
+        if [ -n "${WSH_REPOLIST}" ]
+        then
+            WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/${WSH_REPOLIST}"
+        else
+            WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
+        fi
+    fi
+
+    test -d "${WSH_WORKSPACE_ROOT}" || (echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
+
     WSH_CACHE_DIR=${WSH_CACHE_DIR:-"${WSH_WORKSPACE_ROOT}/.wshandler"}
 
     if [ ! -f "${WSH_REPOLIST}" ]
@@ -617,6 +649,35 @@ execute_init()
 }
 
 
+execute_unshallow()
+{
+    TARGET_NAME="$1"
+
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        "${WSH_WORKSPACE_TYPE}_${SOURCE_TYPE}_repo_triplets" \
+            | while read -r NAME REPO VERSION; \
+            do \
+                if [ "${TARGET_NAME}" = "${NAME}" ];\
+                then \
+                    REPO_DIR="${WSH_WORKSPACE_ROOT}/${NAME}/"
+                    if [ -d "${REPO_DIR}/.git" ]; \
+                    then \
+                        echo "${NAME}: unshallowing"; \
+                        cd "${REPO_DIR}"; \
+                        git fetch --unshallow; \
+                        git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"; \
+                        git fetch origin; \
+                        exit; \
+                    else \
+                        echo "${NAME}: is not a git repository'"; \
+                        exit 40; \
+                    fi \
+                fi; \
+            done
+    done
+}
+
 set_version()
 {
     TARGET_MATCH="$2"
@@ -663,10 +724,21 @@ WSH_XARGS=(xargs --no-run-if-empty -L 1 -P "${WSH_JOBS}")
 WSH_KEEP_GOING=""
 WSH_YQ_BINARY="yq"
 WSH_SOURCE_TYPE="git"
+WSH_REPOLIST=
 
 while [[ $# -gt 0 ]]
 do
     case $1 in
+        -v|--version)
+            if [ -n "${WSH_VERSION}" ]
+            then
+                echo "wshandler version: ${WSH_VERSION}"
+                exit
+            else
+                echo "wshandler version is unknown"
+                exit 50
+            fi;;
+
         -y|--yq)
             WSH_YQ_BINARY=$2
             shift; shift;;
@@ -703,6 +775,10 @@ do
             WSH_SOURCE_TYPE=$2
             shift; shift;;
 
+        -l|--list)
+            WSH_REPOLIST=$2
+            shift; shift;;
+
         clone|init)
             "execute_$1" "${@:2}"
             exit;;
@@ -712,7 +788,11 @@ do
             execute_command "$1"
             exit;;
 
-        add|remove|merge|remove_by_url|foreach|prune|push|branch|commit|set_version_branch)
+        is_source_space)
+            check_workspace "is_source_space"
+            exit;;
+
+        add|remove|merge|remove_by_url|foreach|prune|push|branch|commit|set_version_branch|unshallow)
             check_workspace "$1"
             "execute_$1" "${@:2}"
             exit;;
