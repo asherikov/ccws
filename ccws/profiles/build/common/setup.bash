@@ -176,7 +176,7 @@ export CCWS_LLVM_VERSION
 # installation path
 #
 
-CCWS_BUILD_TIME=$(date '+%Y%m%d_%H%M')
+CCWS_BUILD_TIME=$(date -u '+%Y%m%d_%H%M')
 CCWS_BUILD_USER=$(whoami)
 export CCWS_BUILD_TIME CCWS_BUILD_USER
 
