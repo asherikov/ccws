@@ -34,7 +34,7 @@ help()
     echo ""
     echo "List commands:"
     echo "  Information:"
-    echo "    status"
+    echo "    [-u|--unsorted] status"
     echo "    is_source_space"
     echo "  Initialization:"
     echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs)] clone git <LIST_REPOSITORY> [<BRANCH>]"
@@ -104,7 +104,7 @@ git_status()
     DATA=$(
         echo "name|version|actual version|HM|repository";
         echo "----|-------|--------------|--|----------";
-        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done
+        "${WSH_WORKSPACE_TYPE}_git_repo_triplets" | while read -r -a TRIPLET; do dir_git_status "${TRIPLET[@]}"; done | "${WSH_SORT_COMMAND}"
     )
 
     FORMAT_STRING=""
@@ -725,6 +725,7 @@ WSH_KEEP_GOING=""
 WSH_YQ_BINARY="yq"
 WSH_SOURCE_TYPE="git"
 WSH_REPOLIST=
+WSH_SORT_COMMAND="sort"
 
 while [[ $# -gt 0 ]]
 do
@@ -778,6 +779,10 @@ do
         -l|--list)
             WSH_REPOLIST=$2
             shift; shift;;
+
+        -u|--unsorted)
+            WSH_SORT_COMMAND="cat"
+            shift;;
 
         clone|init)
             "execute_$1" "${@:2}"
