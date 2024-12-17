@@ -51,7 +51,7 @@ export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
 
 # default package to build can be specified in source directory or via command line,
 # when not provided usually all packages in the workspace are processed
-export PKG?=$(shell (cat "${WORKSPACE_SRC}/.ccws/package" 2> /dev/null | paste -d ' ' -s) || echo "")
+export PKG?=$(shell (cat "${WORKSPACE_SRC}/.ccws/package" 2> /dev/null | sed -e 's/[[:space:]]*\#.*//' -e '/^[[:space:]]*$/d' | paste -d ' ' -s) || echo "")
 export PKG_ID=$(shell echo "${PKG}" | md5sum | cut -f 1 -d ' ')
 
 
@@ -170,7 +170,10 @@ assert_EMAIL_must_not_be_empty:
 
 
 build_glob:
-	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep ${PKG_NAME_PART} | paste -d ' ' -s)\""
+	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep '${PKG_NAME_PART}' | paste -d ' ' -s)\""
+
+build_all:
+	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | paste -d ' ' -s)\""
 
 build: assert_BUILD_PROFILE_must_exist
 	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_build

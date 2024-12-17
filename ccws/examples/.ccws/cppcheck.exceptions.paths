@@ -1,2 +1,5 @@
-staticoma/src/3rdparty
-staticoma/src/3rdparty
+staticoma/src/3rdparty # comment
+staticoma/src/3rdparty# comment
+
+  # comment
+#comment

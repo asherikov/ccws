@@ -1,7 +1,6 @@
 # Clean workspace
 wsclean:
 	rm -rf "${WORKSPACE_DIR}"/build*
-	rm -rf "${WORKSPACE_DIR}"/devel*
 	rm -rf "${WORKSPACE_DIR}"/install*
 	rm -rf "${WORKSPACE_DIR}"/log*
 	rm -rf "${WORKSPACE_SRC}/.rosinstall.bak"

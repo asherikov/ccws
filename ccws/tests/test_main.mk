@@ -95,6 +95,7 @@ test:
 build_with_profile:
 	${MAKE} wsclean
 	${MAKE} bp_install_build
+	${MAKE} build_all
 	${MAKE} staticoma
 	${MAKE} wstest
 	${MAKE} wsctest

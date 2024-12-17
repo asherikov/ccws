@@ -1,2 +1,5 @@
-staticoma
-examples_rclcpp_minimal_subscriber
+staticoma # comment
+examples_rclcpp_minimal_subscriber#comment
+
+  # comment
+#comment

@@ -322,6 +322,10 @@ Known issues
 - Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
   e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
 
+- `proot` segfault while building on arm64 in Ubuntu 22, e.g., while building
+  debian packages. Newer version of `proot` has to be used, see
+  <https://github.com/proot-me/proot/issues/312>.
+
 
 Related software
 ================

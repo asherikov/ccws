@@ -30,6 +30,8 @@ done
 cat >> "${SCRIPT}" <<EOF
 logger "${MESSAGE}"
 echo "${MESSAGE}"
+echo "Installed package has been built with <https://github.com/asherikov/ccws>."
+echo "Source setup script located in '${CCWS_INSTALL_DIR_HOST}' before using the package."
 EOF
 
 chmod +x "${SCRIPT}"

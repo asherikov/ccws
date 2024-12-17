@@ -80,6 +80,7 @@ test_dependencies:
 build_with_profile:
 	${MAKE} wsclean
 	${MAKE} bp_install_build
+	#${MAKE} build_all
 	${MAKE} examples_rclcpp_minimal_subscriber
 	# workspace test
 	${MAKE} wstest

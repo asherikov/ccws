@@ -364,15 +364,18 @@ export DEBIAN_FRONTEND
 
 ccws_read_exceptions()
 {
-    FILE="${CCWS_SOURCE_EXTRAS}/${BUILD_PROFILE}.exceptions.${1}"
-
-    if [ -f "${FILE}" ]
-    then
-        if [ "$1" = "paths" ]
+    FILENAME_PREFIX="${CCWS_SOURCE_EXTRAS}/${BUILD_PROFILE}.exceptions.${1}"
+    for FILE in "${FILENAME_PREFIX}" "${FILENAME_PREFIX}.*"
+    do
+        if [ -f "${FILE}" ]
         then
-            sed -e "s=^=:${CCWS_SOURCE_DIR}/=" < "${FILE}" | tr -d '\n'
-        else
-            sed -e 's=^=:=' < "${FILE}" | tr -d '\n'
+            if [ "$1" = "paths" ]
+            then
+                JOIN_PATTERN="s=^=:${CCWS_SOURCE_DIR}/="
+            else
+                JOIN_PATTERN="s=^=:="
+            fi
+            sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$/d' -e "${JOIN_PATTERN}" < "${FILE}" | tr -d '\n'
         fi
-    fi
+    done
 }
