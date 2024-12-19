@@ -67,6 +67,8 @@ help()
     echo "wshandler installation commands:"
     echo "  install_test_deps"
     echo "  [-p|--policy {skip_yq}|snap|download] install <BIN_PATH {~/bin}>"
+    echo "  upgrade <BIN_PATH {~/bin}>"
+    echo "  upgrade_appimage <BIN_PATH {~/bin}>"
 
     exit "${EXIT_CODE}"
 }
@@ -715,6 +717,15 @@ snap_install()
     sudo snap install "$@"
 }
 
+wsh_download()
+{
+    if ! command -v "wget" > /dev/null
+    then
+        apt_install wget
+    fi
+    wget -O - "$@"
+}
+
 
 WSH_SOURCE_TYPES="git"
 WSH_COMMAND_POLICY=default
@@ -846,11 +857,7 @@ do
                         snap_install yq
                         ;;
                     download)
-                        if ! command -v "wget" > /dev/null
-                        then
-                            apt_install wget
-                        fi
-                        wget -O - "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_$(dpkg --print-architecture).tar.gz" \
+                        wsh_download "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_$(dpkg --print-architecture).tar.gz" \
                             | tar -zxO > "${BIN_PATH}/yq"
                         chmod +x "${BIN_PATH}/yq"
                         ;;
@@ -859,6 +866,22 @@ do
                         exit 4;;
                 esac
             fi
+            exit;;
+
+        upgrade)
+            BIN_PATH=${2:-"${HOME}/bin"}
+            mkdir -p "${BIN_PATH}"
+
+            wsh_download "https://github.com/asherikov/wshandler/releases/latest/download/wshandler" > "${BIN_PATH}/wshandler"
+            chmod +x "${BIN_PATH}/wshandler"
+            exit;;
+
+        upgrade_appimage)
+            BIN_PATH=${2:-"${HOME}/bin"}
+            mkdir -p "${BIN_PATH}"
+
+            wsh_download "https://github.com/asherikov/wshandler/releases/latest/download/wshandler-$(uname -m).AppImage" > "${BIN_PATH}/wshandler"
+            chmod +x "${BIN_PATH}/wshandler"
             exit;;
 
         *)
