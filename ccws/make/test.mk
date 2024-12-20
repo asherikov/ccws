@@ -3,9 +3,9 @@ TEST_PKG_LIST=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.packages
 TEST_PKG_LIST_EXCEPT=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.exceptions.packages
 
 wslist_test:
-	${MAKE_QUIET} wslist | sort > "${TEST_PKG_LIST}"
-	(cat "${WORKSPACE_SRC}/.ccws/ccws.tests.exceptions.packages" 2> /dev/null | sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$/d' || true) | sort > "${TEST_PKG_LIST_EXCEPT}"
-	comm -23 "${TEST_PKG_LIST}" "${TEST_PKG_LIST_EXCEPT}"
+	@${MAKE_QUIET} wslist | sort > "${TEST_PKG_LIST}"
+	@(cat "${WORKSPACE_SRC}/.ccws/ccws.tests.exceptions.packages" 2> /dev/null | sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$$/d' || true) | sort > "${TEST_PKG_LIST_EXCEPT}"
+	@comm -23 "${TEST_PKG_LIST}" "${TEST_PKG_LIST_EXCEPT}"
 
 # generic test target, it is recommended to use more specific targets below
 wstest_generic:
