@@ -47,8 +47,8 @@ private_dpkg_deb_focal: private_dpkg_deb_bionic
 private_dpkg_deb_jammy:
 	dpkg-deb -Zzstd -z9 --root-owner-group --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
-private_dpkg_deb_noble: private_dpkg_deb_jammy
-	# TODO: --threads-max= (since 1.21.9)
+private_dpkg_deb_noble: 
+	dpkg-deb -Zzstd -z9 --root-owner-group --threads-max=${JOBS} --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified

@@ -20,6 +20,10 @@ bp_static_checks_install_build_focal:
 bp_static_checks_install_build_jammy: install_python3
 	${PIP3_INSTALL} catkin-lint
 
+#ubuntu24
+bp_static_checks_install_build_noble: bp_static_checks_install_build_jammy
+	# passthrough
+
 bp_static_checks_install_build_python: install_python3
 	${PIP3_INSTALL} pylint
 	${PIP3_INSTALL} flake8

@@ -3,7 +3,7 @@ on:
         branches:
             - '**'
         tags:
-            - 'NEVER' 
+            - 'NEVER'
     pull_request:
         types: [opened, reopened]
 
@@ -36,6 +36,13 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - run: make -f ccws/tests/test_main_ros2.mk ROS_DISTRO=humble
+
+    noble_ros2:
+        runs-on: ubuntu-24.04
+
+        steps:
+            - uses: actions/checkout@v4
+            - run: make -f ccws/tests/test_main_ros2.mk ROS_DISTRO=jazzy
 
     jammy_ros2_src:
         runs-on: ubuntu-22.04

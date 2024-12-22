@@ -24,7 +24,6 @@ bp_cppcheck_build: assert_BASE_BUILD_PROFILE_must_exist
 			--suppressions-list='${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions' \
 			--project='${WORKSPACE_DIR}/build/${BASE_BUILD_PROFILE}/compile_commands.json' \
 			3>&1 1>&2 2>&3 \
-			{} \
 			| tee --append '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/cppcheck.err' "
 	test ! -s '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/cppcheck.err' || exit 1
 

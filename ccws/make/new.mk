@@ -17,3 +17,6 @@ new_focal:
 new_jammy:
 	cp -R ${CCWS_DIR}/examples/pkg_ament "${WORKSPACE_SRC}/${PKG}"
 
+new_noble: new_jammy
+	#
+

@@ -139,6 +139,8 @@ then
                 ROS_DISTRO=noetic;;
             jammy)
                 ROS_DISTRO=humble;;
+            noble)
+                ROS_DISTRO=jazzy;;
         esac
     fi
 fi
@@ -168,6 +170,8 @@ case "${OS_DISTRO_HOST}" in
         CCWS_LLVM_VERSION=12;;
     jammy)
         CCWS_LLVM_VERSION=15;;
+    noble)
+        CCWS_LLVM_VERSION=18;;
 esac
 export CCWS_LLVM_VERSION
 
