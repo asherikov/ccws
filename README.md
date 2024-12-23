@@ -342,6 +342,11 @@ Related software
   <http://wiki.ros.org/buildfarm> -- the core of ROS packaging infrastructure.
   Complicated, specialized on handling of individual packages rather than
   workspaces, not suitable for quick field redeployments.
+- <https://github.com/colcon/colcon-bundle> provides functionality similar to
+  'superpackages' allowing to pack install space into a single archive.
+  Naturally, it does not provide all the package features like dependencies,
+  install scripts, etc. Moreover, it does not rely on chroot-like environment
+  to ensure correct paths.
 
 
 TODO
