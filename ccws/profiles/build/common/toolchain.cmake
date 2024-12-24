@@ -3,6 +3,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/../vendor/toolchain_prefix.cmake" OPTIONAL)
 set(CMAKE_VERBOSE_MAKEFILE          ON  CACHE STRING "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS   ON  CACHE STRING "" FORCE)
 
+# ccache does not work for linking
 set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 

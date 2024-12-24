@@ -3,7 +3,7 @@
     <th>CI status</th>
     <td align="center">
         <a href="https://github.com/asherikov/ccws/actions?query=workflow%3A.github%2Fworkflows%2Fmaster.yml+branch%3Amaster">
-        <img src="https://github.com/asherikov/ccws/workflows/.github/workflows/master.yml/badge.svg?branch=master" alt="Build Status">
+        <img src="https://github.com/asherikov/ccws/actions/workflows/master.yml/badge.svg" alt="Build Status">
         </a>
     </td>
   </tr>
