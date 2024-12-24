@@ -72,6 +72,7 @@ export CCWS_CATKIN_LINT_EXCEPTIONS
 #   useStlAlgorithm -- not nocessarily makes code cleaner and easier to read
 #   unusedStructMember -- false positives
 #   constStatement -- "suspicious , operator", https://trac.cppcheck.net/ticket/9766
+#   duplInheritedMember -- too many ignores to add
 #
 CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=uninitMemberVar \
@@ -80,5 +81,6 @@ CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=unknownMacro \
 --suppress=useStlAlgorithm \
 --suppress=unusedStructMember \
---suppress=constStatement"
+--suppress=constStatement \
+--suppress=duplInheritedMember"
 export CCWS_CPPCHECK_EXCEPTIONS
