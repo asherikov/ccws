@@ -94,7 +94,7 @@ test_cmake_toolchain:
 	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
 	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
 	# should fail
-	! ${MAKE} examples_rclcpp_minimal_subscriber
+	! ${MAKE} staticoma
 	rm -Rf "${WORKSPACE_SRC}/.ccws"
 
 build_with_profile:

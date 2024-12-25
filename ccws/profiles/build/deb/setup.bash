@@ -6,20 +6,17 @@ set -o pipefail
 
 
 ##########################################################################################
-BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
-BASE_BUILD_PROFILE=${1:-"$BASE_BUILD_PROFILE"}
-if [ -z "${BASE_BUILD_PROFILE}" ]
+CCWS_PRIMARY_BUILD_PROFILE=${CCWS_PRIMARY_BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+CCWS_SECONDARY_BUILD_PROFILE=${1:-"${CCWS_SECONDARY_BUILD_PROFILE}"}
+if [ -z "${CCWS_SECONDARY_BUILD_PROFILE}" ]
 then
-    echo "Build profile cannot be chosen automatically for 'deb' mixin, make sure BASE_BUILD_PROFILE is set."
+    echo "Build profile cannot be chosen automatically for 'deb' mixin, make sure that secondary profile is set."
     return 0
 fi
-
 
 ##########################################################################################
 # override parameters usually set in common/setup.bash
 #
-
-CCWS_BUILD_DIR="${WORKSPACE_DIR}/build/${BUILD_PROFILE}_${BASE_BUILD_PROFILE}"
 
 if [ -z "${INSTALL_PKG_PREFIX}" ]
 then
@@ -37,7 +34,7 @@ then
     esac
 fi
 
-CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}__${BASE_BUILD_PROFILE}__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
+CCWS_PKG_FULL_NAME=${INSTALL_PKG_PREFIX}__$(echo "${CCWS_BUILD_PROFILES_TAIL}" | sed -e 's/,/_/g')__$(echo "${VERSION}" | sed -e 's/[[:punct:]]/_/g' -e 's/[[:space:]]/_/g')
 
 CCWS_INSTALL_DIR_HOST="/opt/${VENDOR}/${CCWS_PKG_FULL_NAME}"
 CCWS_INSTALL_DIR_BUILD_ROOT="${WORKSPACE_DIR}/install/${CCWS_PKG_FULL_NAME}"
@@ -46,11 +43,11 @@ CCWS_INSTALL_DIR_BUILD="${CCWS_INSTALL_DIR_BUILD_ROOT}/${CCWS_INSTALL_DIR_HOST}"
 export CCWS_INSTALL_DIR_BUILD_ROOT CCWS_INSTALL_DIR_HOST
 
 
-CMAKE_TOOLCHAIN_FILE=${BUILD_PROFILES_DIR}/${BASE_BUILD_PROFILE}/toolchain.cmake
+CMAKE_TOOLCHAIN_FILE=${BUILD_PROFILES_DIR}/${CCWS_SECONDARY_BUILD_PROFILE}/toolchain.cmake
 
 
 ##########################################################################################
-source "$(dirname "${BASH_SOURCE[0]}")/../${BASE_BUILD_PROFILE}/setup.bash" "${@:2}" ""
+source "$(dirname "${BASH_SOURCE[0]}")/../${CCWS_SECONDARY_BUILD_PROFILE}/setup.bash" "${@:2}" ""
 
 
 ##########################################################################################

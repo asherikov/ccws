@@ -4,7 +4,7 @@
 # 	conflict resolution is fragile and inconvenient https://docs.conan.io/2/tutorial/versioning/conflicts.html
 
 # https://docs.conan.io/2/reference/environment.html#conan-home
-export CCWS_CONAN_HOME?="${CCWS_CACHE}/conan/${BUILD_PROFILE}"
+export CCWS_CONAN_HOME?="${CCWS_CACHE}/conan/${CCWS_PRIMARY_BUILD_PROFILE}"
 
 install_conan: install_python3
 	${PIP3_INSTALL} conan

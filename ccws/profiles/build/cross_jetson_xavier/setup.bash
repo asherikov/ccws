@@ -5,7 +5,7 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+CCWS_PRIMARY_BUILD_PROFILE=${CCWS_PRIMARY_BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 
 CROSS_PROFILE="$(basename "$(dirname "${BASH_SOURCE[0]}")")"
 export CROSS_PROFILE

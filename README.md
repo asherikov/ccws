@@ -82,8 +82,8 @@ profiles:
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
 - `cross_jetson_nano` -- cross-compilation for Jetson Nano.
-- `clangd` -- collects compilation commands for a given `BASE_BUILD_PROFILE`
-  and generates clangd configuration file in the workspace root.
+- `clangd` -- collects compilation commands from another profile and generates
+  clangd configuration file in the workspace root.
 - `deb` -- debian package generation (see below).
 
 
@@ -119,8 +119,8 @@ Dependencies
 ------------
 
 Dependencies can be installed using `make bp_install_build
-BUILD_PROFILE=<profile>`, which is going to install the following tools and
-profile specific dependencies:
+BUILD_PROFILE=<profile>[,<profile>...]`, which is going to install the
+following tools and profile specific dependencies:
 - `colcon`
 - `yq` -- <https://github.com/asherikov/wshandler> dependency
 - `cmake`
@@ -193,8 +193,8 @@ single debian 'superpackage'. Unlike `bloom` `CCWS` generates binary packages
 directly instead of generating source packages first.
 
 Binary package generation is implemented as a build profile mixin that can be
-overlayed over an arbitrary build profile: `make <pkg> BUILD_PROFILE=deb
-BASE_BUILD_PROFILE=reldebug`.
+overlayed over an arbitrary build profile: `make <pkg>
+BUILD_PROFILE=deb,reldebug`.
 
 `CCWS` approach has a number of advantages:
 
@@ -293,8 +293,8 @@ Extending `CCWS`
 
 `CCWS` functionality can be extended in multiple ways:
 - by adding new build profiles, e.g., `make bp_new
-  BUILD_PROFILE=vendor_static_checks BASE_BUILD_PROFILE=static_checks`, all
-  profiles starting with `vendor` prefix are ignored by git;
+  BUILD_PROFILE=vendor_static_checks,static_checks`, all profiles starting with
+  `vendor` prefix are ignored by git;
 - by adding execution profiles;
 - `make` targets can be added by creating a
   `ccws/profiles/build/vendor/<filename>.mk` file;

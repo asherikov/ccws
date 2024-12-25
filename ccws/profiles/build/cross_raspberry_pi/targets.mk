@@ -1,5 +1,5 @@
 assert_BUILD_PROFILE_must_be_cross_raspberry_pi:
-	test "${BUILD_PROFILE}" = "cross_raspberry_pi"
+	test "${CCWS_PRIMARY_BUILD_PROFILE}" = "cross_raspberry_pi"
 
 bp_cross_raspberry_pi_install_build: cross_common_install_build cross_purge bp_common_install_build
 	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler
@@ -62,8 +62,8 @@ bp_cross_raspberry_pi_build: private_cross_build
 private_bp_cross_raspberry_pi_pack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	cd "${CCWS_SYSROOT_DATA}"; \
-		tar -cjf "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}_image.tar.bz2" system.img cross-pi-gcc
+		tar -cjf "${CCWS_ARTIFACTS_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}_image.tar.bz2" system.img cross-pi-gcc
 
 private_bp_cross_raspberry_pi_unpack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	cd "${CCWS_SYSROOT_DATA}"; \
-		tar -xf "${CCWS_ARTIFACTS_DIR}/${BUILD_PROFILE}_image.tar.bz2"
+		tar -xf "${CCWS_ARTIFACTS_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}_image.tar.bz2"

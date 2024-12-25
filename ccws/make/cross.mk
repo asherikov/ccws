@@ -57,7 +57,7 @@ private_cross_build: assert_CCWS_SYSROOT_must_be_mounted
 
 cross_mount:
 	# implementation is profile specific
-	${MAKE} bp_${BUILD_PROFILE}_mount
+	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_mount
 
 cross_umount:
 	bash -c "${SETUP_SCRIPT}; \
@@ -76,7 +76,7 @@ cross_common_install_build:
 	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DATA}\""
 
 cross_flash:
-	${MAKE} bp_${BUILD_PROFILE}_flash
+	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_flash
 
 bp_%_flash:
 	test "${DEVICE}" != ""
@@ -84,10 +84,10 @@ bp_%_flash:
 	bash -c "${SETUP_SCRIPT}; sudo dd if=\"\$${CCWS_SYSROOT_DATA}/system.img\" of=${DEVICE} status=progress bs=16M"
 
 cross_get:
-	${MAKE} bp_${BUILD_PROFILE}_get
+	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_get
 
 cross_initialize:
-	${MAKE} bp_${BUILD_PROFILE}_initialize
+	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_initialize
 
 cross_install: cross_get
 	${MAKE} cross_mount
@@ -97,15 +97,15 @@ cross_install: cross_get
 
 cross_pack:
 	${MAKE} cross_umount
-	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_pack
+	${MAKE} wswraptarget TARGET=private_bp_${CCWS_PRIMARY_BUILD_PROFILE}_pack
 
 cross_unpack:
 	${MAKE} cross_umount
-	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_unpack
+	${MAKE} wswraptarget TARGET=private_bp_${CCWS_PRIMARY_BUILD_PROFILE}_unpack
 
 cross_purge:
 	${MAKE} cross_umount
-	${MAKE} wswraptarget TARGET=private_bp_${BUILD_PROFILE}_purge
+	${MAKE} wswraptarget TARGET=private_bp_${CCWS_PRIMARY_BUILD_PROFILE}_purge
 
 cross_python_soabi: assert_CCWS_SYSROOT_must_be_mounted
 	printf "from sysconfig import get_config_var\nprint(get_config_var('SOABI'))\n" \

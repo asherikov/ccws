@@ -7,9 +7,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS   ON  CACHE STRING "" FORCE)
 set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
 
-set(CCWS_BUILD_PROFILE  "$ENV{BUILD_PROFILE}"   CACHE STRING "" FORCE)
+# TODO deprecated
+set(CCWS_BUILD_PROFILE  "$ENV{CCWS_PRIMARY_BUILD_PROFILE}" CACHE STRING "" FORCE)
+string(REPLACE "," ";" CCWS_BUILD_PROFILES_LIST "$ENV{CCWS_BUILD_PROFILES}")
+set(CCWS_BUILD_PROFILES "${CCWS_BUILD_PROFILES_LIST}" CACHE STRING "" FORCE)
 
-set(CTEST_BUILD_NAME    "${CCWS_BUILD_PROFILE}" CACHE STRING "" FORCE)
+set(CTEST_BUILD_NAME    "${CCWS_BUILD_PROFILES}" CACHE STRING "" FORCE)
 # controls testing of CCWS-aware packages
 set(CCWS_ENABLE_TESTING ON                     CACHE STRING "" FORCE)
 # debug level
@@ -44,11 +47,6 @@ set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-str
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 
-# 1. it is generally a bad idea to depend on a build profile in the code
-# 2. this may lead to unnecessary cache misses during compilation (ccache)
-# 3. if necessary this define can be added for a specific package
-#add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
-
 # -flto
 # performance gain seems to be marginal in general, but the main limiting
 # factor currently (gcc7) is:
@@ -76,5 +74,6 @@ set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE S
 # workspace specific cmake parameters
 ###
 
-include("$ENV{CCWS_SOURCE_EXTRAS}/toolchain.cmake" OPTIONAL)
+include("$ENV{CCWS_SOURCE_EXTRAS}/toolchain.cmake" OPTIONAL RESULT_VARIABLE CCWS_SOURCE_EXTRAS_TOOLCHAIN)
+message("Extra toolchain inclusion: ${CCWS_SOURCE_EXTRAS_TOOLCHAIN}")
 

@@ -6,43 +6,30 @@ WORKSPACE_DIR=${WORKSPACE_DIR:-"$(pwd)"}
 BUILD_PROFILES_DIR=${BUILD_PROFILES_DIR:-"${CCWS_DIR}/profiles/build"}
 export WORKSPACE_DIR BUILD_PROFILES_DIR
 
-if [ -z "${BUILD_PROFILE}" ]
+if [ -z "${CCWS_BUILD_PROFILES}" ]
 then
     echo "Profile is not defined"
-    test -n "${BUILD_PROFILE}"
+    test -n "${CCWS_BUILD_PROFILES}"
 else
-    echo "Selected profile: '${BUILD_PROFILE}'"
-    export BUILD_PROFILE
+    echo "Selected profiles: '${CCWS_BUILD_PROFILES}'"
+    export CCWS_BUILD_PROFILES
 fi
 
-# some profiles can be used as wrappers
-#if [ -z "${SOURCED_BUILD_PROFILE}" ]
-#then
-#    SOURCED_BUILD_PROFILE="${BUILD_PROFILE}"
-#    export SOURCED_BUILD_PROFILE
-#else
-#    if [ "${SOURCED_BUILD_PROFILE}" != "${BUILD_PROFILE}" ]
-#    then
-#        echo "CCWS: cannot source '${BUILD_PROFILE}' profile, '${SOURCED_BUILD_PROFILE}' is already in use."
-#        return 0
-#    fi
-#fi
 
 if [ -z "${CCWS_ARTIFACTS_DIR}" ]
 then
     if [ -z "${ARTIFACTS_DIR}" ]
     then
-        CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts/${BUILD_PROFILE}"
+        CCWS_ARTIFACTS_DIR="${WORKSPACE_DIR}/artifacts/${CCWS_BUILD_PROFILES_ID}"
     else
-        CCWS_ARTIFACTS_DIR="${ARTIFACTS_DIR}/${BUILD_PROFILE}"
+        CCWS_ARTIFACTS_DIR="${ARTIFACTS_DIR}/${CCWS_BUILD_PROFILES_ID}"
     fi
 fi
-CCWS_BUILD_PROFILE_DIR="${BUILD_PROFILES_DIR}/${BUILD_PROFILE}"
-CCWS_BUILD_DIR=${CCWS_BUILD_DIR:-"${WORKSPACE_DIR}/build/${BUILD_PROFILE}"}
-CCWS_LOG_DIR=${CCWS_LOG_DIR:-"${WORKSPACE_DIR}/build/log/${BUILD_PROFILE}"}
+CCWS_PRIMARY_BUILD_PROFILE_DIR="${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}"
+CCWS_LOG_DIR=${CCWS_LOG_DIR:-"${WORKSPACE_DIR}/build/log/${CCWS_BUILD_PROFILES_ID}"}
 CCWS_SOURCE_DIR="${WORKSPACE_SRC}"
 CCWS_SOURCE_EXTRAS="${CCWS_SOURCE_DIR}/.ccws"
-export CCWS_ARTIFACTS_DIR CCWS_BUILD_PROFILE_DIR CCWS_BUILD_DIR CCWS_SOURCE_DIR CCWS_LOG_DIR CCWS_SOURCE_EXTRAS
+export CCWS_ARTIFACTS_DIR CCWS_PRIMARY_BUILD_PROFILE_DIR CCWS_SOURCE_DIR CCWS_LOG_DIR CCWS_SOURCE_EXTRAS
 
 CCWS_PROOT_BIN="${CCWS_DIR}/scripts/proot"
 export CCWS_PROOT_BIN
@@ -134,12 +121,16 @@ then
     then
         case "${OS_DISTRO_HOST}" in
             bionic)
+                ROS_VERSION=1
                 ROS_DISTRO=melodic;;
             focal)
+                ROS_VERSION=1
                 ROS_DISTRO=noetic;;
             jammy)
+                ROS_VERSION=2
                 ROS_DISTRO=humble;;
             noble)
+                ROS_VERSION=2
                 ROS_DISTRO=jazzy;;
         esac
     fi
@@ -151,6 +142,14 @@ else
     echo "Selected ROS distro: '${ROS_DISTRO}'"
     export ROS_DISTRO
 fi
+
+case "${ROS_DISTRO}" in
+    melodic|noetic)
+        ROS_VERSION=1;;
+    *)
+        ROS_VERSION=2;;
+esac
+export ROS_VERSION
 
 # has to be set for colcon to determine dependencies properly
 case "${ROS_DISTRO}" in
@@ -203,7 +202,7 @@ CCWS_CXX_STANDARD=17
 export CCWS_CXX_STANDARD
 
 # since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
-CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE:-"${CCWS_BUILD_PROFILE_DIR}/toolchain.cmake"}
+CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE:-"${CCWS_PRIMARY_BUILD_PROFILE_DIR}/toolchain.cmake"}
 export CMAKE_TOOLCHAIN_FILE
 
 # since 3.12: https://cmake.org/cmake/help/latest/envvar/CMAKE_BUILD_PARALLEL_LEVEL.html
@@ -233,7 +232,7 @@ CCACHE_BASEDIR="${WORKSPACE_DIR}"
 CCACHE_NOHASHDIR="YES"
 CCACHE_MAXSIZE=${CCACHE_MAXSIZE:-"8G"}
 #CCACHE_LOGFILE=${CCWS_ARTIFACTS_DIR}/ccache.log
-#CCACHE_LOGFILE=${CCWS_BUILD_DIR}/ccache.log
+#CCACHE_LOGFILE=${CCWS_BUILD_SPACE_DIR}/ccache.log
 #export CCACHE_LOGFILE
 export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE CCACHE_NOHASHDIR
 
@@ -298,12 +297,12 @@ then
 
     source "${HOME}/.nix-profile/etc/profile.d/nix.sh"
 
-    CCWS_BUILD_DIR_NIX="${CCWS_BUILD_DIR}/nix"
+    CCWS_BUILD_SPACE_DIR_NIX="${CCWS_BUILD_SPACE_DIR}/nix"
 
-    mkdir -p "${CCWS_BUILD_DIR_NIX}"
-    ${CCWS_NIX} develop "${CCWS_SOURCE_DIR}" --command env > "${CCWS_BUILD_DIR_NIX}/env"
+    mkdir -p "${CCWS_BUILD_SPACE_DIR_NIX}"
+    ${CCWS_NIX} develop "${CCWS_SOURCE_DIR}" --command env > "${CCWS_BUILD_SPACE_DIR_NIX}/env"
 
-    #PATH="$(grep '^PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^PATH=//'):${PATH}"
+    #PATH="$(grep '^PATH=' < "${CCWS_BUILD_SPACE_DIR_NIX}/env" | sed 's/^PATH=//'):${PATH}"
 
 
     # nix compilers mess up CMAKE_LIBRARY_ARCHITECTURE
@@ -319,9 +318,9 @@ then
     fi
 
 
-    NIX_CMAKE_PREFIX_PATH="$(grep '^CMAKE_PREFIX_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_PREFIX_PATH=//' || echo -n '')"
-    NIX_CMAKE_LIBRARY_PATH="$(grep '^CMAKE_LIBRARY_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_LIBRARY_PATH=//' || echo -n '')"
-    NIX_CMAKE_INCLUDE_PATH="$(grep '^CMAKE_INCLUDE_PATH=' < "${CCWS_BUILD_DIR_NIX}/env" | sed 's/^CMAKE_INCLUDE_PATH=//' || echo -n '')"
+    NIX_CMAKE_PREFIX_PATH="$(grep '^CMAKE_PREFIX_PATH=' < "${CCWS_BUILD_SPACE_DIR_NIX}/env" | sed 's/^CMAKE_PREFIX_PATH=//' || echo -n '')"
+    NIX_CMAKE_LIBRARY_PATH="$(grep '^CMAKE_LIBRARY_PATH=' < "${CCWS_BUILD_SPACE_DIR_NIX}/env" | sed 's/^CMAKE_LIBRARY_PATH=//' || echo -n '')"
+    NIX_CMAKE_INCLUDE_PATH="$(grep '^CMAKE_INCLUDE_PATH=' < "${CCWS_BUILD_SPACE_DIR_NIX}/env" | sed 's/^CMAKE_INCLUDE_PATH=//' || echo -n '')"
 
     if [ -n "${NIX_CMAKE_PREFIX_PATH}" ]
     then
@@ -368,18 +367,21 @@ export DEBIAN_FRONTEND
 
 ccws_read_exceptions()
 {
-    FILENAME_PREFIX="${CCWS_SOURCE_EXTRAS}/${BUILD_PROFILE}.exceptions.${1}"
-    for FILE in "${FILENAME_PREFIX}" "${FILENAME_PREFIX}.*"
+    for PROFILE in $(echo "${CCWS_BUILD_PROFILES}" | tr "," "\n")
     do
-        if [ -f "${FILE}" ]
-        then
-            if [ "$1" = "paths" ]
+        FILENAME_PREFIX="${CCWS_SOURCE_EXTRAS}/${PROFILE}.exceptions.${1}"
+        for FILE in "${FILENAME_PREFIX}" "${FILENAME_PREFIX}.*"
+        do
+            if [ -f "${FILE}" ]
             then
-                JOIN_PATTERN="s=^=:${CCWS_SOURCE_DIR}/="
-            else
-                JOIN_PATTERN="s=^=:="
+                if [ "$1" = "paths" ]
+                then
+                    JOIN_PATTERN="s=^=:${CCWS_SOURCE_DIR}/="
+                else
+                    JOIN_PATTERN="s=^=:="
+                fi
+                sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$/d' -e "${JOIN_PATTERN}" < "${FILE}" | tr -d '\n'
             fi
-            sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$/d' -e "${JOIN_PATTERN}" < "${FILE}" | tr -d '\n'
-        fi
+        done
     done
 }

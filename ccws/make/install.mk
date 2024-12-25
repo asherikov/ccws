@@ -59,10 +59,9 @@ install_ccws_deps_noble: install_ccws_deps_jammy
 
 
 bp_install_build:
-	echo "CCWS/bp_install_build: ${BUILD_PROFILE}"
-	${MAKE} bp_${BUILD_PROFILE}_install_build
+	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | xargs -I {} ${MAKE} bp_{}_install_build
 
-bp_%_install_build: assert_BUILD_PROFILE_must_exist bp_common_install_build
+bp_%_install_build: assert_BUILD_PROFILES_must_exist bp_common_install_build
 	# placeholder target
 
 ep_install:

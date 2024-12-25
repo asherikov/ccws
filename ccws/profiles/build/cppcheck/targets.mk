@@ -1,13 +1,13 @@
-bp_cppcheck_build: assert_BASE_BUILD_PROFILE_must_exist
-	rm -Rf "${WORKSPACE_DIR}/build/${BUILD_PROFILE}/"
-	mkdir -p "${WORKSPACE_DIR}/build/${BUILD_PROFILE}/"
+bp_cppcheck_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFILE_must_exist
+	rm -Rf "${CCWS_BUILD_SPACE_DIR}/"
+	mkdir -p "${CCWS_BUILD_SPACE_DIR}/"
 	bash -c "${SETUP_SCRIPT}; \
 		echo '${SETUP_SCRIPT}'; \
 		echo \"<<\$${CCWS_STATIC_DIR_EXCEPTIONS}>>>\"; \
-		echo $${CCWS_STATIC_DIR_EXCEPTIONS} > '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions'"
-	sed -i -e 's/:/\n/g' '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions'
-	sed -i -e '/^$$/d' '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions'
-	sed -i -e 's/^/*:/' -e 's/$$/*/' '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions'
+		echo $${CCWS_STATIC_DIR_EXCEPTIONS} > '${CCWS_BUILD_SPACE_DIR}/suppressions'"
+	sed -i -e 's/:/\n/g' '${CCWS_BUILD_SPACE_DIR}/suppressions'
+	sed -i -e '/^$$/d' '${CCWS_BUILD_SPACE_DIR}/suppressions'
+	sed -i -e 's/^/*:/' -e 's/$$/*/' '${CCWS_BUILD_SPACE_DIR}/suppressions'
 	bash -c "${SETUP_SCRIPT}; \
 		cppcheck \
 			-j ${JOBS} \
@@ -21,11 +21,11 @@ bp_cppcheck_build: assert_BASE_BUILD_PROFILE_must_exist
 			--inline-suppr \
 			-i /usr \
 			\$${CCWS_CPPCHECK_EXCEPTIONS} \
-			--suppressions-list='${WORKSPACE_DIR}/build/${BUILD_PROFILE}/suppressions' \
-			--project='${WORKSPACE_DIR}/build/${BASE_BUILD_PROFILE}/compile_commands.json' \
+			--suppressions-list='${CCWS_BUILD_SPACE_DIR}/suppressions' \
+			--project='${WORKSPACE_DIR}/build/${CCWS_SECONDARY_BUILD_PROFILE}/compile_commands.json' \
 			3>&1 1>&2 2>&3 \
-			| tee --append '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/cppcheck.err' "
-	test ! -s '${WORKSPACE_DIR}/build/${BUILD_PROFILE}/cppcheck.err' || exit 1
+			| tee --append '${CCWS_BUILD_SPACE_DIR}/cppcheck.err' "
+	test ! -s '${CCWS_BUILD_SPACE_DIR}/cppcheck.err' || exit 1
 
 
 bp_cppcheck_install_build: bp_common_install_build

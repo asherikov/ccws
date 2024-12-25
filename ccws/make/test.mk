@@ -1,6 +1,6 @@
 TEST_REGEX?=.*
-TEST_PKG_LIST=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.packages
-TEST_PKG_LIST_EXCEPT=${WORKSPACE_DIR}/build/${BUILD_PROFILE}/ccws.tests.exceptions.packages
+TEST_PKG_LIST=${CCWS_BUILD_SPACE_DIR}/ccws.tests.packages
+TEST_PKG_LIST_EXCEPT=${CCWS_BUILD_SPACE_DIR}/ccws.tests.exceptions.packages
 
 wslist_test:
 	@${MAKE_QUIET} wslist | sort > "${TEST_PKG_LIST}"
@@ -28,7 +28,7 @@ wsctest:
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
+	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		colcon \
 		--log-base \$${CCWS_LOG_DIR} \
 		test \
@@ -36,7 +36,7 @@ test: assert_PKG_arg_must_be_specified
 		--merge-install \
 		--executor sequential \
 		--ctest-args --output-on-failure -j ${JOBS} \
-		--build-base \"\$${CCWS_BUILD_DIR}\" \
+		--build-base \"\$${CCWS_BUILD_SPACE_DIR}\" \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
 		--base-paths "${WORKSPACE_SRC}" \
 		--test-result-base \$${CCWS_LOG_DIR}/testing \
@@ -45,9 +45,9 @@ test: assert_PKG_arg_must_be_specified
 
 ctest: assert_PKG_arg_must_be_specified
 	echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} bash -c \
-		"time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE}; \
+		"time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
-		cd \"\$${CCWS_BUILD_DIR}/{}\"; \
+		cd \"\$${CCWS_BUILD_SPACE_DIR}/{}\"; \
 		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_{}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
@@ -64,15 +64,15 @@ showtestresults: test_results
 test_results: assert_PKG_arg_must_be_specified
 	# shows fewer tests
 	echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_pkg PKG={}"
-	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
+	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_SPACE_DIR}/${PKG}"
 
 private_test_results_pkg: assert_PKG_arg_must_be_specified
 	@mkdir -p ${CCWS_ARTIFACTS_DIR}/${PKG}/
-	@cp -R ${CCWS_BUILD_DIR}/${PKG}/Testing ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
-	@cp -R ${CCWS_BUILD_DIR}/${PKG}/test_results ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
-	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_DIR}/${PKG}
+	@cp -R ${CCWS_BUILD_SPACE_DIR}/${PKG}/Testing ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
+	@cp -R ${CCWS_BUILD_SPACE_DIR}/${PKG}/test_results ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
+	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_SPACE_DIR}/${PKG}
 
 test_list: assert_PKG_arg_must_be_specified
-	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${BUILD_PROFILE} test ${EXEC_PROFILE} \
-		&& echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} ctest --show-only --test-dir \"\$${CCWS_BUILD_DIR}/{}\")"
+	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE} \
+		&& echo '${PKG}' | sed 's/ /\n/g' | xargs --no-run-if-empty -I {} ctest --show-only --test-dir \"\$${CCWS_BUILD_SPACE_DIR}/{}\")"
 

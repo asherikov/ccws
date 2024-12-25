@@ -19,10 +19,19 @@ export AUTHOR?=$(shell git config --get user.name)
 # no default, can be derived in many cases, in some must be set explicitly
 export ROS_DISTRO
 
-# default profile
-export BUILD_PROFILE?=reldebug
-# used in build profile mixins and profile creation targets
-export BASE_BUILD_PROFILE?=reldebug
+# build profiles (comma separated)
+BUILD_PROFILE?=reldebug
+# TODO DEPRECATED[use BUILD_PROFILE] used in build profile mixins and profile creation targets
+BASE_BUILD_PROFILE?=
+
+export CCWS_BUILD_PROFILES=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE}" | sed -e 's/,,//g' -e 's/,$$//g')
+export CCWS_BUILD_PROFILES_ID=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
+export CCWS_PRIMARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
+export CCWS_SECONDARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 2 -d ',')
+export CCWS_BUILD_PROFILES_TAIL=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 2- -d ',')
+export CCWS_BUILD_SPACE_DIR=${WORKSPACE_DIR}/build/${CCWS_BUILD_PROFILES_ID}
+
+
 # default package type
 export PKG_TYPE?=catkin
 # global version, string, added to deb package names to enable multiple installations
@@ -33,7 +42,7 @@ export VENDOR?=ccws
 export LICENSE?=Apache 2.0
 export REPO_LIST_FORMAT?=repos
 
-export WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install/${BUILD_PROFILE}
+export WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install/${CCWS_BUILD_PROFILES}
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
@@ -59,7 +68,7 @@ export PKG_ID=$(shell echo "${PKG}" | md5sum | cut -f 1 -d ' ')
 export BUILD_PROFILES_DIR=${CCWS_DIR}/profiles/build/
 export EXEC_PROFILES_DIR=${CCWS_DIR}/profiles/exec/
 MAKE_QUIET=${MAKE} --quiet --no-print-directory
-SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${BUILD_PROFILE}/setup.bash
+SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}/setup.bash ${CCWS_BUILD_PROFILES_TAIL}
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_SRC}
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
 CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
@@ -175,15 +184,15 @@ build_glob:
 build_all:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | paste -d ' ' -s)\""
 
-build: assert_BUILD_PROFILE_must_exist
-	${MAKE} wswraptarget TARGET=bp_${BUILD_PROFILE}_build
+build: assert_BUILD_PROFILES_must_exist
+	${MAKE} wswraptarget TARGET=bp_${CCWS_PRIMARY_BUILD_PROFILE}_build
 
 bp_%_build: private_build
 	# skip to default
 
 # --log-level DEBUG
 private_build: assert_PKG_arg_must_be_specified
-	mkdir -p "${CCWS_BUILD_DIR}"
+	mkdir -p "${CCWS_BUILD_SPACE_DIR}"
 	# override make flags to enable multithreaded builds
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
 		--log-base ${CCWS_LOG_DIR} \
@@ -192,7 +201,7 @@ private_build: assert_PKG_arg_must_be_specified
 		--merge-install \
 		--executor sequential \
 		--base-paths ${WORKSPACE_SRC} \
-		--build-base "${CCWS_BUILD_DIR}" \
+		--build-base "${CCWS_BUILD_SPACE_DIR}" \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
 		--packages-up-to ${PKG}

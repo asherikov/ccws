@@ -118,7 +118,6 @@ catkin_package(
 #    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CCWS_LINKER_FLAGS}")
 #endif()
 #add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})
-#add_definitions(-DCCWS_BUILD_PROFILE="${CCWS_BUILD_PROFILE}")
 ## --------------
 
 ## Specify additional locations of header files

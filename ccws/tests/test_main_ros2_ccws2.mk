@@ -9,7 +9,7 @@ test:
 	# package & profile creation
 	${MAKE} wspurge
 	rm -Rf ccws/profiles/build/test_profile/
-	${MAKE} bp_new BUILD_PROFILE=test_profile BASE_BUILD_PROFILE=reldebug
+	${MAKE} bp_new BUILD_PROFILE=test_profile,reldebug
 	${MAKE} bp_install_build BUILD_PROFILE=test_profile
 	${MAKE} wsinit
 	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
@@ -32,8 +32,8 @@ test:
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
 	# ---
 	# clangd
-	${MAKE} bp_install_build BUILD_PROFILE=clangd
-	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	${MAKE} bp_install_build BUILD_PROFILE=clangd,reldebug
+	${MAKE} BUILD_PROFILE=clangd,reldebug
 	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
@@ -61,7 +61,7 @@ test:
 	# cppcheck
 	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
-	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
+	${MAKE} BUILD_PROFILE=cppcheck,reldebug
 	rm -Rf "${WORKSPACE_SRC}/.ccws"
 	# ---
 	# static checks
@@ -92,8 +92,8 @@ test_dependencies:
 
 test_deb:
 	${MAKE} bp_install_build BUILD_PROFILE=deb
-	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
-	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
+	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug
+	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep minimal-subscriber | cut -f 1 |  xargs sudo apt purge --yes
 

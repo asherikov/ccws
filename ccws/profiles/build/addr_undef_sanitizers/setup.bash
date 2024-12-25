@@ -5,7 +5,7 @@ set -e
 set -o pipefail
 
 ##########################################################################################
-BUILD_PROFILE=${BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
+CCWS_PRIMARY_BUILD_PROFILE=${CCWS_PRIMARY_BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 
 
@@ -14,15 +14,15 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 # https://stackoverflow.com/questions/48267394/what-are-the-valid-sanitizer-suppression-strings-for-gcc
 
 # undefined
-UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${CCWS_BUILD_PROFILE_DIR}/undefined.supp
+UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1:suppressions=${BUILD_PROFILES_DIR}/addr_undef_sanitizers/undefined.supp
 export UBSAN_OPTIONS
 
 # leaks
-LSAN_OPTIONS=suppressions=${CCWS_BUILD_PROFILE_DIR}/leak.supp
+LSAN_OPTIONS=suppressions=${BUILD_PROFILES_DIR}/addr_undef_sanitizers/leak.supp
 export LSAN_OPTIONS
 
 # Suppressions dont work on alloc-dealloc-mismatch for some reason
-ASAN_OPTIONS=alloc_dealloc_mismatch=0:new_delete_type_mismatch=0:suppressions=${CCWS_BUILD_PROFILE_DIR}/address.supp
+ASAN_OPTIONS=alloc_dealloc_mismatch=0:new_delete_type_mismatch=0:suppressions=${BUILD_PROFILES_DIR}/addr_undef_sanitizers/address.supp
 export ASAN_OPTIONS
 
 # address sanitizer
