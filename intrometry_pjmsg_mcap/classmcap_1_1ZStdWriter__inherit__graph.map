@@ -1,0 +1,5 @@
+<map id="mcap::ZStdWriter" name="mcap::ZStdWriter">
+<area shape="rect" id="node1" title="An in&#45;memory IChunkWriter implementation that holds data in a temporary buffer before flushing to an ..." alt="" coords="13,155,149,181"/>
+<area shape="rect" id="node2" href="$classmcap_1_1IChunkWriter.html" title="An abstract interface for writing Chunk data. Chunk data is buffered in memory and written to disk as..." alt="" coords="5,80,156,107"/>
+<area shape="rect" id="node3" href="$classmcap_1_1IWritable.html" title="An abstract interface for writing MCAP data." alt="" coords="18,5,143,32"/>
+</map>

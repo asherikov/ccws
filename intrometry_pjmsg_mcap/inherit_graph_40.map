@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classmcap_1_1IWritable.html" title="An abstract interface for writing MCAP data." alt="" coords="5,56,131,83"/>
+<area shape="rect" id="node2" href="$classmcap_1_1FileWriter.html" title="Implements the IWritable interface used by McapWriter by wrapping a FILE* pointer created by fopen()." alt="" coords="191,5,319,32"/>
+<area shape="rect" id="node3" href="$classmcap_1_1IChunkWriter.html" title="An abstract interface for writing Chunk data. Chunk data is buffered in memory and written to disk as..." alt="" coords="180,56,331,83"/>
+<area shape="rect" id="node7" href="$classmcap_1_1StreamWriter.html" title="Implements the IWritable interface used by McapWriter by wrapping a std::ostream stream." alt="" coords="179,107,332,133"/>
+<area shape="rect" id="node4" href="$classmcap_1_1BufferWriter.html" title="An in&#45;memory IChunkWriter implementation backed by a growable buffer." alt="" coords="380,5,527,32"/>
+<area shape="rect" id="node5" href="$classmcap_1_1LZ4Writer.html" title="An in&#45;memory IChunkWriter implementation that holds data in a temporary buffer before flushing to an ..." alt="" coords="388,56,519,83"/>
+<area shape="rect" id="node6" href="$classmcap_1_1ZStdWriter.html" title="An in&#45;memory IChunkWriter implementation that holds data in a temporary buffer before flushing to an ..." alt="" coords="385,107,521,133"/>
+</map>

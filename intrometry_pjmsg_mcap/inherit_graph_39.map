@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structmcap_1_1IReadable.html" title="An abstract interface for reading MCAP data." alt="" coords="5,56,136,83"/>
+<area shape="rect" id="node2" href="$classmcap_1_1FileReader.html" title="IReadable implementation wrapping a FILE* pointer created by fopen() and a read buffer." alt="" coords="215,5,350,32"/>
+<area shape="rect" id="node3" href="$classmcap_1_1FileStreamReader.html" title="IReadable implementation wrapping a std::ifstream input file stream." alt="" coords="192,56,373,83"/>
+<area shape="rect" id="node4" href="$classmcap_1_1ICompressedReader.html" title="An abstract interface for compressed readers." alt="" coords="184,107,381,133"/>
+<area shape="rect" id="node5" href="$classmcap_1_1BufferReader.html" title="A &quot;null&quot; compressed reader that directly passes through uncompressed data. No internal buffers are al..." alt="" coords="429,56,581,83"/>
+<area shape="rect" id="node6" href="$classmcap_1_1LZ4Reader.html" title="ICompressedReader implementation that decompresses LZ4 (https://lz4.github.io/lz4/) data." alt="" coords="437,107,573,133"/>
+<area shape="rect" id="node7" href="$classmcap_1_1ZStdReader.html" title="ICompressedReader implementation that decompresses Zstandard (https://facebook.github...." alt="" coords="434,157,577,184"/>
+</map>

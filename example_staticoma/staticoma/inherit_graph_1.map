@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classpopl_1_1Option.html" title="Abstract Base class for Options. " alt="" coords="5,31,97,57"/>
-<area shape="rect" id="node2" href="$classpopl_1_1Value.html" title="Value option with optional default value. " alt="" coords="153,5,272,32"/>
-<area shape="rect" id="node4" href="$classpopl_1_1Value.html" title="popl::Value\&lt; bool \&gt;" alt="" coords="145,56,280,83"/>
-<area shape="rect" id="node3" href="$classpopl_1_1Implicit.html" title="Value option with implicit default value. " alt="" coords="328,5,456,32"/>
-<area shape="rect" id="node5" href="$classpopl_1_1Switch.html" title="Value option without value. " alt="" coords="345,56,439,83"/>
-</map>

@@ -1,0 +1,5 @@
+<map id="mcap::BufferReader" name="mcap::BufferReader">
+<area shape="rect" id="node1" title="A &quot;null&quot; compressed reader that directly passes through uncompressed data. No internal buffers are al..." alt="" coords="28,155,180,181"/>
+<area shape="rect" id="node2" href="$classmcap_1_1ICompressedReader.html" title="An abstract interface for compressed readers." alt="" coords="5,80,203,107"/>
+<area shape="rect" id="node3" href="$structmcap_1_1IReadable.html" title="An abstract interface for reading MCAP data." alt="" coords="39,5,169,32"/>
+</map>

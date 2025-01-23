@@ -1,0 +1,4 @@
+<map id="mcap::StreamWriter" name="mcap::StreamWriter">
+<area shape="rect" id="node1" title="Implements the IWritable interface used by McapWriter by wrapping a std::ostream stream." alt="" coords="5,80,159,107"/>
+<area shape="rect" id="node2" href="$classmcap_1_1IWritable.html" title="An abstract interface for writing MCAP data." alt="" coords="19,5,145,32"/>
+</map>

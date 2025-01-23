@@ -1,0 +1,4 @@
+<map id="mcap::FileWriter" name="mcap::FileWriter">
+<area shape="rect" id="node1" title="Implements the IWritable interface used by McapWriter by wrapping a FILE* pointer created by fopen()." alt="" coords="5,80,133,107"/>
+<area shape="rect" id="node2" href="$classmcap_1_1IWritable.html" title="An abstract interface for writing MCAP data." alt="" coords="7,5,132,32"/>
+</map>

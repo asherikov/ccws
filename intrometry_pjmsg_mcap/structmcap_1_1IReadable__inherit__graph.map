@@ -1,0 +1,9 @@
+<map id="mcap::IReadable" name="mcap::IReadable">
+<area shape="rect" id="node1" title="An abstract interface for reading MCAP data." alt="" coords="190,5,321,32"/>
+<area shape="rect" id="node2" href="$classmcap_1_1FileReader.html" title="IReadable implementation wrapping a FILE* pointer created by fopen() and a read buffer." alt="" coords="5,80,140,107"/>
+<area shape="rect" id="node3" href="$classmcap_1_1FileStreamReader.html" title="IReadable implementation wrapping a std::ifstream input file stream." alt="" coords="165,80,346,107"/>
+<area shape="rect" id="node4" href="$classmcap_1_1ICompressedReader.html" title="An abstract interface for compressed readers." alt="" coords="370,80,567,107"/>
+<area shape="rect" id="node5" href="$classmcap_1_1BufferReader.html" title="A &quot;null&quot; compressed reader that directly passes through uncompressed data. No internal buffers are al..." alt="" coords="225,155,377,181"/>
+<area shape="rect" id="node6" href="$classmcap_1_1LZ4Reader.html" title="ICompressedReader implementation that decompresses LZ4 (https://lz4.github.io/lz4/) data." alt="" coords="401,155,537,181"/>
+<area shape="rect" id="node7" href="$classmcap_1_1ZStdReader.html" title="ICompressedReader implementation that decompresses Zstandard (https://facebook.github...." alt="" coords="561,155,704,181"/>
+</map>

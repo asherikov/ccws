@@ -1,0 +1,7 @@
+<map id="mcap::ICompressedReader" name="mcap::ICompressedReader">
+<area shape="rect" id="node1" title="An abstract interface for compressed readers." alt="" coords="151,80,348,107"/>
+<area shape="rect" id="node3" href="$classmcap_1_1BufferReader.html" title="A &quot;null&quot; compressed reader that directly passes through uncompressed data. No internal buffers are al..." alt="" coords="5,155,157,181"/>
+<area shape="rect" id="node4" href="$classmcap_1_1LZ4Reader.html" title="ICompressedReader implementation that decompresses LZ4 (https://lz4.github.io/lz4/) data." alt="" coords="181,155,317,181"/>
+<area shape="rect" id="node5" href="$classmcap_1_1ZStdReader.html" title="ICompressedReader implementation that decompresses Zstandard (https://facebook.github...." alt="" coords="342,155,485,181"/>
+<area shape="rect" id="node2" href="$structmcap_1_1IReadable.html" title="An abstract interface for reading MCAP data." alt="" coords="184,5,315,32"/>
+</map>

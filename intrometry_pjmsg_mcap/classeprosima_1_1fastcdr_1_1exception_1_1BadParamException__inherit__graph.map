@@ -1,0 +1,5 @@
+<map id="eprosima::fastcdr::exception::BadParamException" name="eprosima::fastcdr::exception::BadParamException">
+<area shape="rect" id="node1" title="This class is thrown as an exception when an invalid parameter is being serialized." alt="" coords="5,169,231,211"/>
+<area shape="rect" id="node2" href="$classeprosima_1_1fastcdr_1_1exception_1_1Exception.html" title="This abstract class is used to create exceptions." alt="" coords="39,80,197,121"/>
+<area shape="rect" id="node3" href="/mnt/data/_me/git/asherikov/ccws/ccws/profiles/build/doxygen/cppreference-doxygen-web.tag.xml$cpp/error/exception.html" title=" " alt="" coords="61,5,175,32"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="eprosima::fastcdr::exception::Exception" name="eprosima::fastcdr::exception::Exception">
+<area shape="rect" id="node1" title="This abstract class is used to create exceptions." alt="" coords="168,123,327,165"/>
+<area shape="rect" id="node3" href="$classeprosima_1_1fastcdr_1_1exception_1_1BadOptionalAccessException.html" title="This class is thrown as an exception when accessing the value of a null optional." alt="" coords="385,5,603,61"/>
+<area shape="rect" id="node4" href="$classeprosima_1_1fastcdr_1_1exception_1_1BadParamException.html" title="This class is thrown as an exception when an invalid parameter is being serialized." alt="" coords="381,86,607,127"/>
+<area shape="rect" id="node5" href="$classeprosima_1_1fastcdr_1_1exception_1_1LockedExternalAccessException.html" title="This class is thrown as an exception when accessing to set the value of a locked external." alt="" coords="375,152,613,208"/>
+<area shape="rect" id="node6" href="$classeprosima_1_1fastcdr_1_1exception_1_1NotEnoughMemoryException.html" title="This class is thrown as an exception when the buffer&#39;s internal memory reachs its size limit." alt="" coords="385,232,603,288"/>
+<area shape="rect" id="node2" href="/mnt/data/_me/git/asherikov/ccws/ccws/profiles/build/doxygen/cppreference-doxygen-web.tag.xml$cpp/error/exception.html" title=" " alt="" coords="5,131,120,157"/>
+</map>
