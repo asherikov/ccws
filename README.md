@@ -179,6 +179,7 @@ Testing
 Documentation
 -------------
 - `make BUILD_PROFILE=doxygen`, `firefox artifacts/doxygen/index.html`
+- See example at <https://asherikov.github.io/ccws/>
 
 
 Debian package generation
