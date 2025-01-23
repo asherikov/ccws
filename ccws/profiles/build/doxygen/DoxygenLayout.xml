@@ -21,6 +21,7 @@
     </tab>
     <tab type="examples" visible="yes" title="" intro=""/>
     <tab type="user" url="./pkg_dependency_graph.svg" title="Dependencies"/>
+    <tab type="user" url="./pkg_reverse_dependency_graph.svg" title="Reverse dependencies"/>
     <tab type="user" url="../index.html" title="Package index"/>
   </navindex>
 

@@ -45,6 +45,7 @@ test:
 	${MAKE} BUILD_PROFILE=doxygen
 	${MAKE} graph PKG=staticoma
 	${MAKE} graph
+	${MAKE} graph_reverse PKG=staticoma
 	${MAKE} cache_clean
 	# ---
 	# cppcheck

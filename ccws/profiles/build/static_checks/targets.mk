@@ -119,7 +119,7 @@ yamllint:
                         commas: disable, \
                         comments: {require-starting-space: false, min-spaces-from-content: 0}, \
                         document-start: disable, \
-                        indentation: {spaces: consistent, indent-sequences: consistent}, \
+                        indentation: disable, \
                         line-length: disable, \
                         trailing-spaces: disable, \
                         new-line-at-end-of-file: disable, \

@@ -49,6 +49,7 @@ test:
 	${MAKE} BUILD_PROFILE=doxygen
 	${MAKE} graph PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} graph
+	${MAKE} graph_reverse PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} cache_clean
 	# ---
 	${MAKE} wspurge

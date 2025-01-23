@@ -15,7 +15,7 @@ bp_doxygen_build: doxclean assert_doxygen_installed
         cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > index.html; \
 		echo '<table border="1">' >> index.html; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
-			| sed -e 's|./\(.*\)/index.html|<tr><td><a href=\"./\1/index.html\">\1</a></td><td><a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></td><tr>|' >> index.html; \
+			| sed -e 's|./\(.*\)/index.html|<tr><td><a href=\"./\1/index.html\">\1</a></td><td><a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></td><td><a href=\"./\1/pkg_reverse_dependency_graph.svg\">reverse dependency graph</a></td></tr>|' >> index.html; \
 		echo '</table><h3>Summary</h3><ul><li>packages: ' >> index.html; \
 		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.html; \
 		echo '</li>' >> index.html; \
@@ -39,6 +39,7 @@ dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
         cat \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/deps | xargs -I {} cat {} >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile; \
         mkdir -p \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}; \
 		${MAKE_QUIET} graph | sed 's@  \"\\(.*\\)\";@  \"\\1\" [URL=\"../\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}/pkg_dependency_graph.svg; \
+		${MAKE_QUIET} graph_reverse | sed 's@  \"\\(.*\\)\";@  \"\\1\" [URL=\"../\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG}/pkg_reverse_dependency_graph.svg; \
         cd `${CMD_PKG_LIST} | grep '^${PKG}[[:blank:]]' | sed 's/.*\t\(.*\)\t.*/\1/'`; \
         echo 'TAGFILES+=\"\$$(CCWS_DOXYGEN_WORKING_DIR)/${PKG}/tags.xml=../${PKG}/\"' > \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile.append; \
         find ~+ -path '*include/*' -type d | sed -e 's/\(.*\)/INCLUDE_PATH+=\"\1\"/' >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile.append; \

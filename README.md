@@ -400,3 +400,4 @@ TODO
 - Control symbol visibility and verify with
   <https://github.com/yugr/ShlibVisibilityChecker>.
 - Add `CodeQL` profile (<https://github.com/github/codeql>).
+- cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`

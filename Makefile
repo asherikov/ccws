@@ -217,6 +217,8 @@ graph:
 	@test -z "${PKG}" || ${CMD_PKG_GRAPH} --packages-up-to ${PKG}
 	@test -n "${PKG}" || ${CMD_PKG_GRAPH}
 
+graph_reverse: assert_PKG_arg_must_be_specified
+	@test -z "${PKG}" || ${CMD_PKG_GRAPH} --packages-above ${PKG}
 
 ##
 ## Other targets
