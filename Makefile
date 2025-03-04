@@ -177,6 +177,9 @@ assert_AUTHOR_must_not_be_empty:
 assert_EMAIL_must_not_be_empty:
 	test "${EMAIL}" != ""
 
+assert_JOBS_arg_must_be_positive_integer:
+	test "${JOBS}" -gt 0
+
 
 build_glob:
 	bash -c "${MAKE} PKG=\"\$$(${CMD_PKG_NAME_LIST} | grep '${PKG_NAME_PART}' | paste -d ' ' -s)\""
@@ -191,7 +194,7 @@ bp_%_build: private_build
 	# skip to default
 
 # --log-level DEBUG
-private_build: assert_PKG_arg_must_be_specified
+private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive_integer
 	mkdir -p "${CCWS_BUILD_SPACE_DIR}"
 	# override make flags to enable multithreaded builds
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
