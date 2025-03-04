@@ -14,8 +14,8 @@ override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 
 
 # obtain from gitconfig by default
-export EMAIL?=$(shell git config --get user.email)
-export AUTHOR?=$(shell git config --get user.name)
+export EMAIL?=$(shell git config --get user.email || echo "ccws@ccws.net")
+export AUTHOR?=$(shell git config --get user.name || echo "ccws")
 # no default, can be derived in many cases, in some must be set explicitly
 export ROS_DISTRO
 
@@ -127,7 +127,7 @@ wsinit:
 
 # Status packages in the workspace
 wsstatus:
-	git status
+	test ! -d .git || git status
 	${MAKE} wsstatuspkg
 
 wsstatuspkg:

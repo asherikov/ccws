@@ -54,7 +54,7 @@ private_deb_version_hash: assert_PKG_arg_must_be_specified
 	${MAKE_QUIET} private_info_with_deps \
 		| grep "^path:" | sed 's/path: //' | sort \
 		| xargs -I {} /bin/sh -c 'cd {}; echo {}; git show -s --format=%h; git diff' > ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all
-	git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all
+	test ! -d .git || git show -s --format=%h >> ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all
 	cat "${WORKSPACE_DIR}/build/version_hash/${PKG_ID}.all" | md5sum | grep -o "^......" > ${WORKSPACE_DIR}/build/version_hash/${PKG_ID}
 
 private_deb_lint: assert_PKG_arg_must_be_specified

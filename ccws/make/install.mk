@@ -3,7 +3,7 @@ PIP3_INSTALL?=python3 -m pip install
 
 install_ccws_deps:
 	# moreutils: ts (timestamping utility)
-	${APT_INSTALL} wget gnupg2 moreutils ca-certificates
+	${APT_INSTALL} wget gnupg2 moreutils ca-certificates git
 	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
 	${APT_INSTALL} build-essential ccache proot gdb
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}

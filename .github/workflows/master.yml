@@ -13,22 +13,20 @@ env:
 
 jobs:
     focal:
-        runs-on: ubuntu-20.04
+        container: ros:noetic-ros-base-focal
+        runs-on: ubuntu-latest
 
         # gcc -> 10: https://github.com/orgs/community/discussions/63391
         steps:
             - uses: actions/checkout@v4
-            - run: find /usr/lib/gcc -iname libtsan_preinit.o
+            #- run: find /usr/lib/gcc -iname libtsan_preinit.o
+            - run: sudo apt update
+            - run: sudo apt upgrade --yes
+            - run: sudo apt --yes --no-install-recommends install gcc-9 g++-9 gcc-10 g++-10
             - run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
             - run: sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+            - run: ./ccws/scripts/bootstrap.sh
             - run: make -f ccws/tests/test_main.mk ROS_DISTRO=noetic
-
-    #focal_ros2:
-    #    runs-on: ubuntu-20.04
-    #
-    #    steps:
-    #        - uses: actions/checkout@v4
-    #        - run: make -f ccws/tests/test_main_ros2.mk ROS_DISTRO=foxy
 
     jammy_ros2:
         runs-on: ubuntu-22.04
@@ -80,11 +78,15 @@ jobs:
             - run: make -f ccws/tests/test_nix.mk
 
     cross_raspi:
-        runs-on: ubuntu-20.04
+        container:
+            image: ros:noetic-ros-base-focal
+            options: --privileged
+        runs-on: ubuntu-latest
 
         steps:
             - uses: actions/checkout@v4
             - run: sudo apt update
             - run: sudo apt upgrade --yes
+            - run: ./ccws/scripts/bootstrap.sh
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
 
