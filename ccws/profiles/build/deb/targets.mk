@@ -2,6 +2,8 @@ deb_%:
 	${MAKE} wswraptarget TARGET="private_$@"
 
 private_deb_compile:
+	# clean install directories in order to avoid packing of previously installed stuff
+	rm -rf "${CCWS_INSTALL_DIR_BUILD_ROOT}"/*
 	echo ${CCWS_EXTRA_INSTALL_DIRS} | sed -e "s/ /\n/g" | xargs -I {} mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/{}
 	mkdir -p "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
 	# trim first profile (must be deb) and proceed with the rest

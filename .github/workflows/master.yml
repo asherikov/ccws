@@ -47,6 +47,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+            - run: sudo apt update
+            - run: sudo apt upgrade --yes
             - run: make -f ccws/tests/test_main_ros2.mk ROS_DISTRO=jazzy
 
     jammy_ros2_src:

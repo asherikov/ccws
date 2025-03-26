@@ -223,8 +223,10 @@ BUILD_PROFILE=deb,reldebug`.
 
     - Easy installation of system services, udev rules, configs, etc.
 
-- Different versions of binary packages can be installed simultaneously, if
-  they are built using different `VERSION` parameters.
+- Multiple variants of binary 'superpackage' can be installed simultaneously if
+  they are built using different `VERSION` parameter. Note that it alters
+  installation path, so some workspace packages that are being "smart" with
+  `cmake` may require cleaning build directory if they have been built earlier.
 
 
 ### Building packages

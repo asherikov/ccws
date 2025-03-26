@@ -197,6 +197,7 @@ bp_%_build: private_build
 private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive_integer
 	mkdir -p "${CCWS_BUILD_SPACE_DIR}"
 	# override make flags to enable multithreaded builds
+	# CMAKE_INSTALL_PREFIX does not have effect if set only in toolchain when rebuilding
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
 		--log-base ${CCWS_LOG_DIR} \
 		build \
@@ -206,7 +207,7 @@ private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive
 		--base-paths ${WORKSPACE_SRC} \
 		--build-base "${CCWS_BUILD_SPACE_DIR}" \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
-		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" \
+		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" -DCMAKE_INSTALL_PREFIX="${CCWS_INSTALL_DIR_HOST}" \
 		--packages-up-to ${PKG}
 
 
