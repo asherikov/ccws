@@ -28,6 +28,7 @@ test:
 	sudo apt install ros-${ROS_DISTRO}-ros2cli # used to test setup.bash
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
 	# ---

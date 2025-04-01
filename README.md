@@ -70,10 +70,11 @@ subdirectory contains default parameters, which can be overriden by specific
 profiles:
 - [default] `reldebug` -- default compiler, cmake build type is
   `RelWithDebInfo`
-- `scan_build` -- static checks with `scan_build` and `clang-tidy`.
-  `clang-tidy` parameters are defined in cmake toolchain and must be enabled in
-  packages as shown in package template `CMakeLists`. This profile also uses
-  `clang` compiler.
+- `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
+  static checks. `clang-tidy` parameters are defined in cmake toolchain and
+  must be enabled in packages as shown in package template `CMakeLists`.
+- `clang_tidy` -- a simplified version of `scan_build` without `clang` and
+  `scan_build`.
 - `thread_sanitizer` -- compilation with thread sanitizer.
 - `addr_undef_sanitizers` -- compilation with address and undefined behavior
   sanitizers.
