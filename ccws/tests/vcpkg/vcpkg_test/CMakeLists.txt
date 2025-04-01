@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.16)
 project(vcpkg_test CXX)
 
 set(CMAKE_FIND_DEBUG_MODE ON)
