@@ -356,52 +356,88 @@ Related software
 TODO
 ====
 
+Testing
+-------
+
 - Fuzzing <https://github.com/rosin-project/ros2_fuzz>,
   <https://github.com/sslab-gatech/RoboFuzz>,
   <https://github.com/AFLplusplus/AFLplusplus>,
   <https://github.com/google/clusterfuzzlite>.
-- Investigate generation of debug and development packages.
-- Reproducible builds <https://reproducible-builds.org/>.
-- Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
-- Integrate <https://github.com/oclint/oclint>
-- <https://github.com/ejfitzgerald/clang-tidy-cache> or
-  <https://github.com/mbitsnbites/buildcache> can be used to cache `clang-tidy`
-  runs.
-- <https://github.com/mrtazz/checkmake> might be useful for makefile linting.
-- Cache cmake checks with <https://github.com/cristianadam/cmake-checks-cache>,
-  <https://github.com/polysquare/cmake-forward-cache> might be useful too.
-- Shell formatter <https://github.com/mvdan/sh>.
+- Add code coverage profile.
+- cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`
+
+Static checks
+-------------
+
 - <https://github.com/myint/cppclean> might be useful for unnecessary header
   detection, but looks stale.
+- <https://github.com/mrtazz/checkmake> might be useful for makefile linting.
 - <https://github.com/include-what-you-use/include-what-you-use>
-- Build time analysis with clang <https://github.com/aras-p/ClangBuildAnalyzer>
-  and / or <https://github.com/jrmadsen/compile-time-perf>.
 - Potential replacement for `scan_build`
   <https://github.com/Ericsson/codechecker> with extra checks and caching.
-- <https://github.com/sscpac/statick> is not going to be used, but some of its
-  linters can be integrated.
-- Source code spellcheck <https://github.com/myint/scspell>.
-- <https://github.com/jordansissel/fpm> -- generic binary package generator,
-  potential replacement for `dpkg-deb`.
-- <https://github.com/git-afsantos/haros> -- ROS-aware static analysis, might
-  have issues with non `catkin_make` build environments.
-- <https://github.com/Tencent/TscanCode> -- C++ static analysis tool.
-- <https://github.com/DLu/roscompile/tree/main/roscompile> -- linter for catkin
-  packages.
-- Use <https://libguestfs.org/> or <https://github.com/alperakcan/fuse-ext2>
-  instead of loop devices, to avoid using sudo. There are some issues in Ubuntu
-  though, bug 759725, see <https://libguestfs.org/guestfs-faq.1.html>.
-  `guestfs` is too slow to be practical.
-- Distributed compilation support with <https://github.com/distcc/distcc> can
-  be useful.
-- Add memory sanitizer profile as an alternative to `valgrind`, `gcc` doesn't
-  support it currently.
-- Add code coverage profile.
+
+Dynamic checks
+--------------
+
+- Add memory sanitizer profile as an alternative to `valgrind`.
 - Execution profile with <https://github.com/yugr/libdebugme> to automatically
   start debugger on a signal.
 - <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
   execution profile -- an overkill in general case though.
+
+Build performance
+-----------------
+
+- Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
+- <https://github.com/ejfitzgerald/clang-tidy-cache> or
+  <https://github.com/mbitsnbites/buildcache> can be used to cache `clang-tidy`
+  runs.
+- Cache cmake checks with <https://github.com/cristianadam/cmake-checks-cache>,
+  <https://github.com/polysquare/cmake-forward-cache> might be useful too.
+- Build time analysis with clang <https://github.com/aras-p/ClangBuildAnalyzer>
+  and / or <https://github.com/jrmadsen/compile-time-perf>.
+- Distributed compilation support with <https://github.com/distcc/distcc> can
+  be useful.
+
+Build
+-----
+
+- Reproducible builds <https://reproducible-builds.org/>.
+
+Packaging
+---------
+
+- Investigate generation of debug and development packages, in particular
+  stripping of static libraries and headers.
+- <https://github.com/jordansissel/fpm> -- generic binary package generator,
+  potential replacement for `dpkg-deb`.
+
+Containers and images
+---------------------
+
+- Build/deploy containers.
+- System images as OCI artifacts <https://oras.land/docs/>.
+- Generate system images in layered, container-like fashion
+  <https://osinside.github.io/kiwi/overview.html>.
+- Root filesystem for crosscompilation from a container.
+
+Bookmarks (not going to be supported)
+-------------------------------------
+
+- Shell formatter <https://github.com/mvdan/sh>.
+- <https://github.com/Tencent/TscanCode> -- C++ static analysis tool.
+- <https://github.com/DLu/roscompile/tree/main/roscompile> -- linter for catkin
+  packages.
+- <https://github.com/git-afsantos/haros> -- ROS-aware static analysis, might
+  have issues with non `catkin_make` build environments.
 - Control symbol visibility and verify with
   <https://github.com/yugr/ShlibVisibilityChecker>.
+- Integrate <https://github.com/oclint/oclint>
+- Source code spellcheck <https://github.com/myint/scspell>.
+- <https://github.com/sscpac/statick> is not going to be used, but some of its
+  linters can be integrated.
 - Add `CodeQL` profile (<https://github.com/github/codeql>).
-- cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`
+- Use <https://libguestfs.org/> or <https://github.com/alperakcan/fuse-ext2>
+  instead of loop devices, to avoid using sudo. There are some issues in Ubuntu
+  though, bug 759725, see <https://libguestfs.org/guestfs-faq.1.html>.
+  `guestfs` is too slow to be practical.

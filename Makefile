@@ -71,7 +71,6 @@ MAKE_QUIET=${MAKE} --quiet --no-print-directory
 SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}/setup.bash ${CCWS_BUILD_PROFILES_TAIL}
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${WORKSPACE_SRC}
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
-CMD_PKG_INFO=colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC}
 CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
 CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
 
