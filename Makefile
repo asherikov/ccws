@@ -158,7 +158,6 @@ wsupdate_pkgs_shallow:
 wsupdate_pkgs_shallow_rebase:
 	${CMD_WSHANDLER} -j ${JOBS} -p shallow,rebase update
 
-
 ccache_stats:
 	bash -c "${SETUP_SCRIPT}; ccache --show-stats"
 
@@ -215,6 +214,12 @@ add:
 	bash -c "\
 		DIR=\$$(basename ${REPO} | sed -e 's/\.git$$//'); \
 		${CMD_WSHANDLER} add git \$${DIR} ${REPO} ${VERSION}"
+
+set_repo_version:
+	${CMD_WSHANDLER} set_version_by_url "${REPO}" "${VERSION}"
+
+rm:
+	${CMD_WSHANDLER} remove_by_url "${REPO}"
 
 graph:
 	@test -z "${PKG}" || ${CMD_PKG_GRAPH} --packages-up-to ${PKG}

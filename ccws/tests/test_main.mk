@@ -71,10 +71,14 @@ test_dependencies:
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
+	${MAKE} set_repo_version REPO="https://github.com/asherikov/staticoma.git" VERSION="master"
+	${MAKE} rm REPO="https://github.com/asherikov/staticoma.git"
+	${MAKE} add REPO="https://github.com/asherikov/staticoma.git" VERSION="master"
 	# ---
 	# add dependencies to the workspace and build deb package
 	${MAKE} dep_to_repolist
 	${MAKE} wsupdate
+	${MAKE} dep_install CCWS_DEP_TYPE=build
 	${MAKE} dep_install
 
 test_deb:

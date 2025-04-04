@@ -55,7 +55,11 @@ test:
 	${MAKE} wspurge
 	${MAKE} wsinit
 	${MAKE} add REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
+	${MAKE} set_repo_version REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
+	${MAKE} rm REPO="https://github.com/asherikov/ariles.git"
+	${MAKE} add REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
 	${MAKE} wsupdate
+	${MAKE} dep_install CCWS_DEP_TYPE=build
 	${MAKE} dep_install
 	${MAKE} ros2param
 	# ---
