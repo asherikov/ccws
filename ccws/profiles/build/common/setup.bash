@@ -3,6 +3,7 @@
 
 # if not set assume that this preload is sourced from the root of the workspace
 WORKSPACE_DIR=${WORKSPACE_DIR:-"$(pwd)"}
+WORKSPACE_DIR="$(realpath "${WORKSPACE_DIR}")"
 BUILD_PROFILES_DIR=${BUILD_PROFILES_DIR:-"${CCWS_DIR}/profiles/build"}
 export WORKSPACE_DIR BUILD_PROFILES_DIR
 

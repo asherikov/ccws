@@ -10,11 +10,11 @@ private_deb_compile:
 	${MAKE} bp_${CCWS_SECONDARY_BUILD_PROFILE}_build CCWS_BUILD_PROFILES=${CCWS_BUILD_PROFILES_TAIL}
 	echo "#!/bin/bash -x"                                                           >  "${CCWS_SOURCE_SCRIPT}"
 	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               >> "${CCWS_SOURCE_SCRIPT}"
+	echo "CCWS_PACKAGE_VERSION=\"${VERSION}:\$${CCWS_PACKAGE_VERSION}\""            >> "${CCWS_SOURCE_SCRIPT}"
 	cat "${EXEC_PROFILES_DIR}/common/setup.bash" | grep -v "^#!"                    >> "${CCWS_SOURCE_SCRIPT}"
 	test "${EXEC_PROFILE}" = "" || echo "${EXEC_PROFILE}" \
 		| sed -e "s/^ *//"  -e "s/ *$$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" \
 		| xargs --no-run-if-empty -I {} cat "${EXEC_PROFILES_DIR}/{}/setup.bash" | grep -v "^#!" >> "${CCWS_SOURCE_SCRIPT}"
-	test ! -f "${EXEC_PROFILES_DIR}/vendor/setup.bash" || cat "${EXEC_PROFILES_DIR}/vendor/setup.bash" | grep -v "^#!" >> "${CCWS_SOURCE_SCRIPT}"
 
 private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"
