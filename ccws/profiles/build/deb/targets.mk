@@ -16,6 +16,18 @@ private_deb_compile:
 		| sed -e "s/^ *//"  -e "s/ *$$//"  -e "s/ \+/ /g"  -e "s/ /\\n/g" \
 		| xargs --no-run-if-empty -I {} cat "${EXEC_PROFILES_DIR}/{}/setup.bash" | grep -v "^#!" >> "${CCWS_SOURCE_SCRIPT}"
 
+private_deb_cleanup:
+	# fix setup scripts
+	find "${CCWS_INSTALL_DIR_BUILD}/share" -name 'package.sh' | xargs --no-run-if-empty -I {} sed -i "s=${CCWS_INSTALL_DIR_BUILD_ROOT}==g" {}
+	sed -i "s=${CCWS_INSTALL_DIR_BUILD_ROOT}==g" "${CCWS_INSTALL_DIR_BUILD}"/setup.*
+	sed -i "s=${CCWS_INSTALL_DIR_BUILD_ROOT}==g" "${CCWS_INSTALL_DIR_BUILD}"/local_setup.*
+	# fix ament_index paths
+	-sed -i "s=${CCWS_INSTALL_DIR_BUILD_ROOT}==g" "${CCWS_INSTALL_DIR_BUILD}/share/ament_index/resource_index/parent_prefix_path"/*
+	# remove python cache files
+	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' -or -iname '__pycache__' | xargs --no-run-if-empty rm -Rf
+	# tweak permissions
+	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
+
 private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"
 	${MAKE} wsstatus > "${CCWS_DEB_INFO_DIR}/workspace_status.txt"
@@ -30,9 +42,6 @@ private_deb_pack: assert_PKG_arg_must_be_specified private_dep_resolve private_d
 	mkdir -p "${CCWS_DEBIAN_DIR}"
 	find "${CCWS_PRIMARY_BUILD_PROFILE_DIR}/bin/" -iname "*.sh" | xargs -I {} bash {}
 	rm -Rf "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
-	# cleanup
-	find "${CCWS_INSTALL_DIR_BUILD_ROOT}/" -iname '*.pyc' -or -iname '__pycache__' | xargs --no-run-if-empty rm -Rf
-	chmod -R g-w "${CCWS_INSTALL_DIR_BUILD_ROOT}/"
 	# generate package
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	rm -f "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
@@ -65,6 +74,7 @@ private_deb_lint: assert_PKG_arg_must_be_specified
 
 bp_deb_build: assert_BUILD_PROFILES_must_exist
 	${MAKE} private_deb_compile
+	${MAKE} private_deb_cleanup
 	${MAKE} private_deb_pack
 
 bp_deb_install_build: bp_common_install_build

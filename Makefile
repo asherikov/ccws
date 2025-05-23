@@ -42,7 +42,7 @@ export VENDOR?=ccws
 export LICENSE?=Apache 2.0
 export REPO_LIST_FORMAT?=repos
 
-export WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install/${CCWS_BUILD_PROFILES}
+export WORKSPACE_INSTALL?=${WORKSPACE_DIR}/install/${CCWS_BUILD_PROFILES_ID}
 export ARTIFACTS_DIR=${WORKSPACE_DIR}/artifacts
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
@@ -126,11 +126,11 @@ wsinit:
 
 # Status packages in the workspace
 wsstatus:
-	test ! -d .git || git status
+	test ! -d .git || git describe --dirty --broken --all --long --always
 	${MAKE} wsstatuspkg
 
 wsstatuspkg:
-	${CMD_WSHANDLER} status
+	@${CMD_WSHANDLER} status
 
 # Add new packages to the workspace
 wsscrape:
