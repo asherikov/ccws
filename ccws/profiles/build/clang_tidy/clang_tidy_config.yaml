@@ -66,6 +66,9 @@
 #
 # no library specific stuff
 # -abseil-*
+#
+# sometimes useful
+# -bugprone-easily-swappable-parameters
 Checks: '*,
 -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
@@ -95,7 +98,8 @@ Checks: '*,
 -modernize-avoid-bind,
 -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
 -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming,
--abseil-*'
+-abseil-*,
+-bugprone-easily-swappable-parameters'
 
 WarningsAsErrors: '*'
 #HeaderFilterRegex: '.*'
