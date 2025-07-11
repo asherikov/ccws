@@ -1,7 +1,7 @@
 assert_BUILD_PROFILE_must_be_cross_raspberry_pi:
 	test "${CCWS_PRIMARY_BUILD_PROFILE}" = "cross_raspberry_pi"
 
-bp_cross_raspberry_pi_install_build: cross_common_install_build cross_purge bp_common_install_build
+bp_cross_raspberry_pi_install_build: cross_common_install_build cross_purge install_ccws_build_deps
 	${APT_INSTALL} unzip
 	${MAKE} -j${JOBS} bp_cross_raspberry_pi_install_build_compiler
 

@@ -1,4 +1,4 @@
-bp_static_checks_install_build: bp_common_install_build
+bp_static_checks_install_build: install_ccws_deps
 	#${PIP3_INSTALL} cpplint
 	sudo ${APT_INSTALL} \
 		cppcheck \

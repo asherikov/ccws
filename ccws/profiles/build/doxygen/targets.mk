@@ -1,4 +1,4 @@
-bp_doxygen_install_build: bp_common_install_build
+bp_doxygen_install_build: install_ccws_deps
 	sudo ${APT_INSTALL} doxygen graphviz
 
 doxclean:

@@ -28,5 +28,5 @@ bp_cppcheck_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFI
 	test ! -s '${CCWS_BUILD_SPACE_DIR}/cppcheck.err' || exit 1
 
 
-bp_cppcheck_install_build: bp_common_install_build
+bp_cppcheck_install_build: install_ccws_deps
 	sudo ${APT_INSTALL} cppcheck

@@ -77,6 +77,6 @@ bp_deb_build: assert_BUILD_PROFILES_must_exist
 	${MAKE} private_deb_cleanup
 	${MAKE} private_deb_pack
 
-bp_deb_install_build: bp_common_install_build
+bp_deb_install_build: install_ccws_deps
 	sudo ${APT_INSTALL} dpkg lintian
 

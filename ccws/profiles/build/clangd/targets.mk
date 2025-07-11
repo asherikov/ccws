@@ -12,7 +12,7 @@ bp_clangd_build: assert_BUILD_PROFILES_must_exist
 	# 	https://github.com/clangd/clangd/issues/541
 
 
-bp_clangd_install_build: bp_common_install_build
+bp_clangd_install_build: install_ccws_deps
 	# neovim:
 	#
 	# sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
