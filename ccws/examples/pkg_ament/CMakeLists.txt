@@ -1,25 +1,20 @@
 cmake_minimum_required(VERSION 3.16)
 project(@@PACKAGE@@)
 
-#if(CCWS_CLANG_TIDY)
-#    set(CMAKE_CXX_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
-#endif()
-#if(CCWS_CXX_FLAGS)
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_CXX_FLAGS}")
-#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CCWS_LINKER_FLAGS}")
-#else()
-#    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-#    set(CMAKE_VERBOSE_MAKEFILE ON)
-#
-#    if(NOT CMAKE_CXX_STANDARD)
-#        set(CMAKE_CXX_STANDARD 17)
-#        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#    endif()
-#
-#    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
-#    endif()
-#endif()
+include(ccws_set_cmake_flags OPTIONAL RESULT_VARIABLE CCWS_ON)
+if(NOT CCWS_ON)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    set(CMAKE_VERBOSE_MAKEFILE ON)
+
+    if(NOT CMAKE_CXX_STANDARD)
+        set(CMAKE_CXX_STANDARD 17)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    endif()
+
+    if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    endif()
+endif()
 
 
 # find dependencies

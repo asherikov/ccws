@@ -107,18 +107,11 @@ catkin_package(
 ## Build ##
 ###########
 
-## --------------
-## CCWS flags
-## --------------
-#if (CCWS_CLANG_TIDY)
-#    set (CMAKE_CXX_CLANG_TIDY "${CCWS_CLANG_TIDY}")
-#endif()
-#if (CCWS_CXX_FLAGS)
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_CXX_FLAGS}")
-#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CCWS_LINKER_FLAGS}")
-#endif()
-#add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})
-## --------------
+# --------------
+# CCWS flags
+# --------------
+include(ccws_set_cmake_flags OPTIONAL)
+# --------------
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
