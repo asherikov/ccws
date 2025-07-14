@@ -1,3 +1,5 @@
+CCWS_DEB_DEP_TYPE?=run
+
 deb_%:
 	${MAKE} wswraptarget TARGET="private_$@"
 
@@ -75,7 +77,7 @@ private_deb_lint: assert_PKG_arg_must_be_specified
 bp_deb_build: assert_BUILD_PROFILES_must_exist
 	${MAKE} private_deb_compile
 	${MAKE} private_deb_cleanup
-	${MAKE} private_deb_pack
+	${MAKE} private_deb_pack CCWS_DEP_TYPE=${CCWS_DEB_DEP_TYPE}
 
 bp_deb_install_build: install_ccws_deps
 	sudo ${APT_INSTALL} dpkg lintian
