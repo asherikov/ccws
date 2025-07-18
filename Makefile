@@ -27,8 +27,8 @@ BASE_BUILD_PROFILE?=
 export CCWS_BUILD_PROFILES=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE}" | sed -e 's/,,//g' -e 's/,$$//g')
 export CCWS_BUILD_PROFILES_ID=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
 export CCWS_PRIMARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
-export CCWS_SECONDARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 2 -d ',')
-export CCWS_BUILD_PROFILES_TAIL=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 2- -d ',')
+export CCWS_SECONDARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut --only-delimited -f 2 -d ',')
+export CCWS_BUILD_PROFILES_TAIL=$(shell echo ${CCWS_BUILD_PROFILES} | cut --only-delimited -f 2- -d ',')
 export CCWS_BUILD_SPACE_DIR=${WORKSPACE_DIR}/build/${CCWS_BUILD_PROFILES_ID}
 
 

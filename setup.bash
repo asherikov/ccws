@@ -1,7 +1,8 @@
 #!/bin/bash
 
-CCWS_ROOT=$(dirname "${BASH_SOURCE[0]}" | xargs realpath)
-PROFILES_DIR="${CCWS_ROOT}/ccws/profiles/"
+CCWS_DIR="$(dirname "${BASH_SOURCE[0]}" | xargs realpath)/ccws"
+PROFILES_DIR="${CCWS_DIR}/profiles/"
+export CCWS_DIR
 
 if [ -z "${CCWS_BUILD_PROFILES}" ];
 then
@@ -19,7 +20,7 @@ SETUP_SCRIPT="${PROFILES_DIR}/build/$(echo "${CCWS_BUILD_PROFILES}" | cut -f 1 -
 if [ -f "${SETUP_SCRIPT}" ]
 then
     # shellcheck disable=SC2046
-    source "${SETUP_SCRIPT}" $(echo "${CCWS_BUILD_PROFILES}" | cut -f 2- -d ',' | sed 's/,/ /g');
+    source "${SETUP_SCRIPT}" $(echo "${CCWS_BUILD_PROFILES}" | cut --only-delimited -f 2- -d ',' | sed 's/,/ /g');
     if [ -t 0 ];
     then
         # ignore errors to prevent session termination if interactive
