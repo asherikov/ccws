@@ -110,7 +110,7 @@ catkin_package(
 # --------------
 # CCWS flags
 # --------------
-include(ccws_set_cmake_flags OPTIONAL)
+include(ccws_set_cmake_flags OPTIONAL RESULT_VARIABLE CCWS_ON)
 # --------------
 
 ## Specify additional locations of header files

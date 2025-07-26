@@ -10,6 +10,7 @@ endif()
 # duplicates CMAKE_CXX_FLAGS, which should be gradually deprecated
 set(CMAKE_CXX_STANDARD "$ENV{CCWS_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_definitions(-DCCWS_DEBUG=${CCWS_DEBUG})
 

@@ -972,13 +972,12 @@ execute_init()
 execute_selective_command()
 {
     COMMAND_NAME="$1"
+    WSH_NAME_PATTERNS=("${@:2}")
 
-    if [ "${COMMAND_NAME}" == "update" ]
+    if [ "${COMMAND_NAME}" == "update" ] && [ ${#WSH_NAME_PATTERNS[@]} -eq 0 ]
     then
         update_root
     fi
-
-    WSH_NAME_PATTERNS=("${@:2}")
 
     for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
     do
