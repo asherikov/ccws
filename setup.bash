@@ -19,15 +19,6 @@ SETUP_SCRIPT="${PROFILES_DIR}/build/$(echo "${CCWS_BUILD_PROFILES}" | cut -f 1 -
 
 if [ -f "${SETUP_SCRIPT}" ]
 then
-    # shellcheck disable=SC2046
-    source "${SETUP_SCRIPT}" $(echo "${CCWS_BUILD_PROFILES}" | cut --only-delimited -f 2- -d ',' | sed 's/,/ /g');
-    if [ -t 0 ];
-    then
-        # ignore errors to prevent session termination if interactive
-        set +e
-    fi
-
-
     if [ $# -eq 0 ]
     then
         # load 'test' exec profile if not overriden explicitly
@@ -46,6 +37,15 @@ then
             EXEC_PROFILE="$1 ${EXEC_PROFILE}"
             shift
         done
+    fi
+
+
+    # shellcheck disable=SC2046
+    source "${SETUP_SCRIPT}" $(echo "${CCWS_BUILD_PROFILES}" | cut --only-delimited -f 2- -d ',' | sed 's/,/ /g');
+    if [ -t 0 ];
+    then
+        # ignore errors to prevent session termination if interactive
+        set +e
     fi
 
 
