@@ -6,6 +6,15 @@ do
     CCWS_PROOT_ARGS+=" --bind=${CCWS_INSTALL_DIR_BUILD_ROOT}/${DIR}:${DIR}"
 done
 
+if [ "${CCWS_CROSS_HOST_PYTHON}" = "YES" ] && [ -d "/opt/ros/${ROS_DISTRO}" ]
+then
+    # python bindings (only if the same ROS distro is installed on the build system)
+    # Note that architecture-specific libraries may be installed to python paths --
+    # in such cases this breaks compilation. The performance gain, however is quite
+    # substantial.
+    CCWS_PROOT_ARGS+=" $(find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ')"
+fi
+
 #echo ">>>>> CCWS cmake wrapper >>>>>>"
 #pwd
 #echo "Command line: $@"
@@ -35,11 +44,6 @@ proot --rootfs="${CCWS_SYSROOT}" \
     --bind=/usr/bin/perl \
     --bind=/usr/bin/make \
     --bind=/usr/bin/ccache \
-    ${IFS# python bindings (only if the same ROS distro is installed on the build system)} \
-    ${IFS# Note that architecture-specific libraries may be installed to python paths -- } \
-    ${IFS# in such cases this breaks compilation. The performance gain, however is quite} \
-    ${IFS# substantial, so the binding is enabled by default} \
-    $(test ! -d /opt/ros/${ROS_DISTRO} || find /usr/bin/ /usr/lib/ -maxdepth 1 -name "python*" | sed "s/^/--bind=/" | paste -s -d ' ') \
     ${IFS# cmake bindings} \
     --bind=/usr/bin/cmake \
     $(find /usr/share/ -maxdepth 1 -name "cmake*" | sed "s/^/--bind=/" | paste -s -d ' ') \

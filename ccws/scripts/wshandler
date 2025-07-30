@@ -909,7 +909,7 @@ dir_run()
 
 execute_foreach()
 {
-    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
+    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -L 1 -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
 }
 
 execute_branch()
@@ -1062,7 +1062,7 @@ WSH_SOURCE_TYPES="git"
 WSH_COMMAND_POLICY=default
 WSH_JOBS=1
 WSH_INDENT=4
-WSH_XARGS=(xargs --no-run-if-empty -L 1 -P "${WSH_JOBS}")
+WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
 WSH_KEEP_GOING=""
 WSH_YAML_BINARY=
 WSH_REPOLIST=

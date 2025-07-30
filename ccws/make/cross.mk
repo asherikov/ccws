@@ -1,3 +1,5 @@
+export CCWS_CROSS_HOST_PYTHON?=NO
+
 # converts absolute symlinks to relative in a mounted sysroot
 # this is not needed with proot, but is necessary for some other approaches to
 # cross compilation
