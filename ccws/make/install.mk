@@ -27,11 +27,11 @@ install_python3:
 install_ccws_deps_ros1:
 	sh -c 'test -f /etc/apt/sources.list.d/ros-latest.list \
 		|| test -f /etc/apt/sources.list.d/ros1-latest.list \
-		|| (echo "deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main" | sudo tee /etc/apt/sources.list.d/ros-latest.list && apt update)'
+		|| (echo "deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main" | sudo tee /etc/apt/sources.list.d/ros-latest.list && sudo apt update)'
 
 install_ccws_deps_ros2:
 	sh -c 'test -f /etc/apt/sources.list.d/ros2-latest.list \
-		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" | sudo tee /etc/apt/sources.list.d/ros2-latest.list && apt update)'
+		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" | sudo tee /etc/apt/sources.list.d/ros2-latest.list && sudo apt update)'
 
 install_wshandler_bionic:
 	"${CCWS_DIR}/scripts/wshandler" -y yq --policy download install "${CCWS_DIR}/scripts/"
