@@ -327,7 +327,7 @@ dir_git_prune()
     REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
     dir_git_assert "${REPO_DIR}"
     pushd "${REPO_DIR}" > /dev/null
-    git remote | xargs --no-run-if-empty -L 1 -I {} git remote prune {}
+    git remote | xargs --no-run-if-empty -I {} git remote prune {}
     popd > /dev/null
 }
 
