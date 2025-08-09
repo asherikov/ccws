@@ -23,7 +23,7 @@ private_cmake_cfg_clean:
 	rm -f ${CCWS_BUILD_SPACE_DIR}/*/CMakeCache.txt
 
 bp_purge:
-	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | xargs -I {} ${MAKE} bp_{}_purge
+	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | ${CCWS_XARGS} ${MAKE} bp_{}_purge
 
 bp_%_purge: assert_BUILD_PROFILES_must_exist
 	# placeholder target
@@ -31,7 +31,7 @@ bp_%_purge: assert_BUILD_PROFILES_must_exist
 bp_clean:
 	rm -rf "${CCWS_BUILD_SPACE_DIR}"
 	rm -rf "${WORKSPACE_DIR}/install/${CCWS_BUILD_PROFILES_ID}"
-	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | xargs -I {} ${MAKE} bp_{}_clean
+	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | ${CCWS_XARGS} ${MAKE} bp_{}_clean
 
 bp_%_clean: assert_BUILD_PROFILES_must_exist
 	# placeholder target

@@ -1,5 +1,5 @@
 assert_BUILD_PROFILES_must_exist:
-	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | xargs -I {} test -f "${BUILD_PROFILES_DIR}/{}/setup.bash"
+	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | ${CCWS_XARGS} test -f "${BUILD_PROFILES_DIR}/{}/setup.bash"
 
 assert_SECONDARY_BUILD_PROFILE_must_exist:
 	test -f "${BUILD_PROFILES_DIR}/${CCWS_SECONDARY_BUILD_PROFILE}/setup.bash"

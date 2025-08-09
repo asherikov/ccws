@@ -11,9 +11,9 @@ cross_sysroot_fix_abs_symlinks:
 # internal target, should be called with initialized environment
 private_cross_mount_loopback:
 	mkdir -p "${CCWS_SYSROOT}"
-	#losetup -j "${CCWS_SYSROOT_DATA}/system.img" | cut -f 1 -d ':' | xargs --no-run-if-empty -I {} sudo losetup -d {}
+	#losetup -j "${CCWS_SYSROOT_DATA}/system.img" | cut -f 1 -d ':' | ${CCWS_XARGS} sudo losetup -d {}
 	sudo losetup -PL --find --show "${CCWS_SYSROOT_DATA}/system.img" \
-		| xargs -I {} sudo /bin/sh -c 'make private_cross_loopback_initialize LOOPBACK_DEVICE={} && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
+		| ${CCWS_XARGS} sudo /bin/sh -c 'make private_cross_loopback_initialize LOOPBACK_DEVICE={} && mount ${SYSROOT_MOUNT_OPTIONS} "{}${SYSROOT_PARTITION}" "${CCWS_SYSROOT}"'
 
 # internal target, should be called with initialized environment
 private_cross_mount_specialfs:
@@ -65,12 +65,12 @@ cross_umount:
 	bash -c "${SETUP_SCRIPT}; \
 		test -n \"\$${CCWS_SYSROOT}\" \
 		&& ((mountpoint -q \"\$${CCWS_SYSROOT}\" && sudo umount --recursive \"\$${CCWS_SYSROOT}\") \
-		|| (mount | cut -f 3 -d ' ' | (grep \"\$${CCWS_SYSROOT}\" || true) | xargs --no-run-if-empty -I {} sudo umount {}))"
+		|| (mount | cut -f 3 -d ' ' | (grep \"\$${CCWS_SYSROOT}\" || true) | ${CCWS_XARGS} sudo umount {}))"
 
 # to be used in docker
 cross_umount_all:
 	sudo umount -a || true
-	losetup | grep `pwd` | cut -f 1 -d " " | xargs --no-run-if-empty -I {} sudo losetup -d {}
+	losetup | grep `pwd` | cut -f 1 -d " " | ${CCWS_XARGS} sudo losetup -d {}
 
 cross_common_install_build:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support

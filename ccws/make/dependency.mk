@@ -15,7 +15,7 @@ private_dep_resolve: private_dep_list
 	${MAKE} private_dep_resolve_pip
 
 private_dep_resolve_list:
-	cat '${DEPLIST_FILE}' | env ROS_HOME='${CCWS_ROSDEP_CACHE}' xargs -I {} sh -c "rosdep resolve {} 2> /dev/null | tr '\n' ' ' && echo '\n'" > '${DEPLIST_FILE}.list'
+	cat '${DEPLIST_FILE}' | env ROS_HOME='${CCWS_ROSDEP_CACHE}' ${CCWS_XARGS} sh -c "rosdep resolve {} 2> /dev/null | tr '\n' ' ' && echo '\n'" > '${DEPLIST_FILE}.list'
 
 private_dep_resolve_deb:
 	cat '${DEPLIST_FILE}.list' \

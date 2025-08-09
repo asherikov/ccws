@@ -73,6 +73,7 @@ CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-o
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${WORKSPACE_SRC}
 CMD_PKG_GRAPH=colcon graph --base-paths ${WORKSPACE_SRC} --dot --dot-cluster
 CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler -r ${WORKSPACE_SRC} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
+CCWS_XARGS=xargs --no-run-if-empty -I {}
 
 
 ##
@@ -120,7 +121,7 @@ wsinit:
 	! ${CMD_WSHANDLER} is_source_space
 	mkdir -p "${WORKSPACE_SRC}"
 	touch "${WORKSPACE_SRC}/.${REPO_LIST_FORMAT}"
-	cd ${WORKSPACE_SRC}; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | xargs -P ${JOBS} --no-run-if-empty -I {} git clone {}"
+	cd ${WORKSPACE_SRC}; bash -c "echo '${REPOS}' | sed -e 's/ \+/ /g' -e 's/ /\n/g' | ${CCWS_XARGS} -P ${JOBS} git clone {}"
 	-${MAKE} wsscrape_all
 	${MAKE} wsupdate
 

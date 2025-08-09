@@ -12,7 +12,7 @@ install_vcpkg:
 
 vcpkg_generate_overlays: assert_PKG_arg_must_be_specified
 	${CCWS_VCPKG_ROOT}/vcpkg depend-info "${PKG}" | cut -f 2 -d ':' | sed -e 's/,/\n/g' -e 's/ //g' -e '/^$$/d' | sort | uniq | grep -v 'vcpkg' \
-		| xargs -I {} ${MAKE} vcpkg_generate_overlay PKG={}
+		| ${CCWS_XARGS} ${MAKE} vcpkg_generate_overlay PKG={}
 
 vcpkg_generate_overlay: assert_PKG_arg_must_be_specified
 	# https://devblogs.microsoft.com/cppblog/using-system-package-manager-dependencies-with-vcpkg/
