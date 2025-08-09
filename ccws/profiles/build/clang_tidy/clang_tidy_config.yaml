@@ -44,6 +44,8 @@
 
 # recursion is ok https://clang.llvm.org/extra/clang-tidy/checks/misc/no-recursion.html
 # -misc-no-recursion
+# noisy and not very useful
+# -misc-include-cleaner
 #
 # does not allow '#pragma once'
 # -llvm-header-guard
@@ -91,7 +93,7 @@ Checks: '*,
 -cppcoreguidelines-owning-memory,
 -cert-err58-cpp,
 -readability-function-cognitive-complexity,
--misc-no-recursion,
+-misc-no-recursion,-misc-include-cleaner,
 -llvm-header-guard,
 -readability-avoid-const-params-in-decls,
 -altera-unroll-loops,

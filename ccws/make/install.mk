@@ -19,7 +19,7 @@ install_ros_key:
 	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
 
 install_ccws_build_deps: install_ccws_deps
-	${APT_INSTALL} build-essential ccache proot gdb
+	sudo ${APT_INSTALL} build-essential ccache proot gdb
 
 install_python3:
 	sudo ${APT_INSTALL} python3 python3-pip
