@@ -9,7 +9,7 @@ WSH_VERSION=
 
 wsh_echo()
 {
-    echo "WSH:" "$@"
+    test "${WSH_QUIET}" = "YES" || echo "WSH:" "$@"
 }
 
 help()
@@ -40,6 +40,7 @@ help()
     wsh_echo "                                                      # can be specified multiple times"
     wsh_echo "  -T|--tag <TAG>                 {}                   # filter repositories by tags"
     wsh_echo "                                                      # can be specified multiple times"
+    wsh_echo "  -q|--quiet                                          # suppress most of the output"
     wsh_echo ""
     wsh_echo "Repository list commands:"
     wsh_echo "  Information:"
@@ -175,11 +176,11 @@ git_scrape()
 
         GIT_VERSION=$(git branch --show-current | tr -d '\n')
         GIT_VERSION=${GIT_VERSION:-"$(git describe --tags | tr -d '\n')"}
-        GIT_VERSION=${GIT_VERSION:-"$(git rev-parse HEAD | tr -d '\n')"}
+        GIT_VERSION=${GIT_VERSION:-"$(git rev-parse --verify HEAD | tr -d '\n')"}
 
         popd > /dev/null
 
-        wsh_echo "Found unmanaged git repository:  ${GIT_DIR}  ${GIT_REPO}  ${GIT_VERSION}"
+        echo "Found unmanaged git repository:  ${GIT_DIR}  ${GIT_REPO}  ${GIT_VERSION}"
 
         case "${WSH_COMMAND_POLICY}" in
             ask|default)
@@ -192,7 +193,7 @@ git_scrape()
                         [Nn])   ACTION=show;;
                         [Cc])   ACTION=clean;;
                         *)
-                            wsh_echo "Please enter one of y/n/c.";;
+                            echo "Please enter one of y/n/c.";;
                     esac
                 done;;
             show|add|clean)
@@ -205,6 +206,8 @@ git_scrape()
             add)    execute_add git "${GIT_DIR}" "${GIT_REPO}" "${GIT_VERSION}";;
             clean)  rm -rf "${REPO_DIR}";;
         esac
+
+        ACTION=""
     done
 }
 
@@ -260,12 +263,12 @@ dir_git_uncommitted()
 
 dir_git_get_hash()
 {
-    git rev-parse HEAD
+    git rev-parse --verify HEAD
 }
 
 dir_git_get_branch()
 {
-    git rev-parse --abbrev-ref HEAD
+    git rev-parse --verify --abbrev-ref HEAD
 }
 
 dir_git_status()
@@ -280,7 +283,7 @@ dir_git_status()
     if [ -d "${GIT_DIR}/.git" ]
     then
         cd "${GIT_DIR}"
-        GIT_VERSION_HASH=$(git rev-parse "${GIT_VERSION}" 2> /dev/null || echo -n "-")
+        GIT_VERSION_HASH=$(git rev-parse --verify "${GIT_VERSION}^{commit}" 2> /dev/null || echo -n "-")
         GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
         GIT_ACTUAL_HASH=$(dir_git_get_hash || echo -n "-")
     fi
@@ -442,8 +445,11 @@ status()
     SOURCE_TYPE=$1
 
     DATA=$(
-        echo "name|version|actual version|HM|repository";
-        echo "----|-------|--------------|--|----------";
+        if [ "${WSH_QUIET}" = "NO" ]
+        then
+            echo "name|version|actual version|HM|repository";
+            echo "----|-------|--------------|--|----------";
+        fi
         "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" | while read -r -a tuple; do "dir_${SOURCE_TYPE}_status" "${tuple[@]}"; done | "${WSH_SORT_COMMAND}"
     )
 
@@ -458,7 +464,11 @@ status()
         FORMAT_STRING+="%-${MAX_LEN}.${MAX_LEN}s"
     done
 
-    echo "Flags: H - version hash mismatch, M - uncommited changes"
+    if [ "${WSH_QUIET}" = "NO" ]
+    then
+        echo "Flags: H - version hash mismatch, M - uncommited changes"
+    fi
+
     IFS=$'\n' readarray -t ROWS <<< "${DATA}"
     for ROW in "${ROWS[@]}"
     do
@@ -468,10 +478,13 @@ status()
         printf "${FORMAT_STRING} %s\n" "${COLS[@]}"
     done
 
-    echo
+    if [ "${WSH_QUIET}" = "NO" ]
+    then
+        echo
 
-    WSH_COMMAND_POLICY=show
-    scrape "${SOURCE_TYPE}" "${WSH_WORKSPACE_ROOT}"
+        WSH_COMMAND_POLICY=show
+        scrape "${SOURCE_TYPE}" "${WSH_WORKSPACE_ROOT}"
+    fi
 }
 
 scrape()
@@ -481,6 +494,8 @@ scrape()
 
 check_workspace()
 {
+    WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
+
     if [ "${WSH_YAML_TOOL}" = "auto" ]
     then
         YAML_TOOL_LIST=(gojq yq)
@@ -919,11 +934,11 @@ execute_branch()
 
     case ${ACTION} in
         new)
-            execute_foreach git "((git status --porcelain | grep . > /dev/null) && git checkout -b ${BRANCH}) || true";;
+            execute_foreach git "((git status --porcelain | grep . > /dev/null) && git checkout -b '${BRANCH}') || true";;
         allnew)
-            execute_foreach git "git checkout -b ${BRANCH}";;
+            execute_foreach git "git checkout -b '${BRANCH}'";;
         delete)
-            execute_foreach git "(git ls-remote --exit-code --heads origin ${BRANCH} > /dev/null && git push origin --delete ${BRANCH}) || true";;
+            execute_foreach git "(git ls-remote --exit-code --heads origin '${BRANCH}' > /dev/null && git push origin --delete '${BRANCH}') || true";;
         show)
             execute_foreach git "git branch -a | grep '${BRANCH}'";;
         merge)
@@ -1062,7 +1077,7 @@ WSH_SOURCE_TYPES="git"
 WSH_COMMAND_POLICY=default
 WSH_JOBS=1
 WSH_INDENT=4
-WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
+WSH_XARGS=()
 WSH_KEEP_GOING=""
 WSH_YAML_BINARY=
 WSH_REPOLIST=
@@ -1070,6 +1085,7 @@ WSH_REPOLISTS=()
 WSH_SORT_COMMAND="sort"
 WSH_BACKUP_FILE=
 WSH_TAGS=()
+WSH_QUIET=NO
 
 while [[ $# -gt 0 ]]
 do
@@ -1087,16 +1103,17 @@ do
         -y|--yaml_tool)     WSH_YAML_TOOL="$2";     shift; shift;;
         -Y|--yaml_binary)   WSH_YAML_BINARY=$2;     shift; shift;;
         -r|--root)          WSH_WORKSPACE_ROOT=$2;  shift; shift;;
-        -c|--cache)         WSH_CACHE_DIR=$2 shift; shift;;
+        -c|--cache)         WSH_CACHE_DIR=$2;       shift; shift;;
         -t|--type)          WSH_WORKSPACE_TYPE=$2;  shift; shift;;
-        -j|--jobs)          WSH_JOBS=$2 shift;      shift;;
-        -i|--indent)        WSH_INDENT=$2 shift;    shift;;
+        -j|--jobs)          WSH_JOBS=$2;            shift; shift;;
+        -i|--indent)        WSH_INDENT=$2;          shift; shift;;
         -p|--policy)        WSH_COMMAND_POLICY=$2;  shift; shift;;
 
         -k|--keep-going)    WSH_KEEP_GOING="-k";    shift;;
         -l|--list)          WSH_REPOLISTS+=("$2");  shift; shift;;
         -T|--tag)           WSH_TAGS+=("$2");       shift; shift;;
         -u|--unsorted)      WSH_SORT_COMMAND="cat"; shift;;
+        -q|--quiet)         WSH_QUIET="YES";        shift;;
 
         clone|init)
             "execute_$1" "${@:2}"
