@@ -1,6 +1,7 @@
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 # disable optimization to increase compilation speed
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O0" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O0" CACHE STRING "" FORCE)
 
 find_program(CCWS_CLANG_TIDY_EXECUTABLE NAMES clang-tidy-$ENV{CCWS_LLVM_VERSION} REQUIRED)
 

@@ -1,6 +1,7 @@
 set(CMAKE_BUILD_TYPE            RelWithDebInfo CACHE STRING "" FORCE)
 # disable optimization to increase compilation speed
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O0" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O0" CACHE STRING "" FORCE)
 
 set(CMAKE_CXX_COMPILER /usr/share/clang/scan-build-$ENV{CCWS_LLVM_VERSION}/libexec/c++-analyzer  CACHE STRING "" FORCE)
 set(CMAKE_C_COMPILER /usr/share/clang/scan-build-$ENV{CCWS_LLVM_VERSION}/libexec/ccc-analyzer  CACHE STRING "" FORCE)
