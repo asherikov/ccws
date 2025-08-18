@@ -12,5 +12,7 @@ set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY_EXECUTABLE};--config-file=$ENV{BUILD_PROF
 
 set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
 
+string(REPLACE  "-fstack-protector-strong"  ""  CCWS_CXX_FLAGS  "${CCWS_CXX_FLAGS}")
+
 # should be enabled selectively, otherwise is going to fail on 3rd party software
 #set(CMAKE_CXX_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
