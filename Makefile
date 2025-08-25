@@ -112,8 +112,8 @@ wswraptarget:
 	bash -c "time (${SETUP_SCRIPT}; ${MAKE} --no-print-directory ${TARGET})"
 
 wslist:
-	@test -z "${PKG}" || ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG}
-	@test -n "${PKG}" || ${CMD_PKG_NAME_LIST}
+	@test -z "${PKG}" || ${CMD_PKG_NAME_LIST} --packages-up-to ${PKG} | sort
+	@test -n "${PKG}" || ${CMD_PKG_NAME_LIST} | sort
 
 
 # Reset & initialize workspace
