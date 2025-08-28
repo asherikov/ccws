@@ -32,7 +32,7 @@ private_deb_cleanup:
 
 private_deb_info: assert_PKG_arg_must_be_specified private_deb_version_hash
 	mkdir -p "${CCWS_DEB_INFO_DIR}"
-	${MAKE} wsstatus > "${CCWS_DEB_INFO_DIR}/workspace_status.txt"
+	-${MAKE} wsstatus > "${CCWS_DEB_INFO_DIR}/workspace_status.txt"
 	echo "${PKG}" > "${CCWS_DEB_INFO_DIR}/pkg.txt"
 	echo ${CCWS_BUILD_USER} ${CCWS_BUILD_TIME} > "${CCWS_DEB_INFO_DIR}/build_info.txt"
 	cat ${WORKSPACE_DIR}/build/version_hash/${PKG_ID} \
