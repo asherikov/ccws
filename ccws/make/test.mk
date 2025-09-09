@@ -28,8 +28,8 @@ wsctest:
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	test -d '${CCWS_BUILD_SPACE_DIR}/${PKG}' \
-		&& (bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
+	test ! -d '${CCWS_BUILD_SPACE_DIR}/${PKG}' \
+		|| (bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		colcon \
 		--log-base \$${CCWS_LOG_DIR} \
 		test \
@@ -42,7 +42,8 @@ test: assert_PKG_arg_must_be_specified
 		--base-paths "${WORKSPACE_SRC}" \
 		--test-result-base \$${CCWS_LOG_DIR}/testing \
 		--packages-select ${PKG} )" \
-		&& ${MAKE} showtestresults || ${MAKE} showtestresults) || echo "CCWS: ${PKG} was not built?"
+		&& ${MAKE} showtestresults || ${MAKE} showtestresults)
+	test -d '${CCWS_BUILD_SPACE_DIR}/${PKG}' || echo "CCWS: ${PKG} was not built?"
 
 ctest: assert_PKG_arg_must_be_specified
 	echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c \
