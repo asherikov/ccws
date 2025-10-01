@@ -19,11 +19,11 @@ private_dep_resolve_list:
 
 private_dep_resolve_deb:
 	cat '${DEPLIST_FILE}.list' \
-		| grep '^#apt' | sed -e 's/^#apt//g' -e 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.deb'
+		| grep '^#apt' | sed -e 's/^#apt//g' -e 's/ /\n/g' | sed '/^$$/d' | sort | uniq > '${DEPLIST_FILE}.deb'
 
 private_dep_resolve_pip:
 	cat '${DEPLIST_FILE}.list' \
-		| grep '^#pip' | sed -e 's/^#pip//g' -e 's/ /\n/g' | grep -v '^$$' | sort | uniq > '${DEPLIST_FILE}.pip'
+		| grep '^#pip' | sed -e 's/^#pip//g' -e 's/ /\n/g' | sed '/^$$/d' | sort | uniq > '${DEPLIST_FILE}.pip'
 
 private_dep_install: private_dep_resolve
 	# we dont use "rosdep install" since we need lists of dependencies, e.g., for binary packages
@@ -41,7 +41,7 @@ private_dep_to_repolist:
 private_dep_list:
 	mkdir -p ${DEPLIST_DIR}
 	+${MAKE_QUIET} wslist | sort > ${DEPLIST_DIR}/ccws.list
-	+${MAKE_QUIET} private_info_with_deps_${CCWS_DEP_TYPE} | sort | uniq | grep -v '^$$' > ${DEPLIST_FILE}.${CCWS_DEP_TYPE}
+	+${MAKE_QUIET} private_info_with_deps_${CCWS_DEP_TYPE} | sort | uniq | sed '/^$$/d' > ${DEPLIST_FILE}.${CCWS_DEP_TYPE}
 	# remove packages that are already in the workspace
 	comm -13 ${DEPLIST_DIR}/ccws.list ${DEPLIST_FILE}.${CCWS_DEP_TYPE} > ${DEPLIST_FILE}
 
