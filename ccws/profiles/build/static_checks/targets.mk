@@ -5,16 +5,16 @@ bp_static_checks_install_build: install_ccws_deps
 		flawfinder \
 		yamllint \
 		shellcheck
-	sudo ${MAKE} bp_static_checks_install_build_${OS_DISTRO_BUILD}
+	${MAKE} bp_static_checks_install_build_${OS_DISTRO_BUILD}
 	${MAKE} bp_static_checks_install_build_python
 
 #ubuntu18
 bp_static_checks_install_build_bionic:
-	${APT_INSTALL} python-catkin-lint
+	sudo ${APT_INSTALL} python-catkin-lint
 
 #ubuntu20
 bp_static_checks_install_build_focal:
-	${APT_INSTALL} python3-catkin-lint
+	sudo ${APT_INSTALL} python3-catkin-lint
 
 #ubuntu22
 bp_static_checks_install_build_jammy: install_python3
@@ -32,15 +32,28 @@ bp_static_checks_install_build_python: install_python3
 	${PIP3_INSTALL} types-PyYAML
 
 
-bp_static_checks_build:
+bp_static_checks_build_common:
 	${MAKE} cppcheck
-	${MAKE} catkin_lint
 	${MAKE} yamllint
 	#${MAKE} cpplint
 	${MAKE} shellcheck
 	# false positives
 	-${MAKE} flawfinder
 	${MAKE} bp_static_checks_build_python
+
+#ubuntu18
+bp_static_checks_build_bionic:
+	${MAKE} catkin_lint
+
+#ubuntu20
+bp_static_checks_build_focal:
+	${MAKE} catkin_lint
+
+bp_static_checks_build_%:
+	# do nothing
+
+bp_static_checks_build: bp_static_checks_build_common
+	${MAKE} bp_static_checks_build_${OS_DISTRO_BUILD}
 
 bp_static_checks_build_python:
 	${MAKE} pylint
