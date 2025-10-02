@@ -92,3 +92,23 @@ jobs:
             - run: ./ccws/scripts/bootstrap.sh
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
 
+    docker: # https://github.com/marketplace/actions/build-and-push-docker-images
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: git config --remove-section 'http.https://github.com/'
+            - uses: docker/setup-qemu-action@v3
+            - uses: docker/setup-buildx-action@v3
+            - uses: docker/login-action@v3
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            - uses: docker/build-push-action@v6
+              with:
+                  file: ccws/examples/Dockerfile
+                  context: .
+                  push: false
+                  tags: asherikov/ccws:latest,asherikov/ccws:${{ github.ref_name }}
+                  build-args: |
+                      "BASE_IMAGE=ubuntu:noble"

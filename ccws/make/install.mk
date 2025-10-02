@@ -70,7 +70,9 @@ install_ccws_deps_noble: install_ccws_deps_jammy
 
 
 bp_install_build:
-	echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/\n/g' | ${CCWS_XARGS} ${MAKE} bp_{}_install_build
+	echo "${CCWS_BUILD_PROFILES}" \
+		| sed -e 's/,/\n/g' \
+		| ${CCWS_XARGS} sh -c "echo 'CCWS: installing {}' && ${MAKE} bp_{}_install_build || exit 255"
 
 bp_%_install_build: assert_BUILD_PROFILES_must_exist
 	sudo ${MAKE} install_ccws_build_deps

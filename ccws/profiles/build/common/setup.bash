@@ -138,7 +138,7 @@ then
 fi
 if [ -z "${ROS_DISTRO}" ]
 then
-    echo "Could not determine ROS_DISTRO" >&2
+    echo "Could not determine ROS_DISTRO for ${OS_DISTRO_HOST}" >&2
 else
     echo "Selected ROS distro: '${ROS_DISTRO}'"
     export ROS_DISTRO

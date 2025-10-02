@@ -2,21 +2,15 @@ ARG BASE_IMAGE=ubuntu:jammy
 FROM ${BASE_IMAGE}
 
 ARG APT_INSTALL="apt --yes --no-install-recommends install"
-ARG PIP3_INSTALL="python3 -m pip install"
+# `break-system-packages`: workaround for `externally-managed-environment` pip
+# error in Ubuntu >=24
+# TODO: use venv instead
+ARG PIP3_INSTALL="python3 -m pip install --break-system-packages"
 
 ENV PIP_CACHE_DIR=/cache/pip
 ENV DEBIAN_FRONTEND=noninteractive
 
-
-RUN --mount=target=/ccws_docker_context,ro \
-    cd /ccws_docker_context \
-    && mkdir -p /ccws/workspace \
-    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
-    && cd /ccws
-
-WORKDIR /ccws
-ENV WORKSPACE_DIR=/ccws/workspace
-
+# docker-clean is removed since we mount cache volumes for storing apt data
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
@@ -25,8 +19,21 @@ RUN \
     && apt update \
     && apt upgrade -y \
     && ${APT_INSTALL} neovim screen git ssh \
-    && cd /ccws \
-    && ./ccws/scripts/bootstrap.sh \
+    && git config --global --add safe.directory '*'
+
+RUN --mount=target=/ccws_docker_context,ro \
+    cd /ccws_docker_context \
+    && mkdir -p /ccws/workspace \
+    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/
+
+WORKDIR /ccws
+ENV WORKSPACE_DIR=/ccws/workspace
+
+RUN \
+--mount=type=cache,target=/var/cache/apt,sharing=locked \
+--mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
+--mount=type=cache,target=/cache/pip,sharing=locked \
+    ./ccws/scripts/bootstrap.sh \
     && make ep_install EXEC_PROFILE=valgrind \
     && make bp_install_build BUILD_PROFILE=addr_undef_sanitizers \
     && make bp_install_build BUILD_PROFILE=clangd \
