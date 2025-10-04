@@ -924,7 +924,7 @@ dir_run()
 
 execute_foreach()
 {
-    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -L 1 -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
+    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
 }
 
 execute_branch()
@@ -1012,43 +1012,48 @@ set_version()
         *) TYPE=ALL;;
     esac
 
+    UPDATED=false
     for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
     do
-        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
-            | while read -r NAME REPO VERSION; \
-            do \
-                if [ "${TYPE}" = "ALL" ]; \
-                then \
-                    cd "${WSH_WORKSPACE_ROOT:?}/${NAME}"; \
-                    case $1 in \
-                        set_version_to_hash) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_hash")";; \
-                        set_version_to_branch) \
-                            case "${WSH_COMMAND_POLICY}" in \
-                                default|active)
-                                    if [ "${TARGET_MATCH}" != "$("dir_${SOURCE_TYPE}_get_branch")" ]; \
-                                    then \
-                                        continue; \
-                                    fi;; \
-                                *) exit 1;; \
-                            esac
-                            TARGET_VERSION="${TARGET_MATCH}"; \
-                            ;; \
-                    esac \
-                elif [ "${TARGET_MATCH}" != "${!TYPE}" ]; \
-                then \
-                    continue; \
-                fi; \
-                if [ "${VERSION}" != "${TARGET_VERSION}" ]; \
-                then \
-                    wsh_echo "${NAME}: changing '${VERSION}' to '${TARGET_VERSION}'"; \
-                    execute_add "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}"; \
-                fi; \
-                if [ "${TYPE}" != "ALL" ]; \
-                then \
-                    exit; \
-                fi; \
-            done
+        while read -r NAME REPO VERSION;
+        do
+            if [ "${TYPE}" = "ALL" ];
+            then
+                cd "${WSH_WORKSPACE_ROOT:?}/${NAME}";
+                case $1 in
+                    set_version_to_hash) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_hash")";;
+                    set_version_to_branch)
+                        case "${WSH_COMMAND_POLICY}" in
+                            default|active)
+                                if [ "${TARGET_MATCH}" != "$("dir_${SOURCE_TYPE}_get_branch")" ];
+                                then
+                                    continue;
+                                fi;;
+                            *) exit 60;;
+                        esac
+                        TARGET_VERSION="${TARGET_MATCH}";
+                        ;;
+                esac
+            elif [ "${TARGET_MATCH}" != "${!TYPE}" ];
+            then
+                continue;
+            fi;
+            UPDATED=true;
+            if [ "${VERSION}" != "${TARGET_VERSION}" ];
+            then
+                wsh_echo "${NAME}: changing '${VERSION}' to '${TARGET_VERSION}'";
+                execute_add "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}";
+            fi;
+            if [ "${TYPE}" != "ALL" ];
+            then
+                exit;
+            fi;
+        done < <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}")
     done
+    if [ "${UPDATED}" = "false" ]
+    then
+        exit 61;
+    fi
 }
 
 
