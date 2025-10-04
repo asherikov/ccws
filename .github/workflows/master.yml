@@ -92,7 +92,16 @@ jobs:
             - run: ./ccws/scripts/bootstrap.sh
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
 
-    docker:
+    docker_jammy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'jammy'
+                  push: false
+
+    docker_noble:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v5

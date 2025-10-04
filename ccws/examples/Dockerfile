@@ -1,16 +1,17 @@
-ARG BASE_IMAGE=ubuntu:jammy
+ARG BASE_IMAGE=ubuntu:noble
 FROM ${BASE_IMAGE}
 
 ARG APT_INSTALL="apt --yes --no-install-recommends install"
-# `break-system-packages`: workaround for `externally-managed-environment` pip
-# error in Ubuntu >=24
-# TODO: use venv instead
-ARG PIP3_INSTALL="python3 -m pip install --break-system-packages"
+ARG PIP3_INSTALL="python3 -m pip install"
 
 ENV PIP_CACHE_DIR=/cache/pip
 ENV DEBIAN_FRONTEND=noninteractive
 
-# docker-clean is removed since we mount cache volumes for storing apt data
+# 1. docker-clean is removed since we mount cache volumes for storing apt data
+# 2. Remove EXTERNALLY-MANAGED to work around `externally-managed-environment` pip
+#    error in Ubuntu >=24
+#    TODO: use venv instead
+#    https://askubuntu.com/questions/1465218/pip-error-on-ubuntu-externally-managed-environment-%C3%97-this-environment-is-extern
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
@@ -18,7 +19,8 @@ RUN \
     rm /etc/apt/apt.conf.d/docker-clean \
     && apt update \
     && apt upgrade -y \
-    && ${APT_INSTALL} neovim screen git ssh \
+    && ${APT_INSTALL} neovim screen git ssh python3 \
+    && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
     && git config --global --add safe.directory '*'
 
 RUN --mount=target=/ccws_docker_context,ro \
