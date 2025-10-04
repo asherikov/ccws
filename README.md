@@ -285,9 +285,9 @@ testing, but it is recommended to build a tailored image using
 
 The image can be used in the following way:
 
-- `docker pull asherikov/ccws`
+- `docker pull asherikov/ccws_noble` (or `asherikov/ccws_jammy`)
 - `mkdir tmp_ws` # sources, build, install, cache will go here
-- `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws bash`
+- `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws_noble bash`
 - `make wsinit REPOS="https://github.com/asherikov/qpmad.git"`
 - `...`
 
