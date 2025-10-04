@@ -28,6 +28,6 @@ runs:
             file: ccws/examples/Dockerfile
             context: .
             push: ${{ inputs.push }}
-            tags: asherikov/ccws:latest,asherikov/ccws_${{ inputs.distro }}:${{ github.ref_name }}
+            tags: asherikov/ccws_${{ inputs.distro }}:latest,asherikov/ccws_${{ inputs.distro }}:${{ github.ref_name }}
             build-args: "BASE_IMAGE=ubuntu:${{ inputs.distro }}"
 
