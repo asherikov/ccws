@@ -1,0 +1,77 @@
+// This is an example of a Jenkins pipeline, missing parts have to be added for it to work.
+
+pipeline {
+    agent {
+        // Your Jenkins agent, for example a docker container build using example Dockerfile
+    }
+
+    options {
+        timeout(time: 180, unit: 'MINUTES')
+    }
+
+    environment {
+        // Can generally be detected automatically if ROS is installed in the container
+        ROS_DISTRO = 'humble'
+        // If you are building C++ project make sure that available memory is at least JOBS*2 Gb.
+        JOBS = 4
+        // Is used for building debian packages.
+        EMAIL = 'continuous@sevendof.com'
+        AUTHOR = 'continuous'
+
+        // https://github.com/PX4/PX4-Autopilot/pull/13978
+        LANG = 'C.UTF-8'
+        LC_ALL = 'C.UTF-8'
+
+        // Use external volume and reuse it for different jobs
+        CCWS_CACHE = '/cache/'
+        CCACHE_MAXSIZE = '24G'
+    }
+
+    stages {
+        stage('checkout') {
+            steps {
+                // 1. Get ccws, it can also be included in the container
+                // 2. Get workspace
+                // 3. cd to ccws root and update packages
+                sh 'make wsupdate_shallow WORKSPACE_SRC=...'
+            }
+        }
+
+        stage('static-check') {
+            steps {
+                sh 'make BUILD_PROFILE=static_checks'
+            }
+        }
+
+
+        stage('clang-tidy') {
+            steps {
+                sh 'make wsclean'
+                // You can also build specific packages
+                sh 'make build_all BUILD_PROFILE=scan_build'
+                // Show cache statistics
+                sh 'make ccache_stats'
+            }
+        }
+
+
+        stage('reldebug-build') {
+            steps {
+                sh 'make wsclean'
+                // reldebug is the default profile
+                sh 'make build_all'
+                // run tests
+                sh 'make wstest'
+            }
+        }
+    }
+
+    post {
+        always {
+            junit '<CCWS_WORKSPACE>/artifacts/*/*/test_results/*/*.xml'
+        }
+        unsuccessful {
+            archiveArtifacts artifacts: 'artifacts/**/*', fingerprint: true, allowEmptyArchive: true
+        }
+    }
+}

@@ -276,8 +276,11 @@ The general workflow is documented below, for more technical details see
     - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
 
 
-Using `CCWS` docker
-===================
+Advanced usage
+==============
+
+`CCWS` docker image
+-------------------
 
 A docker image with preinstalled `CCWS` and dependencies is available for
 testing, but it is recommended to build a tailored image using
@@ -292,8 +295,15 @@ The image can be used in the following way:
 - `...`
 
 
+`CCWS` in CI
+------------
+
+See `ccws/examples/Jenkinsfile.example`, `.github/workflows/reusable_*` and
+https://github.com/asherikov/sharf/tree/main/.github/workflows for examples.
+
+
 Extending `CCWS`
-================
+----------------
 
 `CCWS` functionality can be extended in multiple ways:
 - by adding new build profiles, e.g., `make bp_new

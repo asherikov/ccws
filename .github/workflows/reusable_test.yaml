@@ -1,0 +1,137 @@
+# https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
+on:
+    workflow_call:
+        inputs:
+            distro:
+                required: false
+                default: noble
+                type: string
+            workspace_github_repo:
+                required: false
+                default: ${{ github.repository }}
+                type: string
+            workspace_version:
+                required: false
+                default: ${{ github.sha }}
+                type: string
+            package_github_repo:
+                required: false
+                default: ''
+                type: string
+            package_version:
+                required: false
+                default: ''
+                type: string
+
+defaults:
+    run:
+        working-directory: /ccws
+
+env:
+    WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+    GITHUB_REPO: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
+
+jobs:
+    static:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        env:
+            BUILD_PROFILE: static_checks
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                repository: ${{ inputs.workspace_github_repo }}
+                ref: ${{ inputs.workspace_version }}
+            - if: ${{ inputs.package_github_repo != '' }}
+              run: |
+                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                make
+
+    tidy:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        env:
+            BUILD_PROFILE: scan_build
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                repository: ${{ inputs.workspace_github_repo }}
+                ref: ${{ inputs.workspace_version }}
+            - if: ${{ inputs.package_github_repo != '' }}
+              run: |
+                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                apt update
+                make dep_install
+                make build_all
+
+    reldebug:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        env:
+            BUILD_PROFILE: reldebug
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                repository: ${{ inputs.workspace_github_repo }}
+                ref: ${{ inputs.workspace_version }}
+            - if: ${{ inputs.package_github_repo != '' }}
+              run: |
+                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                apt update
+                make dep_install
+                make build_all
+                make wstest
+
+    addr_sanitizer:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        env:
+            BUILD_PROFILE: addr_undef_sanitizers
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                repository: ${{ inputs.workspace_github_repo }}
+                ref: ${{ inputs.workspace_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                apt update
+                make dep_install
+                make build_all
+                make wstest
+
+    thread_sanitizer:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        env:
+            BUILD_PROFILE: thread_sanitizer
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                repository: ${{ inputs.workspace_github_repo }}
+                ref: ${{ inputs.workspace_version }}
+            - if: ${{ inputs.package_github_repo != '' }}
+              run: |
+                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                echo "race:libfastrtps.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
+                echo "race:libfastcdr.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
+                apt update
+                make dep_install
+                make build_all
+                make wstest
+
+    deb:
+        uses: ./.github/workflows/reusable_deb.yaml
+        with:
+            distro: ${{ inputs.distro }}
+            workspace_github_repo: ${{ inputs.workspace_github_repo }}
+            workspace_version: ${{ inputs.workspace_version }}
+            package_version: ${{ inputs.workspace_version }}
+            package_github_repo: ${{ inputs.workspace_github_repo }}

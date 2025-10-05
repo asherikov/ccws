@@ -1,0 +1,48 @@
+# https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
+on:
+    workflow_call:
+        inputs:
+            distro:
+                required: false
+                default: noble
+                type: string
+            version:
+                required: true
+                default: ''
+                type: string
+            push:
+                required: false
+                default: true
+                type: string
+
+jobs:
+    dox:
+        container: asherikov/ccws_${{ inputs.distro }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                submodules: true
+                fetch-depth: 0
+            - run: |
+                git config --global user.name github-actions
+                git config --global user.email github-actions@github.com
+                git config --global --add safe.directory '*'
+            - run: |
+                cd /ccws
+                export WORKSPACE_SRC=${GITHUB_WORKSPACE}
+                make wsupdate_pkgs_shallow
+                make
+              env:
+                BUILD_PROFILE: doxygen
+            - if: ${{ inputs.push == 'true' }}
+              run: |
+                cd ${GITHUB_WORKSPACE}/gh-pages
+                git checkout gh-pages
+                find ./ -not -name '.*' -maxdepth 1 | xargs rm -rf
+                cp -r /ccws/workspace/artifacts/doxygen/* ./
+                git add -f *
+                git commit -a -m "Automated update ${{ inputs.version }}"
+                git push

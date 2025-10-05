@@ -1,0 +1,71 @@
+# https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
+on:
+    workflow_call:
+        inputs:
+            distro:
+                required: false
+                default: noble
+                type: string
+            cloudsmith_repo:
+                required: false
+                default: ''
+                type: string
+            workspace_github_repo:
+                required: false
+                default: ${{ github.repository }}
+                type: string
+            workspace_version:
+                required: false
+                default: ${{ github.sha }}
+                type: string
+            package_version:
+                required: false
+                default: ''
+                type: string
+            package_github_repo:
+                required: false
+                default: ''
+                type: string
+        secrets:
+            cloudsmith_token:
+                required: false
+
+defaults:
+    run:
+        working-directory: /ccws
+
+env:
+    WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+    GITHUB_REPO: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
+
+jobs:
+    deb:
+        runs-on: ubuntu-latest
+        container:
+            image: asherikov/ccws_${{ inputs.distro }}
+            options: --security-opt seccomp:unconfined
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                ref: ${{ inputs.workspace_version }}
+                repository: ${{ inputs.workspace_github_repo }}
+            - if: ${{ inputs.package_github_repo != '' }}
+              run: |
+                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+            - run: |
+                make wsupdate_pkgs_shallow
+                apt update
+                make dep_install
+                # VENDOR=sharf VERSION=all are specified in workspace config (.ccws/config.mk)
+                make build_all BUILD_PROFILE=deb,reldebug
+              env:
+                EMAIL: example@example.com
+                AUTHOR: CI
+                CLOUDSMITH_API_KEY: ${{ inputs.cloudsmith_token }}
+            - run: |
+                find ${WORKSPACE_DIR}/artifacts/ -iname *.deb
+              shell: bash
+            - if: ${{ inputs.cloudsmith_repo != '' }}
+              run: |
+                python3 -m pip install --break-system-packages cloudsmith-cli
+                find ${WORKSPACE_DIR}/artifacts/ -iname *.deb | xargs --no-run-if-empty -I {} cloudsmith push deb ${{ inputs.cloudsmith_repo }} {}
