@@ -1,25 +1,30 @@
 bp_doxygen_install_build: install_ccws_deps
-	sudo ${APT_INSTALL} doxygen graphviz
+	sudo ${APT_INSTALL} doxygen graphviz pandoc
 
 doxclean:
 	bash -c "${SETUP_SCRIPT}; \
-		rm -Rf \$${CCWS_DOXYGEN_OUTPUT_DIR}/doxygen; \
+		rm -Rf \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
 		rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}"
 
 bp_doxygen_build: doxclean assert_doxygen_installed
 	bash -c "${SETUP_SCRIPT}; \
-        ${MAKE_QUIET} wslist | xargs -I {} bash -c '${MAKE} dox PKG={}' || true; \
+		${MAKE_QUIET} wslist | xargs -I {} bash -c '${MAKE} dox PKG={}' || true; \
 		${MAKE_QUIET} wslist | wc -l > \$${CCWS_DOXYGEN_WORKING_DIR}/package_num; \
 		${MAKE_QUIET} graph | sed 's@  \"\\(.*\\)\";@  \"\\1\" [URL=\"./\\1/index.html\"];@' | dot -Tsvg > \$${CCWS_DOXYGEN_OUTPUT_DIR}/pkg_dependency_graph.svg; \
+		${MAKE_QUIET} wsstatus > \$${CCWS_DOXYGEN_WORKING_DIR}/wsstatus; \
         cd \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
-        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.html > index.html; \
-		echo '<table border="1">' >> index.html; \
+		cp \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/pandoc/* ./; \
+		test ! -f \$${WORKSPACE_SRC}/README.md || cat \$${WORKSPACE_SRC}/README.md > index.md; \
+        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.md >> index.md; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
-			| sed -e 's|./\(.*\)/index.html|<tr><td><a href=\"./\1/index.html\">\1</a></td><td><a href=\"./\1/pkg_dependency_graph.svg\">dependency graph</a></td><td><a href=\"./\1/pkg_reverse_dependency_graph.svg\">reverse dependency graph</a></td></tr>|' >> index.html; \
-		echo '</table><h3>Summary</h3><ul><li>packages: ' >> index.html; \
-		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.html; \
-		echo '</li>' >> index.html; \
-        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.html >> index.html"
+			| sed -e 's=./\(.*\)/index.html=| [\1](./\1/index.html) | [graph](./\1/pkg_dependency_graph.svg) | [graph](./\1/pkg_reverse_dependency_graph.svg) |=' >> index.md; \
+		echo -e '\nTotal number of packages: ' >> index.md; \
+		cat \$${CCWS_DOXYGEN_WORKING_DIR}/package_num >> index.md; \
+		echo -e '\nWorkspace status\n-----\n:::{.wide}\n\`\`\`' >> index.md; \
+		cat \$${CCWS_DOXYGEN_WORKING_DIR}/wsstatus >> index.md; \
+		echo -e '\`\`\`\n:::\n' >> index.md; \
+        cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_footer.md >> index.md; \
+		pandoc index.md --output index.html --table-of-contents --number-sections --to html5+smart --template=template.html5 --css theme.css --css skylighting-solarized-theme.css --wrap=none --variable=date:\"DATE: `date '+%Y-%m-%d'`\" --metadata title=\"\$${VENDOR}\""
 
 assert_doxygen_installed:
 	type doxygen > /dev/null

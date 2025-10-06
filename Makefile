@@ -127,7 +127,7 @@ wsinit:
 
 # Status packages in the workspace
 wsstatus:
-	test ! -d .git || git describe --dirty --broken --all --long --always
+	cd ${WORKSPACE_SRC}; test ! -d .git || git describe --dirty --broken --all --long --always
 	${MAKE} wsstatuspkg
 
 wsstatuspkg:
