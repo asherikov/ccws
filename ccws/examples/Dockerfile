@@ -1,7 +1,8 @@
 ARG BASE_IMAGE=ubuntu:noble
 FROM ${BASE_IMAGE}
 
-ARG APT_INSTALL="apt --yes --no-install-recommends install"
+# these would override CCWS commands
+ARG APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
 ARG PIP3_INSTALL="python3 -m pip install"
 
 ENV PIP_CACHE_DIR=/cache/pip
