@@ -133,5 +133,5 @@ jobs:
             distro: ${{ inputs.distro }}
             workspace_github_repo: ${{ inputs.workspace_github_repo }}
             workspace_version: ${{ inputs.workspace_version }}
-            package_version: ${{ inputs.workspace_version }}
-            package_github_repo: ${{ inputs.workspace_github_repo }}
+            package_version: ${{ inputs.package_version }}
+            package_github_repo: ${{ inputs.package_github_repo }}

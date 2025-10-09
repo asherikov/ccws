@@ -36,7 +36,7 @@ defaults:
 
 env:
     WORKSPACE_SRC: ${GITHUB_WORKSPACE}
-    GITHUB_REPO: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
+    PACKAGE_GITHUB_REPO_URL: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
 
 jobs:
     deb:
@@ -51,7 +51,7 @@ jobs:
                 repository: ${{ inputs.workspace_github_repo }}
             - if: ${{ inputs.package_github_repo != '' }}
               run: |
-                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+                make set_repo_version REPO=${PACKAGE_GITHUB_REPO_URL} VERSION=${{ inputs.package_version }}
             - run: |
                 make wsupdate_pkgs_shallow
                 apt update
@@ -61,11 +61,17 @@ jobs:
               env:
                 EMAIL: example@example.com
                 AUTHOR: CI
-                CLOUDSMITH_API_KEY: ${{ inputs.cloudsmith_token }}
             - run: |
                 find ${WORKSPACE_DIR}/artifacts/ -iname *.deb
               shell: bash
-            - if: ${{ inputs.cloudsmith_repo != '' }}
+            - if: ${{ inputs.distro == 'jammy' }}
+              run: |
+                python3 -m pip install cloudsmith-cli
+            - if: ${{ inputs.distro != 'jammy' }}
               run: |
                 python3 -m pip install --break-system-packages cloudsmith-cli
+            - if: ${{ inputs.cloudsmith_repo != '' }}
+              run: |
                 find ${WORKSPACE_DIR}/artifacts/ -iname *.deb | xargs --no-run-if-empty -I {} cloudsmith push deb ${{ inputs.cloudsmith_repo }} {}
+              env:
+                CLOUDSMITH_API_KEY: ${{ secrets.cloudsmith_token }}

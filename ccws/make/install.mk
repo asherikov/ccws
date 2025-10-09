@@ -75,7 +75,7 @@ bp_install_build:
 		| ${CCWS_XARGS} sh -c "echo 'CCWS: installing {}' && ${MAKE} bp_{}_install_build || exit 255"
 
 bp_%_install_build: assert_BUILD_PROFILES_must_exist
-	sudo ${MAKE} install_ccws_build_deps
+	${MAKE} install_ccws_build_deps
 
 ep_install:
 	${MAKE} ep_${EXEC_PROFILE}_install

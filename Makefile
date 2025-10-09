@@ -14,8 +14,8 @@ override export WORKSPACE_SRC::=$(shell realpath "${WORKSPACE_SRC}")
 
 
 # obtain from gitconfig by default
-export EMAIL?=$(shell git config --get user.email || echo "ccws@ccws.net")
-export AUTHOR?=$(shell git config --get user.name || echo "ccws")
+export EMAIL?=$(shell git config --get user.email 2> /dev/null || echo "ccws@ccws.net")
+export AUTHOR?=$(shell git config --get user.name 2> /dev/null || echo "ccws")
 # no default, can be derived in many cases, in some must be set explicitly
 export ROS_DISTRO
 
