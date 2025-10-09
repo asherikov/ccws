@@ -361,7 +361,15 @@ Related software
   Naturally, it does not provide all the package features like dependencies,
   install scripts, etc. Moreover, it does not rely on chroot-like environment
   to ensure correct paths.
-
+- <https://github.com/b-robotized/ros_team_workspace> -- python based
+  environment that also aims at workspace handling automation. Unlike `CCWS`
+  which is primarily a build/deployment environment, it has more ROS-specific
+  features like setting up bringup packages. However, it lacks some of advanced
+  build features `CCWS` has.
+- <https://github.com/athackst/vscode_ros2_workspace> -- VSCode-specific
+  workspace environment, that provides various build and static analysis
+  options, but not as many as `CCWS`.
+  analysis features.
 
 TODO
 ====
