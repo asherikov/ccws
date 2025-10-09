@@ -12,15 +12,18 @@ wsh_echo()
     test "${WSH_QUIET}" = "YES" || echo "WSH:" "$@"
 }
 
+wsh_exit()
+{
+    wsh_echo "$2"
+    exit "$1"
+}
+
 help()
 {
     EXIT_CODE=${1:-"0"}
     wsh_echo "Usage (default values are shown in curly braces):"
     wsh_echo "  wshandler [<COMMON_ARGS>] [<COMMAND_ARGS>] <COMMAND> <COMMAND_ARGS>"
-    if [ -n "${WSH_VERSION}" ]
-    then
-        wsh_echo "  wshandler -v|--version"
-    fi
+    test -z "${WSH_VERSION}" || wsh_echo "  wshandler -v|--version"
     wsh_echo ""
     wsh_echo "Notation:"
     wsh_echo "  <REQUIRED ARGUMENT>"
@@ -29,18 +32,23 @@ help()
     wsh_echo "  (VALID OPTIONS IN A LIST)"
     wsh_echo ""
     wsh_echo "Common arguments:"
-    wsh_echo "  -y|--yaml_tool auto|gojq|yq    {auto}               # use gojq or yq, auto prefers gojq"
-    wsh_echo "  -Y|--yaml_binary <BINARY_PATH> {yq|gojq}            # override yaml tool (yq/gojq) path"
-    wsh_echo "  -r|--root <WORKSPACE_ROOT>     {./}                 # parent of --list if it is a path"
-    wsh_echo "  -c|--cache <CACHE_DIR>         {<WORKSPACE_ROOT>}   # temporary files created here"
-    wsh_echo "  -t|--type rosinstall|repos     {repos}              # repository list format"
-    wsh_echo "  -i|--indent 1|2|3...           {4}                  # default indentation in yaml repository list"
-    wsh_echo "  -k|--keep-going                {false}              # do not stop on errors"
-    wsh_echo "  -l|--list <FILENAME>           {.rosinstall|.repos} # default depends on --type,"
-    wsh_echo "                                                      # can be specified multiple times"
-    wsh_echo "  -T|--tag <TAG>                 {}                   # filter repositories by tags"
-    wsh_echo "                                                      # can be specified multiple times"
-    wsh_echo "  -q|--quiet                                          # suppress most of the output"
+    wsh_echo "  -y|--yaml_tool auto|gojq|yq    {auto}               # Use gojq or yq, auto prefers gojq"
+    wsh_echo "  -Y|--yaml_binary <BINARY_PATH> {yq|gojq}            # Override yaml tool (yq/gojq) path"
+    wsh_echo "  -r|--root <WORKSPACE_ROOT>     {./}                 # Parent of --list if it is a path"
+    wsh_echo "  -c|--cache <CACHE_DIR>         {<WORKSPACE_ROOT>}   # Temporary files created here"
+    wsh_echo "  -t|--type rosinstall|repos     {repos}              # Repository list format"
+    wsh_echo "  -i|--indent 1|2|3...           {4}                  # Default indentation in yaml repository list"
+    wsh_echo "  -k|--keep-going                {false}              # Do not stop on errors"
+    wsh_echo "  -l|--list <FILENAME>           {.rosinstall|.repos} # Default depends on --type,"
+    wsh_echo "                                                      #can be specified multiple times,"
+    wsh_echo "                                                      #mutually exclusive with -L"
+    wsh_echo "  -L|--list-discover                                  # Automatically discover lists in the root,"
+    wsh_echo "                                                      #recursively searches for *.<type> files,"
+    wsh_echo "                                                      #mutually exclusive with -l,"
+    wsh_echo "                                                      #should be set after -r and -t."
+    wsh_echo "  -T|--tag <TAG>                 {}                   # Filter repositories by tags"
+    wsh_echo "                                                      #can be specified multiple times"
+    wsh_echo "  -q|--quiet                                          # Suppress most of the output"
     wsh_echo ""
     wsh_echo "Repository list commands:"
     wsh_echo "  Information:"
@@ -83,10 +91,12 @@ help()
     wsh_echo "    push [<PACKAGE_NAME> ...]         # git push"
     wsh_echo "    unshallow [<PACKAGE_NAME> ...]    # git unshallow"
     wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs|rebase)] update [<PACKAGE_NAME> ...] # git pull"
-    wsh_echo "      default     # plain clone"
-    wsh_echo "      shallow     # shallow clone"
-    wsh_echo "      nolfs       # disable git LFS"
-    wsh_echo "      rebase      # do git pull with rebase"
+    wsh_echo "      default      # plain clone"
+    wsh_echo "      shallow      # shallow clone"
+    wsh_echo "      nolfs        # disable git LFS"
+    wsh_echo "      rebase       # do git pull with rebase"
+    wsh_echo "      unmodified   # only unmodified repos"
+    wsh_echo "      nosubmodules # do not checkout submodules"
     wsh_echo ""
     wsh_echo "  Generic commands:"
     wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git '<COMMAND>'  # execute command in each repository"
@@ -127,19 +137,15 @@ update_root()
             if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
             then
                 # if we are on a branch make sure that it is updated
-                if (git branch --show-current | grep "${GIT_VERSION}")
+                if (git branch --show-current | grep "${REPO_VERSION}")
                 then
                     PULL_ENV=(env)
                     PULL_ARGS=()
                     for POLICY in "${POLICIES[@]}";
                     do
                         case ${POLICY} in
-                            rebase)
-                                PULL_ARGS+=(--rebase)
-                                ;;
-                            nolfs)
-                                PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
-                                ;;
+                            rebase) PULL_ARGS+=(--rebase);;
+                            nolfs)  PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
                         esac
                     done
                     # do not fail, e.g., the branch might be deleted from git remote
@@ -159,28 +165,28 @@ git_scrape()
     then
         FIND_ARGS+=(-mindepth 2)
     fi
-    GIT_DIRS=$(cd "${SCRAPE_ROOT}" && find ./ "${FIND_ARGS[@]}" -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
-    UNKNOWN_GIT_DIRS=$(comm -2 -3 <(echo "${GIT_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | sort))
+    REPO_DIRS=$(cd "${SCRAPE_ROOT}" && find ./ "${FIND_ARGS[@]}" -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
+    UNKNOWN_REPO_DIRS=$(comm -2 -3 <(echo "${REPO_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | sort))
 
-    for GIT_DIR in ${UNKNOWN_GIT_DIRS}
+    for REPO_DIR in ${UNKNOWN_REPO_DIRS}
     do
-        wsh_echo "Processing ${GIT_DIR}"
-        REPO_DIR="${SCRAPE_ROOT}/${GIT_DIR}"
-        pushd "${REPO_DIR}" > /dev/null
-        GIT_REPO=$(git remote get-url origin | tr -d '\n' || true)
+        wsh_echo "Processing ${REPO_DIR}"
+        ABSOLUTE_REPO_DIR="${SCRAPE_ROOT}/${REPO_DIR}"
+        pushd "${ABSOLUTE_REPO_DIR}" > /dev/null
+        REPO_URL=$(git remote get-url origin | tr -d '\n' || true)
 
-        if [ "${GIT_REPO}" == "" ]
+        if [ "${REPO_URL}" == "" ]
         then
-            GIT_REPO=$(pwd)
+            REPO_URL=$(pwd)
         fi
 
-        GIT_VERSION=$(git branch --show-current | tr -d '\n')
-        GIT_VERSION=${GIT_VERSION:-"$(git describe --tags | tr -d '\n')"}
-        GIT_VERSION=${GIT_VERSION:-"$(git rev-parse --verify HEAD | tr -d '\n')"}
+        REPO_VERSION=$(git branch --show-current | tr -d '\n')
+        REPO_VERSION=${REPO_VERSION:-"$(git describe --tags | tr -d '\n')"}
+        REPO_VERSION=${REPO_VERSION:-"$(git rev-parse --verify HEAD | tr -d '\n')"}
 
         popd > /dev/null
 
-        echo "Found unmanaged git repository:  ${GIT_DIR}  ${GIT_REPO}  ${GIT_VERSION}"
+        echo "Found unmanaged git repository:  ${REPO_DIR}  ${REPO_URL}  ${REPO_VERSION}"
 
         case "${WSH_COMMAND_POLICY}" in
             ask|default)
@@ -192,8 +198,7 @@ git_scrape()
                         [YyAa]) ACTION=add;;
                         [Nn])   ACTION=show;;
                         [Cc])   ACTION=clean;;
-                        *)
-                            echo "Please enter one of y/n/c.";;
+                        *)      echo "Please enter one of y/n/c.";;
                     esac
                 done;;
             show|add|clean)
@@ -203,8 +208,8 @@ git_scrape()
         esac
 
         case ${ACTION} in
-            add)    execute_add git "${GIT_DIR}" "${GIT_REPO}" "${GIT_VERSION}";;
-            clean)  rm -rf "${REPO_DIR}";;
+            add)    execute_add git "${REPO_DIR}" "${REPO_URL}" "${REPO_VERSION}";;
+            clean)  rm -rf "${ABSOLUTE_REPO_DIR}";;
         esac
 
         ACTION=""
@@ -213,27 +218,34 @@ git_scrape()
 
 git_clone()
 {
-    GIT_REPO=$1
-    VERSION=$2
-    DIR=$3
+    SPARSE=$1
+    REPO_URL=$2
+    VERSION=$3
+    DIR=$4
 
     CLONE_ENV=(env)
-    CLONE_ARGS=(--recurse-submodules)
+    SUBMODULES=YES
     for POLICY in "${POLICIES[@]}";
     do
         case ${POLICY} in
-            shallow)
-                # --no-tags -- we need tags
-                # --single-branch -- implied by --depth
-                CLONE_ARGS+=(--depth 1 --shallow-submodules)
-                ;;
-            nolfs)
-                CLONE_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
-                ;;
+            # --no-tags -- we need tags
+            # --single-branch -- implied by --depth
+            shallow)      CLONE_ARGS+=(--depth 1 --shallow-submodules);;
+            nolfs)        CLONE_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
+            nosubmodules) SUBMODULES=NO;;
         esac
     done
 
-    SOURCE_DESTINATION=("${GIT_REPO}")
+    if [ "${SUBMODULES}" = "YES" ]
+    then
+        CLONE_ARGS+=(--recurse-submodules)
+    fi
+    if [ "${SPARSE}" = "YES" ]
+    then
+        CLONE_ARGS+=(--sparse)
+    fi
+
+    SOURCE_DESTINATION=("${REPO_URL}")
     if [ -n "${DIR}" ]
     then
         SOURCE_DESTINATION+=("${DIR}")
@@ -245,7 +257,7 @@ git_clone()
     else
         if ! ("${CLONE_ENV[@]}" git clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
         then
-            # GIT_VERSION is a hash
+            # REPO_VERSION is a hash
             # clone with history to be able to find it
             "${CLONE_ENV[@]}" git clone --recurse-submodules "${SOURCE_DESTINATION[@]}"
             pushd "${DIR}" > /dev/null
@@ -274,26 +286,26 @@ dir_git_get_branch()
 dir_git_status()
 {
     NAME="$1"
-    GIT_DIR="${WSH_WORKSPACE_ROOT}/$1"
-    GIT_REPO="$2"
-    GIT_VERSION="$3"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}/$1"
+    REPO_URL="$2"
+    REPO_VERSION="$3"
 
     GIT_ACTUAL_VERSION="-"
     GIT_ACTUAL_HASH="-"
-    if [ -d "${GIT_DIR}/.git" ]
+    if [ -d "${REPO_DIR}/.git" ]
     then
-        cd "${GIT_DIR}"
-        GIT_VERSION_HASH=$(git rev-parse --verify "${GIT_VERSION}^{commit}" 2> /dev/null || echo -n "-")
+        cd "${REPO_DIR}"
+        REPO_VERSION_HASH=$(git rev-parse --verify "${REPO_VERSION}^{commit}" 2> /dev/null || echo -n "-")
         GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
         GIT_ACTUAL_HASH=$(dir_git_get_hash || echo -n "-")
     fi
 
     FLAGS=""
-    if [ "${GIT_VERSION_HASH}" = "${GIT_ACTUAL_HASH}" ]
+    if [ "${REPO_VERSION_HASH}" = "${GIT_ACTUAL_HASH}" ]
     then
         FLAGS+=" "
     else
-        if [ "${GIT_VERSION_HASH}" = "-" ] || [ "${GIT_ACTUAL_HASH}" = "-" ]
+        if [ "${REPO_VERSION_HASH}" = "-" ] || [ "${GIT_ACTUAL_HASH}" = "-" ]
         then
             FLAGS+="?"
         else
@@ -308,7 +320,7 @@ dir_git_status()
         FLAGS+=" "
     fi
 
-    echo "${NAME}|${GIT_VERSION}|${GIT_ACTUAL_VERSION}|${FLAGS}|${GIT_REPO}"
+    echo "${NAME}|${REPO_VERSION}|${GIT_ACTUAL_VERSION}|${FLAGS}|${REPO_URL}"
 }
 
 
@@ -345,49 +357,90 @@ dir_git_push()
 
 dir_git_update()
 {
-    GIT_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
-    GIT_REPO="$2"
-    GIT_VERSION="$3"
+    NAME=$1
+    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_URL="$2"
+    REPO_VERSION="$3"
 
-    mkdir -p "${GIT_DIR}"
+    mkdir -p "${REPO_DIR}"
 
     wsh_echo "updating '$1'."
 
-    pushd "${GIT_DIR}" > /dev/null
+    pushd "${REPO_DIR}" > /dev/null
     IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
 
-    if [ -d ".git" ]
+    UNMODIFIED=NO
+    for POLICY in "${POLICIES[@]}";
+    do
+        if [ "${POLICY}" = "unmodified" ]
+        then
+            UNMODIFIED=YES
+        fi
+    done
+
+    SPARSE=NO
+    IFS='.' read -ra GIT_VERSION <<< "$(git version | grep -o '[0-9]*\.[0-9]*\.[0-9]')"
+    if [ "${GIT_VERSION[0]}" -ge 2 ] || { [ "${GIT_VERSION[0]}" -eq 2 ] && [ "${GIT_VERSION[1]}" -ge 25 ]; }
     then
+        SPARSE_PATHS=()
+        readarray -t SPARSE_PATHS <<< "$("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_sparse" "${NAME}" "${WSH_REPOLISTS[0]}")" || true
+        if [ ${#SPARSE_PATHS[@]} -ge 1 ] && [ "${SPARSE_PATHS[0]}" != "" ]
+        then
+            SPARSE=YES
+        fi
+    fi
+
+    CLONED=NO
+    if [ ! -d ".git" ]
+    then
+        rm -rf "${REPO_DIR:?}/*"
+        git_clone "${SPARSE}" "${REPO_URL}" "${REPO_VERSION}" "./"
+        CLONED=YES
+    fi
+
+    if [ "${CLONED}" = "NO" ] || [ "${SPARSE}" = "YES" ]
+    then
+        if [ "${SPARSE}" = "YES" ]
+        then
+            test "${REPO_VERSION}" == '-' || git sparse-checkout set "${SPARSE_PATHS[@]}"
+        fi
+
+        if [ "${UNMODIFIED}" = "YES" ]
+        then
+            REPO_VERSION_HASH=$(git rev-parse --verify "${REPO_VERSION}^{commit}" 2> /dev/null || echo -n "-")
+            GIT_ACTUAL_HASH=$(dir_git_get_hash || echo -n "-")
+
+            if [ "${GIT_ACTUAL_HASH}" != "-" ];
+            then
+                if [ "${REPO_VERSION_HASH}" != "${GIT_ACTUAL_HASH}" ] || dir_git_uncommitted;
+                then
+                    wsh_echo "Skipping modified '${REPO_DIR}'."
+                    popd > /dev/null
+                    return;
+                fi
+            fi
+        fi
+
         git fetch
         if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
         then
-            if [ "${GIT_VERSION}" != '-' ]
-            then
-                git checkout "${GIT_VERSION}"
-            fi
+            test "${REPO_VERSION}" == '-' || git checkout "${REPO_VERSION}"
+
             # if we are on a branch make sure that it is updated
-            if (git branch --show-current | grep "${GIT_VERSION}")
+            if (git branch --show-current | grep "${REPO_VERSION}")
             then
                 PULL_ENV=(env)
                 PULL_ARGS=()
                 for POLICY in "${POLICIES[@]}";
                 do
                     case ${POLICY} in
-                        rebase)
-                            PULL_ARGS+=(--rebase)
-                            ;;
-                        nolfs)
-                            PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1")
-                            ;;
+                        rebase) PULL_ARGS+=(--rebase);;
+                        nolfs)  PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
                     esac
                 done
                 "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
             fi
         fi
-    else
-        rm -rf "${GIT_DIR:?}/*"
-
-        git_clone "${GIT_REPO}" "${GIT_VERSION}" "./"
     fi
     popd > /dev/null
 }
@@ -403,14 +456,12 @@ dir_git_merge()
     then
         if dir_git_uncommitted
         then
-            wsh_echo "Uncommited changes detected in '${NAME}'"
-            exit 30
+            wsh_exit 30 "Uncommited changes detected in '${NAME}'"
         fi
 
         if ! git rev-parse --verify "${TARGET_BRANCH}" 2> /dev/null
         then
-            wsh_echo "No target branch '${TARGET_BRANCH}' in '${NAME}'"
-            exit 31
+            wsh_exit 31 "No target branch '${TARGET_BRANCH}' in '${NAME}'"
         fi
 
         git checkout "${TARGET_BRANCH}"
@@ -420,11 +471,7 @@ dir_git_merge()
 
 dir_git_assert()
 {
-    if [ ! -d "$1/.git" ]
-    then
-        wsh_echo "${NAME}: is not a git repository'"
-        exit 40
-    fi
+    test -d "$1/.git" || wsh_exit 40 "${NAME}: is not a git repository'"
 }
 
 
@@ -492,10 +539,8 @@ scrape()
     "$1_scrape" "${@:2}"
 }
 
-check_workspace()
+initialize_yaml_tool()
 {
-    WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
-
     if [ "${WSH_YAML_TOOL}" = "auto" ]
     then
         YAML_TOOL_LIST=(gojq yq)
@@ -526,29 +571,32 @@ check_workspace()
         WSH_YAML_TOOL=""
     done
 
-    if [ -z "${WSH_YAML_TOOL}" ]
-    then
-        wsh_echo "Cannot find gojq or yq."
-        exit 20
-    fi
+    test -n "${WSH_YAML_TOOL}" || wsh_exit 20 "Cannot find gojq or yq."
 
     case "${WSH_YAML_TOOL}" in
-        yq) WSH_YAML_CMD=("${WSH_YAML_BINARY}" --indent "${WSH_INDENT}")
-            ;;
-        gojq) WSH_YAML_CMD=("${WSH_YAML_BINARY}" --yaml-input "--indent=${WSH_INDENT}")
-            ;;
-        *)
-            wsh_echo "'${WSH_YAML_TOOL}' is not a valid yaml tool.";
-            help 21;;
+        yq)   WSH_YAML_CMD=("${WSH_YAML_BINARY}" --indent "${WSH_INDENT}");;
+        gojq) WSH_YAML_CMD=("${WSH_YAML_BINARY}" --yaml-input "--indent=${WSH_INDENT}");;
+        *)    wsh_exit 21 "'${WSH_YAML_TOOL}' is not a valid yaml tool.";;
     esac
+}
 
+check_workspace()
+{
+    WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
 
-    WSH_WORKSPACE_TYPE=${WSH_WORKSPACE_TYPE:-"repos"}
+    initialize_yaml_tool
 
     if [ ${#WSH_REPOLISTS[@]} -eq 0 ]
     then
         WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT:-"./"}")/"
         WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
+        test -f "${WSH_REPOLIST}" || discover_lists "${WSH_WORKSPACE_ROOT}" -maxdepth 1;
+    fi
+
+    if [ ${#WSH_REPOLISTS[@]} -eq 0 ] || [ "${WSH_REPOLISTS[0]}" = "" ]
+    then
+        # nothing has been found, WSH_REPOLIST points to a nonexistent file
+        true
     elif [ ${#WSH_REPOLISTS[@]} -eq 1 ]
     then
         WSH_REPOLIST="${WSH_REPOLISTS[0]}"
@@ -578,11 +626,7 @@ check_workspace()
 
         for REPOLIST in "${WSH_REPOLISTS[@]}"
         do
-            if [ ! -f "${REPOLIST}" ]
-            then
-                wsh_echo "Repository list '${REPOLIST}' does not exit.";
-                help 22;
-            fi
+            test -f "${REPOLIST}" || wsh_exit 22 "Repository list '${REPOLIST}' does not exit.";
 
             REPOLIST_ROOT="$(realpath "$(dirname "${REPOLIST}")")/"
             cd "${WSH_WORKSPACE_ROOT}"
@@ -617,11 +661,8 @@ check_workspace()
     if [ ! -f "${WSH_REPOLIST}" ]
     then
         case $1 in
-            scrape|add|init)
-                touch "${WSH_REPOLIST}";;
-            *)
-                wsh_echo "'${WSH_REPOLIST}' is not a repository list"
-                exit 23;;
+            scrape|add|init) touch "${WSH_REPOLIST}";;
+            *)               wsh_exit 23 "'${WSH_REPOLIST}' is not a repository list";;
         esac
     fi
     WSH_REPOLIST=$(realpath "${WSH_REPOLIST}")
@@ -632,7 +673,7 @@ check_workspace()
 
     test -d "${WSH_WORKSPACE_ROOT}" || (wsh_echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
 
-    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -y "${WSH_YAML_TOOL}" -Y "${WSH_YAML_BINARY}" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}" -p "${WSH_COMMAND_POLICY}")
+    WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -l "${WSH_REPOLIST}" -y "${WSH_YAML_TOOL}" -Y "${WSH_YAML_BINARY}" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}" -p "${WSH_COMMAND_POLICY}")
     if [ -n "${WSH_KEEP_GOING}" ]
     then
         WSHANDLER+=("${WSH_KEEP_GOING}")
@@ -807,29 +848,49 @@ repos_gojq_merge()
 }
 
 
+rosinstall_yq_sparse()
+{
+    "${WSH_YAML_CMD[@]}" ".[] | select(.*.local-name == \"$1\") | .git.wshandler.sparse[]" "$2" 2> /dev/null
+}
+
+rosinstall_gojq_sparse()
+{
+    "${WSH_YAML_CMD[@]}" --raw-output ".[] | select(.[].\"local-name\" == \"$1\") | .git.wshandler.sparse" "$2" 2> /dev/null
+}
+
+repos_yq_sparse()
+{
+    "${WSH_YAML_CMD[@]}" ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null
+}
+
+repos_gojq_sparse()
+{
+    "${WSH_YAML_CMD[@]}" --raw-output ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null
+}
+
+
 execute_merge()
 {
     SECOND_FILE=$1
-    if [ -s "${SECOND_FILE}" ] && [ ! "${WSH_REPOLIST}" -ef "${SECOND_FILE}" ]
+    if [ ! -s "${SECOND_FILE}" ] || [ "${WSH_REPOLIST}" -ef "${SECOND_FILE}" ]
     then
-        if [ -s "${WSH_REPOLIST}" ]
-        then
-            case "${WSH_COMMAND_POLICY}" in
-                keep|default)
-                    FIRST_FILE="${WSH_BACKUP_FILE}";;
-                replace)
-                    FIRST_FILE="${SECOND_FILE}"
-                    SECOND_FILE="${WSH_BACKUP_FILE}";;
-                *)
-                    help 11;;
-            esac
-            backup
-            "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_merge" "${FIRST_FILE}" "${SECOND_FILE}" > "${WSH_REPOLIST}"
-        else
-            cp "${SECOND_FILE}" "${WSH_REPOLIST}"
-        fi
-    else
         help 10;
+    fi
+    if [ -s "${WSH_REPOLIST}" ]
+    then
+        case "${WSH_COMMAND_POLICY}" in
+            keep|default)
+                FIRST_FILE="${WSH_BACKUP_FILE}";;
+            replace)
+                FIRST_FILE="${SECOND_FILE}"
+                SECOND_FILE="${WSH_BACKUP_FILE}";;
+            *)
+                help 11;;
+        esac
+        backup
+        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_merge" "${FIRST_FILE}" "${SECOND_FILE}" > "${WSH_REPOLIST}"
+    else
+        cp "${SECOND_FILE}" "${WSH_REPOLIST}"
     fi
 }
 
@@ -956,7 +1017,7 @@ execute_commit()
 
 execute_clone()
 {
-    "$1_clone" "$2" "$3" "${WSH_WORKSPACE_ROOT}"
+    "$1_clone" "NO" "$2" "$3" "${WSH_WORKSPACE_ROOT}"
 
     check_workspace update
     execute_selective_command update
@@ -972,7 +1033,7 @@ execute_init()
         pushd "${WSH_WORKSPACE_ROOT}" > /dev/null
         while [[ $# -gt 0 ]]
         do
-            git_clone "$1"
+            git_clone "NO" "$1"
             shift
         done
         popd > /dev/null
@@ -1012,7 +1073,7 @@ set_version()
         *) TYPE=ALL;;
     esac
 
-    UPDATED=false
+    UPDATED=NO
     for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
     do
         while read -r NAME REPO VERSION;
@@ -1038,22 +1099,23 @@ set_version()
             then
                 continue;
             fi;
-            UPDATED=true;
+            UPDATED=YES;
             if [ "${VERSION}" != "${TARGET_VERSION}" ];
             then
                 wsh_echo "${NAME}: changing '${VERSION}' to '${TARGET_VERSION}'";
                 execute_add "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}";
             fi;
-            if [ "${TYPE}" != "ALL" ];
-            then
-                exit;
-            fi;
+            test "${TYPE}" == "ALL" || exit 0;
         done < <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}")
     done
-    if [ "${UPDATED}" = "false" ]
-    then
-        exit 61;
-    fi
+
+    test "${UPDATED}" = "YES" || wsh_exit 61 "Nothing to update."
+}
+
+discover_lists()
+{
+    DISCOVER_PATH=$(realpath "$1");
+    readarray -t WSH_REPOLISTS <<< "$(find "${DISCOVER_PATH}" "$@" -iname "*.${WSH_WORKSPACE_TYPE}" | sort)";
 }
 
 
@@ -1069,10 +1131,7 @@ snap_install()
 
 wsh_download()
 {
-    if ! command -v "wget" > /dev/null
-    then
-        apt_install wget 1>&2
-    fi
+    command -v "wget" > /dev/null || apt_install wget 1>&2
     wget -O - "$@"
 }
 
@@ -1087,10 +1146,12 @@ WSH_KEEP_GOING=""
 WSH_YAML_BINARY=
 WSH_REPOLIST=
 WSH_REPOLISTS=()
+WSH_REPOLIST_SOURCE=
 WSH_SORT_COMMAND="sort"
 WSH_BACKUP_FILE=
 WSH_TAGS=()
 WSH_QUIET=NO
+WSH_WORKSPACE_TYPE=repos
 
 while [[ $# -gt 0 ]]
 do
@@ -1098,11 +1159,9 @@ do
         -v|--version)
             if [ -n "${WSH_VERSION}" ]
             then
-                wsh_echo "wshandler version: ${WSH_VERSION}"
-                exit
+                wsh_exit 0 "wshandler version: ${WSH_VERSION}"
             else
-                wsh_echo "wshandler version is unknown"
-                exit 50
+                wsh_exit 50 "wshandler version is unknown"
             fi;;
 
         -y|--yaml_tool)     WSH_YAML_TOOL="$2";     shift; shift;;
@@ -1115,10 +1174,20 @@ do
         -p|--policy)        WSH_COMMAND_POLICY=$2;  shift; shift;;
 
         -k|--keep-going)    WSH_KEEP_GOING="-k";    shift;;
-        -l|--list)          WSH_REPOLISTS+=("$2");  shift; shift;;
         -T|--tag)           WSH_TAGS+=("$2");       shift; shift;;
         -u|--unsorted)      WSH_SORT_COMMAND="cat"; shift;;
         -q|--quiet)         WSH_QUIET="YES";        shift;;
+
+        -l|--list)
+            test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
+            WSH_REPOLIST_SOURCE="-l";
+            WSH_REPOLISTS+=("$2");
+            shift; shift;;
+        -L|--list-discover)
+            test "${WSH_REPOLIST_SOURCE}" != "-l" || wsh_exit 7 "Arguments -l and -L are incompatible.";
+            WSH_REPOLIST_SOURCE="-L";
+            discover_lists "${WSH_WORKSPACE_ROOT:-"./"}";
+            shift;;
 
         clone|init)
             "execute_$1" "${@:2}"
@@ -1140,6 +1209,7 @@ do
             exit;;
 
         is_source_space)
+            WSH_QUIET=YES
             check_workspace "is_source_space"
             exit;;
 
@@ -1163,12 +1233,8 @@ do
             exit;;
 
         dir_*_update|dir_run)
-            if [ -n "${WSH_KEEP_GOING}" ]
-            then
-                "$1" "${@:2}" || true
-            else
-                "$1" "${@:2}"
-            fi
+            initialize_yaml_tool
+            "$1" "${@:2}" || test -n "${WSH_KEEP_GOING}"
             exit;;
 
         dir_*)
@@ -1203,10 +1269,7 @@ do
                     yq)
                         case "${WSH_COMMAND_POLICY}" in
                             snap)
-                                if ! command -v "snap" > /dev/null
-                                then
-                                    apt_install snap
-                                fi
+                                command -v "snap" > /dev/null || apt_install snap
                                 snap_install yq
                                 ;;
                             download)
@@ -1214,21 +1277,15 @@ do
                                 chmod +x "${BIN_PATH}/yq"
                                 ;;
                             *)
-                                wsh_echo "Unsupported installation policy.";
-                                exit 4;;
+                                wsh_exit 4 "Unsupported installation policy.";;
                         esac;;
                     gojq)
                         case "${WSH_COMMAND_POLICY}" in
-                            apt)
-                                apt_install gojq
-                                ;;
-                            *)
-                                wsh_echo "Unsupported installation policy.";
-                                exit 5;;
+                            apt) apt_install gojq;;
+                            *)   wsh_exit 5 "Unsupported installation policy.";;
                         esac;;
                     auto)
-                        wsh_echo "Automatic yaml tool detection is not supported for this command.";
-                        exit 5;;
+                        wsh_exit 6 "Automatic yaml tool detection is not supported for this command.";;
                 esac
             fi
             exit;;
