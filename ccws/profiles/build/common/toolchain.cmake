@@ -23,12 +23,16 @@ set(CMAKE_CXX_COMPILER_WORKS    TRUE    CACHE BOOL "" FORCE)
 
 # override install prefix provided by colcon: colcon uses host directory
 # structure, cmake -- target directory structure, in general they do not match
-set(CMAKE_INSTALL_PREFIX        $ENV{CCWS_INSTALL_DIR_HOST} CACHE STRING "" FORCE)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX        $ENV{CCWS_INSTALL_DIR_HOST} CACHE STRING "" FORCE)
+endif()
 
-# some packages expect CATKIN_DEVEL_PREFIX to be set when compiling in 'catkin'
-# environment, colcon skips devel phase and does not set it
-# https://github.com/colcon/colcon-ros/issues/119
-set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORCE)
+if("$ENV{ROS_VERSION}" STREQUAL "1")
+    # some packages expect CATKIN_DEVEL_PREFIX to be set when compiling in 'catkin'
+    # environment, colcon skips devel phase and does not set it
+    # https://github.com/colcon/colcon-ros/issues/119
+    set(CATKIN_DEVEL_PREFIX         "${CMAKE_BINARY_DIR}/devel" CACHE STRING "" FORCE)
+endif()
 
 # ccws cmake utilities
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
@@ -39,8 +43,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 ###
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # -ffile-prefix-map: rewrite absolute paths to avoid leaks and reproduce builds, use `set substitute-path` in gdb if needed
-set(CMAKE_C_FLAGS "-fdiagnostics-color -ffile-prefix-map='$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "-fdiagnostics-color -ffile-prefix-map='$ENV{CCWS_SOURCE_DIR}/=/'" CACHE STRING "" FORCE)
+set(CCWS_COMMON_FLAGS "-fdiagnostics-color -ffile-prefix-map='$ENV{CCWS_SOURCE_DIR}/=/'")
+string(FIND "${CMAKE_CXX_FLAGS}" "${CCWS_COMMON_FLAGS}" FIND_RESULT)
+if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CCWS_COMMON_FLAGS}" CACHE STRING "" FORCE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_COMMON_FLAGS}" CACHE STRING "" FORCE)
+endif ()
 set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-strong" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
