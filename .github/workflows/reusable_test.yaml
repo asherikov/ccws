@@ -22,6 +22,11 @@ on:
                 required: false
                 default: ''
                 type: string
+            profiles:
+                required: false
+                default: '["static_checks", "scan_build", "reldebug", "addr_undef_sanitizers", "thread_sanitizer", "deb"]'
+                type: string
+
 
 defaults:
     run:
@@ -33,6 +38,7 @@ env:
 
 jobs:
     static:
+        if: ${{ contains(fromJSON(inputs.profiles), 'static_checks') }}
         container: asherikov/ccws_${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
@@ -49,7 +55,8 @@ jobs:
                 make wsupdate_pkgs_shallow
                 make
 
-    tidy:
+    scan_build:
+        if: ${{ contains(fromJSON(inputs.profiles), 'scan_build') }}
         container: asherikov/ccws_${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
@@ -69,6 +76,7 @@ jobs:
                 make build_all
 
     reldebug:
+        if: ${{ contains(fromJSON(inputs.profiles), 'reldebug') }}
         container: asherikov/ccws_${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
@@ -88,7 +96,8 @@ jobs:
                 make build_all
                 make wstest
 
-    addr_sanitizer:
+    addr_undef_sanitizers:
+        if: ${{ contains(fromJSON(inputs.profiles), 'addr_undef_sanitizers') }}
         container: asherikov/ccws_${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
@@ -106,6 +115,7 @@ jobs:
                 make wstest
 
     thread_sanitizer:
+        if: ${{ contains(fromJSON(inputs.profiles), 'thread_sanitizer') }}
         container: asherikov/ccws_${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
@@ -128,6 +138,7 @@ jobs:
                 make wstest
 
     deb:
+        if: ${{ contains(fromJSON(inputs.profiles), 'deb') }}
         uses: ./.github/workflows/reusable_deb.yaml
         with:
             distro: ${{ inputs.distro }}
