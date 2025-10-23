@@ -54,7 +54,6 @@ jobs:
               run: |
                 make set_repo_version REPO=${PACKAGE_GITHUB_REPO_URL} VERSION=${{ inputs.package_version }}
             - run: |
-                git config --system --add safe.directory '*'
                 make wsupdate_pkgs_shallow
                 apt update
                 make dep_install

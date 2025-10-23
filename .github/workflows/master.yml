@@ -84,6 +84,8 @@ jobs:
             - run: sudo apt upgrade --yes
             - run: ./ccws/scripts/bootstrap.sh
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
+              env:
+                CCACHE_DISABLE: true
 
     docker_jammy:
         runs-on: ubuntu-latest
