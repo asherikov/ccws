@@ -37,6 +37,7 @@ defaults:
 env:
     WORKSPACE_SRC: ${GITHUB_WORKSPACE}
     PACKAGE_GITHUB_REPO_URL: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
+    CCACHE_DISABLE: true
 
 jobs:
     deb:

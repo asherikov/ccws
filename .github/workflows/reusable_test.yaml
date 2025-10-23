@@ -43,6 +43,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: static_checks
+            CCACHE_DISABLE: true
         steps:
             - uses: actions/checkout@v5
               with:
@@ -61,6 +62,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: scan_build
+            CCACHE_DISABLE: true
         steps:
             - uses: actions/checkout@v5
               with:
@@ -81,6 +83,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: reldebug
+            CCACHE_DISABLE: true
         steps:
             - uses: actions/checkout@v5
               with:
@@ -102,6 +105,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: addr_undef_sanitizers
+            CCACHE_DISABLE: true
         steps:
             - uses: actions/checkout@v5
               with:
@@ -120,6 +124,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: thread_sanitizer
+            CCACHE_DISABLE: true
         steps:
             - uses: actions/checkout@v5
               with:
