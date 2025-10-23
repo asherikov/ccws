@@ -22,7 +22,7 @@ RUN \
     && apt upgrade -y \
     && ${APT_INSTALL} neovim screen git ssh python3 \
     && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
-    && git config --global --add safe.directory '*' \
+    && git config --system --add safe.directory '*' \
     && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts \
     && ssh-keyscan gitlab.com >> /etc/ssh/ssh_known_hosts
 
