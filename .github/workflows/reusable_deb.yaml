@@ -6,6 +6,10 @@ on:
                 required: false
                 default: noble
                 type: string
+            build_target:
+                required: false
+                default: build_all
+                type: string
             cloudsmith_repo:
                 required: false
                 default: ''
@@ -57,8 +61,7 @@ jobs:
                 make wsupdate_pkgs_shallow
                 apt update
                 make dep_install
-                # VENDOR=sharf VERSION=all are specified in workspace config (.ccws/config.mk)
-                make build_all BUILD_PROFILE=deb,reldebug JOBS=2
+                make ${{ inputs.build_target }} BUILD_PROFILE=deb,reldebug JOBS=2
               env:
                 EMAIL: example@example.com
                 AUTHOR: CI
