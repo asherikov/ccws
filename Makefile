@@ -236,4 +236,12 @@ graph_reverse: assert_PKG_arg_must_be_specified
 help:
 	@grep -v "^	" Makefile ${CCWS_DIR}/make/*.mk | grep -v "^ " | grep -v "^$$" | grep -v "^\." | grep -v ".mk:$$"
 
+qwen:
+	mkdir -p "${WORKSPACE_SRC}/.ccws/qwen"
+	echo "*" > "${WORKSPACE_SRC}/.ccws/qwen/.qwenignore"
+	docker run --rm -ti \
+		-v "${WORKSPACE_SRC}:/ccws_src" \
+		-v "${WORKSPACE_SRC}/.ccws/qwen:/root/.qwen/" \
+		ghcr.io/qwenlm/qwen-code /bin/bash -c "cd /ccws_src; qwen"
+
 .PHONY: build clean test install
