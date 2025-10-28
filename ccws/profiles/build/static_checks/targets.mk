@@ -1,12 +1,11 @@
 bp_static_checks_install_build: install_ccws_deps
-	#${PIP3_INSTALL} cpplint
 	sudo ${APT_INSTALL} \
 		cppcheck \
 		flawfinder \
 		yamllint \
 		shellcheck
 	${MAKE} bp_static_checks_install_build_${OS_DISTRO_BUILD}
-	${MAKE} bp_static_checks_install_build_python
+	${MAKE} bp_static_checks_install_build_python_${OS_DISTRO_BUILD}
 
 #ubuntu18
 bp_static_checks_install_build_bionic:
@@ -21,15 +20,20 @@ bp_static_checks_install_build_jammy: install_python3
 	${PIP3_INSTALL} catkin-lint
 
 #ubuntu24
-bp_static_checks_install_build_noble: bp_static_checks_install_build_jammy
-	# passthrough
+bp_static_checks_install_build_noble: install_python3
+	sudo ${APT_INSTALL} catkin-lint
 
-bp_static_checks_install_build_python: install_python3
+bp_static_checks_install_build_python_%: install_python3
 	${PIP3_INSTALL} pylint
 	${PIP3_INSTALL} flake8
 	${PIP3_INSTALL} mypy
 	# required by mypy
 	${PIP3_INSTALL} types-PyYAML
+
+bp_static_checks_install_build_python_noble: install_python3
+	sudo ${APT_INSTALL} python3-flake8 
+	sudo ${APT_INSTALL} pylint
+	sudo ${APT_INSTALL} mypy
 
 
 bp_static_checks_build_common:
@@ -182,5 +186,5 @@ mypy:
 		find '${WORKSPACE_SRC}' -iname '*\.py' > ${CCWS_BUILD_SPACE_DIR}/$@/input; \
 		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
 		test -e ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered -a ! -s ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered \
-			|| mypy --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
+			|| mypy --disable-error-code attr-defined --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
 

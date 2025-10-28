@@ -84,3 +84,9 @@ CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=constStatement \
 --suppress=duplInheritedMember"
 export CCWS_CPPCHECK_EXCEPTIONS
+
+
+##########################################################################################
+# mypy
+MYPY_CACHE_DIR=${CCWS_CACHE}/profiles/static_checks/mypy
+export MYPY_CACHE_DIR
