@@ -6,6 +6,10 @@ on:
                 required: false
                 default: noble
                 type: string
+            build_target:
+                required: false
+                default: build_all
+                type: string
             workspace_github_repo:
                 required: false
                 default: ${{ github.repository }}
@@ -75,7 +79,7 @@ jobs:
                 make wsupdate_pkgs_shallow
                 apt update
                 make dep_install
-                make build_all
+                make ${{ inputs.build_target }}
 
     reldebug:
         if: ${{ contains(fromJSON(inputs.profiles), 'reldebug') }}
@@ -96,7 +100,7 @@ jobs:
                 make wsupdate_pkgs_shallow
                 apt update
                 make dep_install
-                make build_all
+                make ${{ inputs.build_target }}
                 make wstest
 
     addr_undef_sanitizers:
@@ -115,7 +119,7 @@ jobs:
                 make wsupdate_pkgs_shallow
                 apt update
                 make dep_install
-                make build_all
+                make ${{ inputs.build_target }}
                 make wstest
 
     thread_sanitizer:
@@ -139,7 +143,7 @@ jobs:
                 echo "race:libfastcdr.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
                 apt update
                 make dep_install
-                make build_all
+                make ${{ inputs.build_target }}
                 make wstest
 
     deb:
@@ -151,3 +155,4 @@ jobs:
             workspace_version: ${{ inputs.workspace_version }}
             package_version: ${{ inputs.package_version }}
             package_github_repo: ${{ inputs.package_github_repo }}
+            build_target: ${{ inputs.build_target }}

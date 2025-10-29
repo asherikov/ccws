@@ -9,6 +9,12 @@ inputs:
         required: false
     registry_password:
         required: false
+    file:
+        required: false
+        default: ccws/examples/Dockerfile
+    tag:
+        required: false
+        default: ccws
 runs:
     using: "composite"
     steps: # https://github.com/marketplace/actions/build-and-push-docker-images
@@ -25,9 +31,9 @@ runs:
 
         - uses: docker/build-push-action@v6
           with:
-            file: ccws/examples/Dockerfile
+            file: ${{ inputs.file }}
             context: .
             push: ${{ inputs.push }}
-            tags: asherikov/ccws_${{ inputs.distro }}:latest,asherikov/ccws_${{ inputs.distro }}:${{ github.ref_name }}
+            tags: asherikov/${{ inputs.tag }}_${{ inputs.distro }}:latest,asherikov/${{ inputs.tag }}_${{ inputs.distro }}:${{ github.ref_name }}
             build-args: "BASE_IMAGE=ubuntu:${{ inputs.distro }}"
 

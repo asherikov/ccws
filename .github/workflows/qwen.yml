@@ -1,0 +1,15 @@
+on: workflow_dispatch
+
+jobs:
+    docker_noble:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'noble'
+                  push: true
+                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
+                  file: ccws/examples/Dockerfile.qwen
+                  tag: ccws_qwen
