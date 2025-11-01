@@ -5,4 +5,4 @@ ccws_rebase:
 
 grab_video:
 	test "${NAME}" != ""
-	ffmpeg -f x11grab -s 1920:1080 -i :1.0 -r 25 -vcodec libx264 ${ARTIFACTS_DIR}/`date +%Y_%m_%d__`${NAME}.mkv
+	ffmpeg -f x11grab -s 1920:1080 -i :1.0 -r 25 -vcodec libx264 ${CCWS_ARTIFACTS_DIR}/`date +%Y_%m_%d__`${NAME}.mkv

@@ -4,6 +4,7 @@ FROM ${BASE_IMAGE}
 # these would override CCWS commands
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
 ENV PIP3_INSTALL="python3 -m pip install"
+ENV CCWS_CACHE=/cache
 
 ENV PIP_CACHE_DIR=/cache/pip
 ENV DEBIAN_FRONTEND=noninteractive

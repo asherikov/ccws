@@ -1,11 +1,11 @@
 TEST_REGEX?=.*
-TEST_PKG_LIST=${CCWS_BUILD_SPACE_DIR}/ccws.tests.packages
-TEST_PKG_LIST_EXCEPT=${CCWS_BUILD_SPACE_DIR}/ccws.tests.exceptions.packages
+TEST_PKG_LIST=${CCWS_BUILD_DIR}/ccws.tests.packages
+TEST_PKG_LIST_EXCEPT=${CCWS_BUILD_DIR}/ccws.tests.exceptions.packages
 
 wslist_test:
 	@${MAKE_QUIET} wslist | sort > "${TEST_PKG_LIST}"
-	@(cat "${WORKSPACE_SRC}/.ccws/ccws.tests.exceptions.packages" 2> /dev/null | sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$$/d' || true) | sort > "${TEST_PKG_LIST_EXCEPT}"
-	@comm -23 "${TEST_PKG_LIST}" "${TEST_PKG_LIST_EXCEPT}" | ${CCWS_XARGS} sh -c "if [ -d '${CCWS_BUILD_SPACE_DIR}/{}' ]; then echo {}; fi"
+	@(cat "${CCWS_SOURCE_DIR}/.ccws/ccws.tests.exceptions.packages" 2> /dev/null | sed -e 's/[[:space:]]*#.*//' -e '/^[[:space:]]*$$/d' || true) | sort > "${TEST_PKG_LIST_EXCEPT}"
+	@comm -23 "${TEST_PKG_LIST}" "${TEST_PKG_LIST_EXCEPT}" | ${CCWS_XARGS} sh -c "if [ -d '${CCWS_BUILD_DIR}/{}' ]; then echo {}; fi"
 
 # generic test target, it is recommended to use more specific targets below
 wstest_generic:
@@ -28,7 +28,7 @@ wsctest:
 
 # this target uses colcon and unlike `ctest` target does not respect `--output-on-failure`
 test: assert_PKG_arg_must_be_specified
-	test ! -d '${CCWS_BUILD_SPACE_DIR}/${PKG}' \
+	test ! -d '${CCWS_BUILD_DIR}/${PKG}' \
 		|| (bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		colcon \
 		--log-base \$${CCWS_LOG_DIR} \
@@ -37,19 +37,19 @@ test: assert_PKG_arg_must_be_specified
 		--merge-install \
 		--executor sequential \
 		--ctest-args --output-on-failure -j ${JOBS} \
-		--build-base \"\$${CCWS_BUILD_SPACE_DIR}\" \
+		--build-base \"\$${CCWS_BUILD_DIR}\" \
 		--install-base \"\$${CCWS_INSTALL_DIR_BUILD}\" \
-		--base-paths "${WORKSPACE_SRC}" \
+		--base-paths "${CCWS_SOURCE_DIR}" \
 		--test-result-base \$${CCWS_LOG_DIR}/testing \
 		--packages-select ${PKG} )" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults)
-	test -d '${CCWS_BUILD_SPACE_DIR}/${PKG}' || echo "CCWS: ${PKG} was not built?"
+	test -d '${CCWS_BUILD_DIR}/${PKG}' || echo "CCWS: ${PKG} was not built?"
 
 ctest: assert_PKG_arg_must_be_specified
 	echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c \
 		"time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
-		cd \"\$${CCWS_BUILD_SPACE_DIR}/{}\"; \
+		cd \"\$${CCWS_BUILD_DIR}/{}\"; \
 		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_{}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
@@ -66,15 +66,15 @@ showtestresults: test_results
 test_results: assert_PKG_arg_must_be_specified
 	# shows fewer tests
 	echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_pkg PKG={}"
-	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_SPACE_DIR}/${PKG}"
+	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
 
 private_test_results_pkg: assert_PKG_arg_must_be_specified
 	@mkdir -p ${CCWS_ARTIFACTS_DIR}/${PKG}/
-	@cp -R ${CCWS_BUILD_SPACE_DIR}/${PKG}/Testing ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
-	@cp -R ${CCWS_BUILD_SPACE_DIR}/${PKG}/test_results ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
-	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_SPACE_DIR}/${PKG}
+	@cp -R ${CCWS_BUILD_DIR}/${PKG}/Testing ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
+	@cp -R ${CCWS_BUILD_DIR}/${PKG}/test_results ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
+	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_DIR}/${PKG}
 
 test_list: assert_PKG_arg_must_be_specified
 	bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE} \
-		&& echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} ctest --show-only --test-dir \"\$${CCWS_BUILD_SPACE_DIR}/{}\")"
+		&& echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} ctest --show-only --test-dir \"\$${CCWS_BUILD_DIR}/{}\")"
 

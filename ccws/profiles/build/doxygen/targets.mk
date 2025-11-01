@@ -14,7 +14,7 @@ bp_doxygen_build: doxclean assert_doxygen_installed
 		${MAKE_QUIET} wsstatus > \$${CCWS_DOXYGEN_WORKING_DIR}/wsstatus; \
         cd \$${CCWS_DOXYGEN_OUTPUT_DIR}; \
 		cp \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/pandoc/* ./; \
-		test ! -f \$${WORKSPACE_SRC}/README.md || cat \$${WORKSPACE_SRC}/README.md > index.md; \
+		test ! -f \$${CCWS_SOURCE_DIR}/README.md || cat \$${CCWS_SOURCE_DIR}/README.md > index.md; \
         cat \$${CCWS_DOXYGEN_CONFIG_DIR}/index_header.md >> index.md; \
 		find ./ -mindepth 2 -maxdepth 2 -name 'index.html' | sort \
 			| sed -e 's=./\(.*\)/index.html=| [\1](./\1/index.html) | [graph](./\1/pkg_dependency_graph.svg) | [graph](./\1/pkg_reverse_dependency_graph.svg) |=' >> index.md; \

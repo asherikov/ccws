@@ -1,5 +1,5 @@
 THIS_MAKEFILE=ccws/tests/test_main_ros2.mk
-WORKSPACE_SRC?=src
+TEST_SOURCE_DIR?=src
 
 export ROS_DISTRO?=foxy
 
@@ -61,10 +61,10 @@ test:
 	${MAKE} ros2param
 	# ---
 	# cppcheck
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}"
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
-	rm -Rf "${WORKSPACE_SRC}/.ccws"
+	rm -Rf "${TEST_SOURCE_DIR}/.ccws"
 	# ---
 	# static checks
 	-sudo apt purge flake8 # broken?
@@ -77,7 +77,7 @@ test_dependencies:
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} new PKG=test_dependencies
-	cp -R ccws/tests/dependencies/package.xml "${WORKSPACE_SRC}/test_dependencies"
+	cp -R ccws/tests/dependencies/package.xml "${TEST_SOURCE_DIR}/test_dependencies"
 	${MAKE} dep_install PKG=test_dependencies
 	${MAKE} wspurge
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
@@ -88,9 +88,9 @@ test_dependencies:
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
-	mv "${WORKSPACE_SRC}/examples" ./
-	rm -Rf "${WORKSPACE_SRC}"/*
-	mv examples "${WORKSPACE_SRC}"
+	mv "${TEST_SOURCE_DIR}/examples" ./
+	rm -Rf "${TEST_SOURCE_DIR}"/*
+	mv examples "${TEST_SOURCE_DIR}"
 
 test_deb:
 	${MAKE} bp_install_build BUILD_PROFILE=deb
@@ -102,11 +102,11 @@ test_deb:
 test_cmake_toolchain:
 	# workspace cmake toolchain
 	${MAKE} wsclean
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
-	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}/"
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${TEST_SOURCE_DIR}/.ccws/toolchain.cmake"
 	# should fail
 	! ${MAKE} examples_rclcpp_minimal_subscriber
-	rm -Rf "${WORKSPACE_SRC}/.ccws"
+	rm -Rf "${TEST_SOURCE_DIR}/.ccws"
 
 build_with_profile:
 	${MAKE} wsclean
@@ -120,8 +120,8 @@ build_with_profile:
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
 	# test exceptions
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}/"
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
-	rm -Rf "${WORKSPACE_SRC}/.ccws"
+	rm -Rf "${TEST_SOURCE_DIR}/.ccws"
 	bash -c "source setup.bash && ros2"

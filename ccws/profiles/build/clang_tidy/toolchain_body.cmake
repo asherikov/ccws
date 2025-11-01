@@ -8,7 +8,7 @@ find_program(CCWS_CLANG_TIDY_EXECUTABLE NAMES clang-tidy-$ENV{CCWS_LLVM_VERSION}
 set(CMAKE_CXX_COMPILER  clang++-$ENV{CCWS_LLVM_VERSION} CACHE STRING "" FORCE)
 set(CMAKE_C_COMPILER    clang-$ENV{CCWS_LLVM_VERSION}   CACHE STRING "" FORCE)
 
-set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY_EXECUTABLE};--config-file=$ENV{BUILD_PROFILES_DIR}/clang_tidy/clang_tidy_config.yaml;--header-filter=$ENV{WORKSPACE_SRC}/.*")
+set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY_EXECUTABLE};--config-file=$ENV{BUILD_PROFILES_DIR}/clang_tidy/clang_tidy_config.yaml;--header-filter=$ENV{CCWS_SOURCE_DIR}/.*")
 
 set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
 

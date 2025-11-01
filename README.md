@@ -61,6 +61,8 @@ Features
 - Based entirely on `make` and shell scripts. All scripts and configurations
   are kept in the workspace and easy to adjust for specific needs.
 
+- Integration with AI coding agent (`qwen`).
+
 
 Build profiles
 --------------
@@ -316,6 +318,25 @@ Extending `CCWS`
   `ccws/profiles/build/vendor/toolchain_suffix.cmake`.
 
 
+Coding agents
+-------------
+
+Basic integration with <https://github.com/QwenLM/qwen-code> is provided, which
+can be used in two ways:
+
+- `make qwen`: runs original <ghcr.io/qwenlm/qwen-code> docker container using
+  source space as the agent workspace.
+
+- `make qwen_ccws`: runs custom build container, see
+  `ccws/examples/Dockerfile.qwen` (`asherikov/ccws_qwen_noble` on docker hub),
+  which includes both `CCWS` and `qwen-code` allowing the agent to use `CCWS`
+  when executing commands. Source, build, install, and other directories are
+  mounted as volumes.
+
+In both cases `qwen` configuration is stored in `.ccws/qwen` directory of the
+source space. See `ccws/make/ai.mk` for more details.
+
+
 Known issues
 ============
 
@@ -438,6 +459,11 @@ Containers and images
 - Generate system images in layered, container-like fashion
   <https://osinside.github.io/kiwi/overview.html>.
 - Root filesystem for crosscompilation from a container.
+
+`CCWS` dependencies
+-------------------
+
+- Use venv for python dependencies.
 
 Bookmarks (not going to be supported)
 -------------------------------------

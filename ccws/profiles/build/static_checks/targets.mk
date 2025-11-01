@@ -73,11 +73,11 @@ cppcheck:
 	# header paths with `-I` flags but that is not trivial in a workspace,
 	# might require parsing compilation commands from cmake.
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find "${WORKSPACE_SRC}" -type f -iname '*.hpp' -or -iname "*.cpp" -or -iname "*.h" > ${CCWS_BUILD_SPACE_DIR}/$@/input
-	rm -f '${CCWS_BUILD_SPACE_DIR}/$@/cppcheck.err'
+	find "${CCWS_SOURCE_DIR}" -type f -iname '*.hpp' -or -iname "*.cpp" -or -iname "*.h" > ${CCWS_BUILD_DIR}/$@/input
+	rm -f '${CCWS_BUILD_DIR}/$@/cppcheck.err'
 	bash -c "${SETUP_SCRIPT}; \
-		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
+		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
 		cppcheck \
 			-j 1 \
 			--relative-paths \
@@ -92,8 +92,8 @@ cppcheck:
 			\$${CCWS_CPPCHECK_EXCEPTIONS} \
 			3>&1 1>&2 2>&3 \
 			{} \
-			| tee --append '${CCWS_BUILD_SPACE_DIR}/$@/cppcheck.err' "
-	test ! -s '${CCWS_BUILD_SPACE_DIR}/$@/cppcheck.err' || exit 1
+			| tee --append '${CCWS_BUILD_DIR}/$@/cppcheck.err' "
+	test ! -s '${CCWS_BUILD_DIR}/$@/cppcheck.err' || exit 1
 
 
 cpplint:
@@ -102,32 +102,32 @@ cpplint:
 		cpplint \
 		\$${EXCEPTIONS} \
 		--filter=-whitespace,-runtime/casting,-runtime/indentation_namespace,-readability/casting,-runtime/references,-readability/braces,-readability/namespace,-build/include_subdir,-build/header_guard,-build/include_order,-build/namespaces,-build/c++11,-readability/alt_tokens,-readability/todo,-build/include \
-		--quiet --recursive '${WORKSPACE_SRC}'"
+		--quiet --recursive '${CCWS_SOURCE_DIR}'"
 
 
 # internal target
 static_checks_generic_dir_filter:
-	mkdir -p ${CCWS_BUILD_SPACE_DIR}/${TARGET}
-	echo -n "test -f ${CCWS_BUILD_SPACE_DIR}/${TARGET}/input && (cat ${CCWS_BUILD_SPACE_DIR}/${TARGET}/input" > ${CCWS_BUILD_SPACE_DIR}/${TARGET}/filter
+	mkdir -p ${CCWS_BUILD_DIR}/${TARGET}
+	echo -n "test -f ${CCWS_BUILD_DIR}/${TARGET}/input && (cat ${CCWS_BUILD_DIR}/${TARGET}/input" > ${CCWS_BUILD_DIR}/${TARGET}/filter
 	bash -c "${SETUP_SCRIPT}; \
-		echo -n \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${CCWS_BUILD_SPACE_DIR}/${TARGET}/filter"
-	echo -n " || true)" >> ${CCWS_BUILD_SPACE_DIR}/${TARGET}/filter
+		echo -n \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ :/g' -e 's=:\([[:graph:]]*\)= | grep -v \"\1\" =g' >> ${CCWS_BUILD_DIR}/${TARGET}/filter"
+	echo -n " || true)" >> ${CCWS_BUILD_DIR}/${TARGET}/filter
 
 
 flawfinder:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find "${WORKSPACE_SRC}" -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${CCWS_BUILD_SPACE_DIR}/$@/input
+	find "${CCWS_SOURCE_DIR}" -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${CCWS_BUILD_DIR}/$@/input
 	bash -c " \
-		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
+		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
 
 
 yamllint:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
-	find "${WORKSPACE_SRC}" -type f -iname '*.yaml' > ${CCWS_BUILD_SPACE_DIR}/$@/input
+	find "${CCWS_SOURCE_DIR}" -type f -iname '*.yaml' > ${CCWS_BUILD_DIR}/$@/input
 	bash -c "${SETUP_SCRIPT}; \
-		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
+		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
                       rules: { \
                         colons: {max-spaces-before: 0, max-spaces-after: -1}, \
@@ -148,10 +148,10 @@ shellcheck:
 		( find ${CCWS_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${CCWS_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${WORKSPACE_DIR} -maxdepth 2 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
-			&& find "${WORKSPACE_SRC}" -iname '*.sh' -or -iname '*.bash' ) \
-			> ${CCWS_BUILD_SPACE_DIR}/$@/input; \
-		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
+			&& find "${CCWS_SOURCE_DIR}" -iname '*.sh' -or -iname '*.bash' ) \
+			> ${CCWS_BUILD_DIR}/$@/input; \
+		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 
 
 catkin_lint:
@@ -165,24 +165,24 @@ catkin_lint:
 		\$${CCWS_CATKIN_LINT_EXCEPTIONS} \
 		\$${DIR_EXCEPTIONS} \
 		\$${PKG_EXCEPTIONS} \
-		'${WORKSPACE_SRC}'"
+		'${CCWS_SOURCE_DIR}'"
 
 pylint:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/^://' -e 's/:/,/g'); \
-		pylint --rcfile \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_SRC}'"
+		pylint --rcfile \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/pylintrc --jobs ${JOBS} --ignore-paths \"\$${DIR_EXCEPTIONS}\" '${CCWS_SOURCE_DIR}'"
 
 flake8:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/^://' -e 's/:/,/g'); \
-		flake8 --config \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/flake8 --exclude \"\$${DIR_EXCEPTIONS}\" '${WORKSPACE_SRC}'"
+		flake8 --config \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/flake8 --exclude \"\$${DIR_EXCEPTIONS}\" '${CCWS_SOURCE_DIR}'"
 
 mypy:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@
 	bash -c "${SETUP_SCRIPT}; \
-		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${WORKSPACE_SRC}==g'); \
-		find '${WORKSPACE_SRC}' -iname '*\.py' > ${CCWS_BUILD_SPACE_DIR}/$@/input; \
-		source ${CCWS_BUILD_SPACE_DIR}/$@/filter > ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered; \
-		test -e ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered -a ! -s ${CCWS_BUILD_SPACE_DIR}/$@/input.filtered \
-			|| mypy --disable-error-code attr-defined --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${WORKSPACE_SRC}'"
+		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/:/ --exclude /g' -e 's=${CCWS_SOURCE_DIR}==g'); \
+		find '${CCWS_SOURCE_DIR}' -iname '*\.py' > ${CCWS_BUILD_DIR}/$@/input; \
+		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
+		test -e ${CCWS_BUILD_DIR}/$@/input.filtered -a ! -s ${CCWS_BUILD_DIR}/$@/input.filtered \
+			|| mypy --disable-error-code attr-defined --namespace-packages --explicit-package-bases --ignore-missing-imports \$${DIR_EXCEPTIONS} '${CCWS_SOURCE_DIR}'"
 

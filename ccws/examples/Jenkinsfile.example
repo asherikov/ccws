@@ -33,7 +33,7 @@ pipeline {
                 // 1. Get ccws, it can also be included in the container
                 // 2. Get workspace
                 // 3. cd to ccws root and update packages
-                sh 'make wsupdate_shallow WORKSPACE_SRC=...'
+                sh 'make wsupdate_shallow CCWS_SOURCE_DIR=...'
             }
         }
 

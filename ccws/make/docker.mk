@@ -1,6 +1,6 @@
 CCWS_DOCKER_BASE_IMAGE?=ros:noetic-ros-base
-CCWS_DOCKER_TAG?=$(shell cat "${WORKSPACE_SRC}/.ccws/docker")
-CCWS_DOCKER_FILE?="${WORKSPACE_SRC}/.ccws/Dockerfile"
+CCWS_DOCKER_TAG?=$(shell cat "${CCWS_SOURCE_DIR}/.ccws/docker")
+CCWS_DOCKER_FILE?="${CCWS_SOURCE_DIR}/.ccws/Dockerfile"
 
 export BUILDKIT_PROGRESS=plain
 

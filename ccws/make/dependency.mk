@@ -49,7 +49,7 @@ private_dep_list:
 # `colcon info --packages-up-to <pkg>` is buggy -> https://github.com/colcon/colcon-core/issues/443
 private_info_with_deps:
 	${MAKE_QUIET} wslist \
-		| xargs colcon --log-base /dev/null info --base-paths ${WORKSPACE_SRC} --packages-select
+		| xargs colcon --log-base /dev/null info --base-paths ${CCWS_SOURCE_DIR} --packages-select
 
 private_info_with_deps_all:
 	${MAKE_QUIET} private_info_with_deps \

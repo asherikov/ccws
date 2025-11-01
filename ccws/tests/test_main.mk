@@ -1,5 +1,5 @@
 THIS_MAKEFILE=ccws/tests/test_main.mk
-WORKSPACE_SRC?=src
+TEST_SOURCE_DIR?=src
 
 test:
 	# ---
@@ -50,20 +50,20 @@ test:
 	${MAKE} cache_clean
 	# ---
 	# cppcheck
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}"
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} BUILD_PROFILE=cppcheck BASE_BUILD_PROFILE=reldebug
-	rm -Rf "${WORKSPACE_SRC}/.ccws"
+	rm -Rf "${TEST_SOURCE_DIR}/.ccws"
 	# ---
 	# static checks
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
 	# must fail without exceptions
 	! ${MAKE} BUILD_PROFILE=static_checks
 	# must succeed with exceptions
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}"
 	${MAKE} BUILD_PROFILE=static_checks
 	# must succeed without package exceptions
-	rm "${WORKSPACE_SRC}/.ccws/static_checks.exceptions.packages"
+	rm "${TEST_SOURCE_DIR}/.ccws/static_checks.exceptions.packages"
 	${MAKE} BUILD_PROFILE=static_checks
 
 test_dependencies:
@@ -90,18 +90,18 @@ test_deb:
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
-	mv "${WORKSPACE_SRC}/staticoma" ./
-	rm -Rf "${WORKSPACE_SRC}"/*
-	mv staticoma "${WORKSPACE_SRC}"
+	mv "${TEST_SOURCE_DIR}/staticoma" ./
+	rm -Rf "${TEST_SOURCE_DIR}"/*
+	mv staticoma "${TEST_SOURCE_DIR}"
 	${MAKE} dep_install
 
 test_cmake_toolchain:
 	# workspace cmake toolchain
-	cp -R ccws/examples/.ccws "${WORKSPACE_SRC}/"
-	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${WORKSPACE_SRC}/.ccws/toolchain.cmake"
+	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}/"
+	echo 'message(FATAL_ERROR "toolchain inclusion")' > "${TEST_SOURCE_DIR}/.ccws/toolchain.cmake"
 	# should fail
 	! ${MAKE} staticoma
-	rm -Rf "${WORKSPACE_SRC}/.ccws"
+	rm -Rf "${TEST_SOURCE_DIR}/.ccws"
 
 build_with_profile:
 	${MAKE} wsclean
