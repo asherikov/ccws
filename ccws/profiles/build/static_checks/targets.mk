@@ -31,7 +31,7 @@ bp_static_checks_install_build_python_%: install_python3
 	${PIP3_INSTALL} types-PyYAML
 
 bp_static_checks_install_build_python_noble: install_python3
-	sudo ${APT_INSTALL} flake8 pylint mypy
+	sudo ${APT_INSTALL} flake8 pylint mypy python3-typeshed
 
 
 bp_static_checks_build_common:

@@ -361,6 +361,10 @@ Known issues
   debian packages. Newer version of `proot` has to be used, see
   <https://github.com/proot-me/proot/issues/312>.
 
+- Workspace prefix is cropped from paths in debug info, you have to set path
+  substitutions in gdb to resolve them correctly
+  `set substitute-path / <path_to_wrokspace>`.
+
 
 Related software
 ================
@@ -418,7 +422,6 @@ Static checks
 Dynamic checks
 --------------
 
-- Add memory sanitizer profile as an alternative to `valgrind`.
 - Execution profile with <https://github.com/yugr/libdebugme> to automatically
   start debugger on a signal.
 - <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
@@ -427,9 +430,9 @@ Dynamic checks
 Build performance
 -----------------
 
-- Replace `ccache` with <https://github.com/mbitsnbites/buildcache>.
+- Replace `ccache` with <https://gitlab.com/bits-n-bites/buildcache>.
 - <https://github.com/ejfitzgerald/clang-tidy-cache> or
-  <https://github.com/mbitsnbites/buildcache> can be used to cache `clang-tidy`
+  <https://gitlab.com/bits-n-bites/buildcache> can be used to cache `clang-tidy`
   runs.
 - Cache cmake checks with <https://github.com/cristianadam/cmake-checks-cache>,
   <https://github.com/polysquare/cmake-forward-cache> might be useful too.
