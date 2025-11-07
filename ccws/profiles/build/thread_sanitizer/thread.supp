@@ -6,3 +6,6 @@ race:libtsan.so.0
 
 #Mutex ... is already destroyed.
 mutex:libfastrtps.so.*
+
+race:libfastrtps.so.*
+race:libfastcdr.so.*
