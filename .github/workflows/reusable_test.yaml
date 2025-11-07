@@ -38,7 +38,6 @@ defaults:
 
 env:
     WORKSPACE_SRC: ${GITHUB_WORKSPACE}
-    GITHUB_REPO: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
 
 jobs:
     static:
@@ -49,16 +48,14 @@ jobs:
             BUILD_PROFILE: static_checks
             CCACHE_DISABLE: true
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                repository: ${{ inputs.workspace_github_repo }}
-                ref: ${{ inputs.workspace_version }}
-            - if: ${{ inputs.package_github_repo != '' }}
-              run: |
-                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
-            - run: |
-                make wsupdate_pkgs_shallow
-                make
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
+                  install_deps: false
+            - run: make
 
     scan_build:
         if: ${{ contains(fromJSON(inputs.profiles), 'scan_build') }}
@@ -68,17 +65,13 @@ jobs:
             BUILD_PROFILE: scan_build
             CCACHE_DISABLE: true
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                repository: ${{ inputs.workspace_github_repo }}
-                ref: ${{ inputs.workspace_version }}
-            - if: ${{ inputs.package_github_repo != '' }}
-              run: |
-                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
             - run: |
-                make wsupdate_pkgs_shallow
-                apt update
-                make dep_install
                 make ${{ inputs.build_target }}
 
     reldebug:
@@ -89,17 +82,13 @@ jobs:
             BUILD_PROFILE: reldebug
             CCACHE_DISABLE: true
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                repository: ${{ inputs.workspace_github_repo }}
-                ref: ${{ inputs.workspace_version }}
-            - if: ${{ inputs.package_github_repo != '' }}
-              run: |
-                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
             - run: |
-                make wsupdate_pkgs_shallow
-                apt update
-                make dep_install
                 make ${{ inputs.build_target }}
                 make wstest
 
@@ -111,14 +100,14 @@ jobs:
             BUILD_PROFILE: addr_undef_sanitizers
             CCACHE_DISABLE: true
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                repository: ${{ inputs.workspace_github_repo }}
-                ref: ${{ inputs.workspace_version }}
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
+                  install_deps: true
             - run: |
-                make wsupdate_pkgs_shallow
-                apt update
-                make dep_install
                 make ${{ inputs.build_target }}
                 make wstest
 
@@ -130,19 +119,15 @@ jobs:
             BUILD_PROFILE: thread_sanitizer
             CCACHE_DISABLE: true
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                repository: ${{ inputs.workspace_github_repo }}
-                ref: ${{ inputs.workspace_version }}
-            - if: ${{ inputs.package_github_repo != '' }}
-              run: |
-                make set_repo_version REPO=${GITHUB_REPO} VERSION=${{ inputs.package_version }}
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
             - run: |
-                make wsupdate_pkgs_shallow
                 echo "race:libfastrtps.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
                 echo "race:libfastcdr.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
-                apt update
-                make dep_install
                 make ${{ inputs.build_target }}
                 make wstest
 

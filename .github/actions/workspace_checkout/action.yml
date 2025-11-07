@@ -1,0 +1,65 @@
+# https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action
+name: 'Workspace checkout action'
+inputs:
+    workspace_github_repo:
+        required: false
+        default: ${{ github.repository }}
+        type: string
+    workspace_version:
+        required: false
+        default: ${{ github.sha }}
+        type: string
+    package_github_repo:
+        required: false
+        default: ''
+        type: string
+    package_version:
+        required: false
+        default: ''
+        type: string
+    install_deps:
+        required: false
+        default: true
+        type: bool
+
+runs:
+    using: "composite"
+    steps:
+        - if: ${{ inputs.workspace_github_repo != '' }}
+          uses: actions/checkout@v5
+          with:
+            repository: ${{ inputs.workspace_github_repo }}
+            ref: ${{ inputs.workspace_version }}
+        - if: ${{ (inputs.workspace_github_repo == '') && (inputs.package_github_repo != '') }}
+          shell: bash
+          env:
+              WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+          run: |
+              cd /ccws
+              make wsinit
+              make add REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git VERSION=${{ inputs.package_version }}
+        - if: ${{ (inputs.workspace_github_repo != '') && (inputs.package_github_repo != '') }}
+          shell: bash
+          env:
+              WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+          run: |
+              cd /ccws
+              make set_repo_version REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git VERSION=${{ inputs.package_version }}
+        - run: |
+              cd /ccws
+              ls -la
+              pwd
+              echo ${{ inputs.workspace_github_repo }}
+              echo ${{ inputs.workspace_version }}
+              make wsupdate_pkgs_shallow
+          env:
+              WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+          shell: bash
+        - if: ${{ inputs.install_deps }}
+          shell: bash
+          env:
+              WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+          run: |
+              cd /ccws
+              apt update
+              make dep_install

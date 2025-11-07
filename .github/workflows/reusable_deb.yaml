@@ -50,17 +50,13 @@ jobs:
             image: asherikov/ccws_${{ inputs.distro }}
             options: --security-opt seccomp:unconfined
         steps:
-            - uses: actions/checkout@v5
+            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
               with:
-                ref: ${{ inputs.workspace_version }}
-                repository: ${{ inputs.workspace_github_repo }}
-            - if: ${{ inputs.package_github_repo != '' }}
-              run: |
-                make set_repo_version REPO=${PACKAGE_GITHUB_REPO_URL} VERSION=${{ inputs.package_version }}
+                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
+                  workspace_version: ${{ inputs.workspace_version }}
+                  package_github_repo: ${{ inputs.package_github_repo }}
+                  package_version: ${{ inputs.package_version }}
             - run: |
-                make wsupdate_pkgs_shallow
-                apt update
-                make dep_install
                 make ${{ inputs.build_target }} BUILD_PROFILE=deb,reldebug JOBS=2
               env:
                 EMAIL: example@example.com
