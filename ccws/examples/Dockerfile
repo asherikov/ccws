@@ -40,14 +40,4 @@ RUN \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
 --mount=type=cache,target=/cache/pip,sharing=locked \
     ./ccws/scripts/bootstrap.sh \
-    && make ep_install EXEC_PROFILE=valgrind \
-    && make bp_install_build BUILD_PROFILE=addr_undef_sanitizers \
-    && make bp_install_build BUILD_PROFILE=clangd \
-    && make bp_install_build BUILD_PROFILE=cppcheck \
-    && make bp_install_build BUILD_PROFILE=cross_raspberry_pi \
-    && make bp_install_build BUILD_PROFILE=deb \
-    && make bp_install_build BUILD_PROFILE=doxygen \
-    && make bp_install_build BUILD_PROFILE=reldebug \
-    && make bp_install_build BUILD_PROFILE=scan_build \
-    && make bp_install_build BUILD_PROFILE=static_checks \
-    && make bp_install_build BUILD_PROFILE=thread_sanitizer
+    && make install_all_profiles

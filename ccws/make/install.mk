@@ -86,3 +86,16 @@ ep_%_install:
 download:
 	mkdir -p ${CCWS_CACHE}/${CCWS_DOWNLOAD_DIR}
 	cd ${CCWS_CACHE}/${CCWS_DOWNLOAD_DIR}; wget --progress=dot:giga --timestamping --no-check-certificate ${FILES}
+
+install_all_profiles:
+	${MAKE} ep_install EXEC_PROFILE=valgrind
+	${MAKE} bp_install_build BUILD_PROFILE=addr_undef_sanitizers
+	${MAKE} bp_install_build BUILD_PROFILE=clangd
+	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
+	${MAKE} bp_install_build BUILD_PROFILE=cross_raspberry_pi
+	${MAKE} bp_install_build BUILD_PROFILE=deb
+	${MAKE} bp_install_build BUILD_PROFILE=doxygen
+	${MAKE} bp_install_build BUILD_PROFILE=reldebug
+	${MAKE} bp_install_build BUILD_PROFILE=scan_build
+	${MAKE} bp_install_build BUILD_PROFILE=static_checks
+	${MAKE} bp_install_build BUILD_PROFILE=thread_sanitizer
