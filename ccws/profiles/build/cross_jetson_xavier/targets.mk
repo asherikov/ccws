@@ -36,17 +36,17 @@ private_cross_jetson_initialize_generic:
 	# 1. copy qemu in order to be able to do chroot
 	# 2. 'wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo chroot ./ apt-key add -;'
 	#    may not work, using workaround from https://github.com/Microsoft/WSL/issues/3286
-	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT}/usr/bin/
+	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/
 	# might be necessary in some docker environments
 	sudo update-binfmts --enable qemu-aarch64
 	# ROS keys
-	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/trusted.gpg.d/ros.gpg > /dev/null
-	echo 'deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main' | sudo chroot ${CCWS_SYSROOT} tee /etc/apt/sources.list.d/ros-latest.list
+	wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | gpg --dearmor | sudo chroot ${CCWS_SYSROOT_MOUNTPOINT} tee /etc/apt/trusted.gpg.d/ros.gpg > /dev/null
+	echo 'deb http://packages.ros.org/ros/ubuntu ${OS_DISTRO_BUILD} main' | sudo chroot ${CCWS_SYSROOT_MOUNTPOINT} tee /etc/apt/sources.list.d/ros-latest.list
 	# nvidia keys (we use ARCH=x86_64 since the package is not available form arm, but contains only configuration files)
 	${MAKE} download FILES="https://developer.download.nvidia.com/compute/cuda/repos/${DISTRO}/x86_64/${KEYRING_PKG}"
-	sudo cp ${CCWS_CACHE}/${KEYRING_PKG} ${CCWS_SYSROOT}/root/
-	sudo chroot ${CCWS_SYSROOT} dpkg -i /root/${KEYRING_PKG}
-	sudo rm -Rf ${CCWS_SYSROOT}/root/${KEYRING_PKG}
+	sudo cp ${CCWS_CACHE}/${KEYRING_PKG} ${CCWS_SYSROOT_MOUNTPOINT}/root/
+	sudo chroot ${CCWS_SYSROOT_MOUNTPOINT} dpkg -i /root/${KEYRING_PKG}
+	sudo rm -Rf ${CCWS_SYSROOT_MOUNTPOINT}/root/${KEYRING_PKG}
 	# repos may be commented out
-	sudo chroot ${CCWS_SYSROOT} sed -i 's/^# *deb/deb/' /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+	sudo chroot ${CCWS_SYSROOT_MOUNTPOINT} sed -i 's/^# *deb/deb/' /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
 

@@ -12,7 +12,7 @@ BINDS=( \
     --bind="${CCWS_CACHE}" \
     --bind="${CCWS_INSTALL_DIR_BUILD}:${CCWS_INSTALL_DIR_HOST}")
 
-if [ "${CCWS_SYSROOT}" != "/" ]
+if [ "${CCWS_SYSROOT_MOUNTPOINT}" != "/" ]
 then
     # bind mounting of /bin/ breaks stuff for some reason}
     BINDS+=( \
@@ -50,7 +50,7 @@ fi
 #pwd
 #echo "Command line: $@"
 # shellcheck disable=SC2086
-proot --rootfs="${CCWS_SYSROOT}" \
+proot --rootfs="${CCWS_SYSROOT_MOUNTPOINT}" \
     --cwd="$(pwd)" \
     ${IFS# profile specific args} \
     ${CCWS_PROOT_ARGS} \

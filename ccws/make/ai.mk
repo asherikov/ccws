@@ -13,8 +13,9 @@ qwen_ccws:
 		-v "${CCWS_CACHE}:/cache" \
 		-v ".gitignore:${WORKSPACE_DIR}/qwen/.qwenignore:ro" \
 		-v "${CCWS_SOURCE_DIR}:/ccws/workspace/src" \
-		-v "${CCWS_BUILD_DIR}:/ccws/workspace/build" \
-		-v "${CCWS_INSTALL_DIR}:/ccws/workspace/install" \
-		-v "${CCWS_ARTIFACTS_DIR}:/ccws/workspace/artifacts" \
 		-v "${CCWS_SOURCE_DIR}/.ccws/qwen:/root/.qwen/" \
+		-v "${CCWS_BUILD_DIR_BASE}:/ccws/workspace/build" \
+		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
+		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
+		-v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/artifacts" \
 		asherikov/ccws_qwen_noble

@@ -32,7 +32,7 @@ export ROS_OS_OVERRIDE
 ##########################################################################################
 # compiler paths
 #
-CCWS_COMPILER_ROOT_HOST="${CCWS_SYSROOT_DATA}/cross-pi-gcc"
+CCWS_COMPILER_ROOT_HOST="${CCWS_SYSROOT_DIR}/cross-pi-gcc"
 CCWS_COMPILER_ROOT_TARGET=/opt/cross-pi-gcc/
 
 export CCWS_COMPILER_ROOT_HOST CCWS_COMPILER_ROOT_TARGET

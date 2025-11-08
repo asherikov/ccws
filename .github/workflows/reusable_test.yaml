@@ -126,8 +126,6 @@ jobs:
                   package_github_repo: ${{ inputs.package_github_repo }}
                   package_version: ${{ inputs.package_version }}
             - run: |
-                echo "race:libfastrtps.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
-                echo "race:libfastcdr.so.*" >> /ccws/ccws/profiles/build/thread_sanitizer/thread.supp
                 make ${{ inputs.build_target }}
                 make wstest
 

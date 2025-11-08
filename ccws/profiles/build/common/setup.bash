@@ -69,10 +69,10 @@ export CCWS_DEB_ARCH
 
 if [ -n "${CROSS_PROFILE}" ]
 then
-    CCWS_SYSROOT_DATA="${WORKSPACE_DIR}/sysroot/${CROSS_PROFILE}"
-    CCWS_SYSROOT="$(realpath --canonicalize-missing "${CCWS_SYSROOT_DATA}/mountpoint")"
-    CCWS_CHROOT="chroot ${CCWS_SYSROOT}"
-    export CCWS_SYSROOT_DATA CCWS_SYSROOT CCWS_CHROOT
+    CCWS_SYSROOT_DIR="${CCWS_SYSROOT_DIR_BASE}/${CROSS_PROFILE}"
+    CCWS_SYSROOT_MOUNTPOINT="$(realpath --canonicalize-missing "${CCWS_SYSROOT_DIR}/mountpoint")"
+    CCWS_CHROOT="chroot ${CCWS_SYSROOT_MOUNTPOINT}"
+    export CCWS_SYSROOT_DIR CCWS_SYSROOT_MOUNTPOINT CCWS_CHROOT
 
     # host root in emulation
     CCWS_BUILD_ROOTFS=/host-rootfs/
@@ -83,8 +83,8 @@ then
 
     # system package search parameters TODO redundant?
     # needed for non-proot crosscompilation
-    #PKG_CONFIG_SYSROOT_DIR=${CCWS_SYSROOT}
-    #PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCWS_SYSROOT}/usr/lib/pkgconfig:${CCWS_SYSROOT}/usr/lib/${CCWS_TRIPLE}/pkgconfig:${CCWS_SYSROOT}/usr/share/pkgconfig"
+    #PKG_CONFIG_SYSROOT_DIR=${CCWS_SYSROOT_MOUNTPOINT}
+    #PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${CCWS_SYSROOT_MOUNTPOINT}/usr/lib/pkgconfig:${CCWS_SYSROOT_MOUNTPOINT}/usr/lib/${CCWS_TRIPLE}/pkgconfig:${CCWS_SYSROOT_MOUNTPOINT}/usr/share/pkgconfig"
     #PKG_CONFIG_SYSROOT_DIR=/
     PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/lib/${CCWS_TRIPLE}/pkgconfig:/usr/share/pkgconfig"
     export PKG_CONFIG_PATH
@@ -102,9 +102,9 @@ if [ -z "${ROS_DISTRO}" ];
 then
     # check installed ROS
     # CCWS_SYSROOT is empty in native builds and nonempty builds, so we are checking the host
-    if [ -d "${CCWS_SYSROOT}/opt/ros/" ];
+    if [ -d "${CCWS_SYSROOT_MOUNTPOINT}/opt/ros/" ];
     then
-        ROS_DISTRO=$(find "${CCWS_SYSROOT}/opt/ros/" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1 | xargs basename | sed 's=/==g')
+        ROS_DISTRO=$(find "${CCWS_SYSROOT_MOUNTPOINT}/opt/ros/" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1 | xargs basename | sed 's=/==g')
     fi
 
     # pick default based on the OS version

@@ -88,6 +88,15 @@ jobs:
               env:
                 CCACHE_DISABLE: true
 
+    noble_docker_cross:
+        runs-on: ubuntu-24.04
+
+        steps:
+            - uses: actions/checkout@v5
+            - run: make docker_install
+            - run: docker pull --platform linux/arm64 ubuntu:latest
+            - run: make docker_mountpoint PLATFORM=arm64 IMAGE=ubuntu:latest BUILD_PROFILE=cross_raspberry_pi
+
     docker_jammy:
         runs-on: ubuntu-latest
         steps:

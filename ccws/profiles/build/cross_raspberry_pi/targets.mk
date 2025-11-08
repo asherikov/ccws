@@ -9,7 +9,7 @@ bp_cross_raspberry_pi_install_build_compiler: assert_BUILD_PROFILE_must_be_cross
 	# gcc -> https://github.com/Pro/raspi-toolchain/
 	${MAKE} download FILES="https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz"
 	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCWS_SYSROOT_DATA}\"; \
+		cd \"\$${CCWS_SYSROOT_DIR}\"; \
 		tar -xf '${CCWS_CACHE}/raspi-toolchain.tar.gz'"
 
 bp_cross_raspberry_pi_get: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
@@ -18,7 +18,7 @@ bp_cross_raspberry_pi_get: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	# space to install ROS dependencies, it is possible to resize it, but not
 	# necessary for this demo
 	${MAKE} download FILES="http://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-05-28/2021-05-07-raspios-buster-armhf.zip"
-	bash -c "${SETUP_SCRIPT}; unzip -p '${CCWS_CACHE}/2021-05-07-raspios-buster-armhf.zip' > \"\$${CCWS_SYSROOT_DATA}/system.img\""
+	bash -c "${SETUP_SCRIPT}; unzip -p '${CCWS_CACHE}/2021-05-07-raspios-buster-armhf.zip' > \"\$${CCWS_SYSROOT_DIR}/system.img\""
 
 
 bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
@@ -30,7 +30,7 @@ bp_cross_raspberry_pi_initialize: assert_BUILD_PROFILE_must_be_cross_raspberry_p
 	#    apt-cache showpkg python-catkin-pkg
 	# 3. remove some heavy packages to get free space for ROS dependencies
 	bash -c "${SETUP_SCRIPT}; \
-		cd \"\$${CCWS_SYSROOT}\"; \
+		cd \"\$${CCWS_SYSROOT_MOUNTPOINT}\"; \
 		sudo cp /usr/bin/qemu-arm-static ./usr/bin/; \
 		sudo update-binfmts --enable qemu-arm; \
 		wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee ./etc/apt/trusted.gpg.d/ros.asc; \
@@ -54,17 +54,17 @@ bp_cross_raspberry_pi_mount: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	${MAKE} wswraptarget TARGET=private_cross_mount_specialfs
 
 private_bp_cross_raspberry_pi_purge:
-	rm -Rf "${CCWS_SYSROOT_DATA}/system.img"
-	rm -Rf "${CCWS_SYSROOT_DATA}/cross-pi-gcc"
+	rm -Rf "${CCWS_SYSROOT_DIR}/system.img"
+	rm -Rf "${CCWS_SYSROOT_DIR}/cross-pi-gcc"
 
 bp_cross_raspberry_pi_build: private_cross_build
 	# redirection
 
 private_bp_cross_raspberry_pi_pack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
-	cd "${CCWS_SYSROOT_DATA}"; \
+	cd "${CCWS_SYSROOT_DIR}"; \
 		tar -cjf "${CCWS_ARTIFACTS_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}_image.tar.bz2" system.img cross-pi-gcc
 
 private_bp_cross_raspberry_pi_unpack: assert_BUILD_PROFILE_must_be_cross_raspberry_pi
-	cd "${CCWS_SYSROOT_DATA}"; \
+	cd "${CCWS_SYSROOT_DIR}"; \
 		tar -xf "${CCWS_ARTIFACTS_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}_image.tar.bz2"
