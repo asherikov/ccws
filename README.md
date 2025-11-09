@@ -83,11 +83,14 @@ profiles:
 - `static_checks` -- static checkers and their configuration.
 - `doxygen` -- doxygen and its configuration.
 - `cross_raspberry_pi` -- cross-compilation for Raspberry Pi.
-- `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
-- `cross_jetson_nano` -- cross-compilation for Jetson Nano.
+- `cross_arm64` -- cross-compilation for arm64 (using docker containers).
 - `clangd` -- collects compilation commands from another profile and generates
   clangd configuration file in the workspace root.
 - `deb` -- debian package generation (see below).
+
+Legacy:
+- `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
+- `cross_jetson_nano` -- cross-compilation for Jetson Nano.
 
 
 Execution profiles
@@ -243,38 +246,41 @@ cross-compilation profiles.
 Cross-compilation
 -----------------
 
-Here `<profile>` stands for `cross_raspberry_pi`, `cross_jetson_xavier`,
-`cross_jetson_nano`. Cross-compilation make targets can be found in
-`ccws/make/cross.mk` and `ccws/profiles/<profile>/targets.mk`
+Here `<profile>` stands for `cross_raspberry_pi`, `cross_arm64`.
+Cross-compilation make targets can be found in `ccws/make/cross.mk` and
+`ccws/profiles/<profile>/targets.mk`
 
-Note on `cross_jetson_xavier` and `cross_jetson_nano`: these profiles require
-Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this in a
-container.
+Note on legacy `cross_jetson_xavier` and `cross_jetson_nano`: these profiles
+require Ubuntu 18.04 / ROS melodic and install `nvcc`, you may want to do this
+in a container.
 
 The general workflow is documented below, for more technical details see
-`ccws/doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`:
+`ccws/doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`
+(ROS1) and `.ccws/test_cross_ros2.mk` (ROS2):
 
 1. Install profile dependencies with `make bp_install_build
    BUILD_PROFILE=<profile>`
 2. Obtain system image:
     - `cross_raspberry_pi` -- `bp_install_build` target automatically
       downloads standard image;
+    - `cross_arm64` -- use `docker_mountpoint` `make` target, which extracts
+      root filesystem from a docker image;
     - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
       these images automatically, you have to manualy copy system partition
       image to `ccws/profiles/cross_jetson_xavier/system.img`.
 3. Initialize source repositories:
     - `make wsinit REPOS="https://github.com/asherikov/staticoma.git"`
-    - [when building all ROS packages] add ROS dependencies of all your
-      packages to the workspace `make dep_to_repolist ROS_DISTRO=melodic`,
-      or a specific package
-      `make dep_to_repolist PKG=<pkg> ROS_DISTRO=melodic`;
+    - [when building all ROS1 packages (does not work with ROS2)] add ROS1
+      dependencies of all your packages to the workspace `make dep_to_repolist
+      ROS_DISTRO=melodic`, or a specific package `make dep_to_repolist
+      PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
 4. Install system dependencies of packages in your workspace to the system
    image: `make cross_install PKG=staticoma BUILD_PROFILE=<profile> ROS_DISTRO=<distro>`
 5. Compile packages:
     - mount sysroot with `make cross_mount BUILD_PROFILE=<profile>`
     - build packages, e.g. `make staticoma BUILD_PROFILE=<profile>` or build and
-      generate deb package `make deb PKG=staticoma BUILD_PROFILE=<profile>`
+      generate deb package `make PKG=staticoma BUILD_PROFILE=deb,<profile>`
     - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
 
 

@@ -18,7 +18,7 @@ scan-build-${CCWS_LLVM_VERSION} \
 --use-c++=/usr/bin/clang++-${CCWS_LLVM_VERSION} \
 -o ${CCWS_ARTIFACTS_DIR} \
 --status-bugs \
---exclude ${WORKSPACE_DIR}/build \
+--exclude ${CCWS_BUILD_DIR_BASE} \
 --exclude /usr/include/ \
 --exclude /usr/src/ \
 --exclude /opt/ros/ \

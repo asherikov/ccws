@@ -22,7 +22,7 @@ bp_cppcheck_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFI
 			-i /usr \
 			\$${CCWS_CPPCHECK_EXCEPTIONS} \
 			--suppressions-list='${CCWS_BUILD_DIR}/suppressions' \
-			--project='${WORKSPACE_DIR}/build/${CCWS_SECONDARY_BUILD_PROFILE}/compile_commands.json' \
+			--project='${CCWS_BUILD_DIR_BASE}/${CCWS_SECONDARY_BUILD_PROFILE}/compile_commands.json' \
 			3>&1 1>&2 2>&3 \
 			| tee --append '${CCWS_BUILD_DIR}/cppcheck.err' "
 	test ! -s '${CCWS_BUILD_DIR}/cppcheck.err' || exit 1

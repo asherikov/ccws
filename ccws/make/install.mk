@@ -93,6 +93,7 @@ install_all_profiles:
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
 	${MAKE} bp_install_build BUILD_PROFILE=cross_raspberry_pi
+	${MAKE} bp_install_build BUILD_PROFILE=cross_arm64
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
 	${MAKE} bp_install_build BUILD_PROFILE=reldebug

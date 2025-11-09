@@ -112,3 +112,6 @@ cross_purge:
 cross_python_soabi: assert_CCWS_SYSROOT_must_be_mounted
 	printf "from sysconfig import get_config_var\nprint(get_config_var('SOABI'))\n" \
 		| bash -c "${SETUP_SCRIPT}; sudo chroot \"\$${CCWS_SYSROOT_MOUNTPOINT}\" python3"
+
+cross_apt_upgrade: assert_CCWS_SYSROOT_must_be_mounted
+	bash -c "${SETUP_SCRIPT}; sudo chroot \"\$${CCWS_SYSROOT_MOUNTPOINT}\" apt upgrade -y"

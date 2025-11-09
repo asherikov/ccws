@@ -9,6 +9,9 @@ done
 BINDS=( \
     --bind="${CCWS_DIR}" \
     --bind="${WORKSPACE_DIR}" \
+    --bind="${CCWS_SOURCE_DIR}" \
+    --bind="${CCWS_BUILD_DIR_BASE}" \
+    --bind="${CCWS_ARTIFACTS_DIR_BASE}" \
     --bind="${CCWS_CACHE}" \
     --bind="${CCWS_INSTALL_DIR_BUILD}:${CCWS_INSTALL_DIR_HOST}")
 

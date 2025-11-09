@@ -11,7 +11,7 @@ qwen_ccws:
 	docker run --rm -ti \
 		-e "CCWS_CACHE=/cache" \
 		-v "${CCWS_CACHE}:/cache" \
-		-v ".gitignore:${WORKSPACE_DIR}/qwen/.qwenignore:ro" \
+		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${CCWS_SOURCE_DIR}:/ccws/workspace/src" \
 		-v "${CCWS_SOURCE_DIR}/.ccws/qwen:/root/.qwen/" \
 		-v "${CCWS_BUILD_DIR_BASE}:/ccws/workspace/build" \

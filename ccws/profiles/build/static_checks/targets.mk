@@ -147,7 +147,7 @@ shellcheck:
 	bash -c "${SETUP_SCRIPT}; \
 		( find ${CCWS_DIR}/profiles/ -maxdepth 3 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
 			&& find ${CCWS_DIR}/scripts -type f \( -iname '*.sh' -or -iname '*.bash' \) \
-			&& find ${WORKSPACE_DIR} -maxdepth 2 -type f \( -iname '*.sh' -or -iname '*.bash' \) \
+			&& echo "${CCWS_ROOT}/setup.bash" \
 			&& find "${CCWS_SOURCE_DIR}" -iname '*.sh' -or -iname '*.bash' ) \
 			> ${CCWS_BUILD_DIR}/$@/input; \
 		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
