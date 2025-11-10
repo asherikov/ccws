@@ -37,7 +37,7 @@ defaults:
         working-directory: /ccws
 
 env:
-    WORKSPACE_SRC: ${GITHUB_WORKSPACE}
+    WORKSPACE_SRC: ${GITHUB_WORKSPACE}/src
 
 jobs:
     static:
@@ -48,13 +48,12 @@ jobs:
             BUILD_PROFILE: static_checks
             CCACHE_DISABLE: true
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
-                  install_deps: false
+            - run: |
+                make checkout_src \
+                    SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                    SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                    PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                    PKG_VERSION=${{ inputs.package_version }}
             - run: make
 
     scan_build:
@@ -65,12 +64,14 @@ jobs:
             BUILD_PROFILE: scan_build
             CCACHE_DISABLE: true
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
+            - run: |
+                make checkout_src \
+                    SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                    SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                    PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                    PKG_VERSION=${{ inputs.package_version }}
+                sudo apt update
+                make dep_install
             - run: |
                 make ${{ inputs.build_target }}
 
@@ -82,12 +83,14 @@ jobs:
             BUILD_PROFILE: reldebug
             CCACHE_DISABLE: true
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
+            - run: |
+                make checkout_src \
+                    SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                    SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                    PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                    PKG_VERSION=${{ inputs.package_version }}
+                sudo apt update
+                make dep_install
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest
@@ -100,13 +103,14 @@ jobs:
             BUILD_PROFILE: addr_undef_sanitizers
             CCACHE_DISABLE: true
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
-                  install_deps: true
+            - run: |
+                make checkout_src \
+                    SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                    SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                    PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                    PKG_VERSION=${{ inputs.package_version }}
+                sudo apt update
+                make dep_install
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest
@@ -119,12 +123,14 @@ jobs:
             BUILD_PROFILE: thread_sanitizer
             CCACHE_DISABLE: true
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
+            - run: |
+                make checkout_src \
+                    SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                    SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                    PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                    PKG_VERSION=${{ inputs.package_version }}
+                sudo apt update
+                make dep_install
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest

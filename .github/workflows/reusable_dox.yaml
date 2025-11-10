@@ -31,7 +31,7 @@ jobs:
                 git config --global user.email github-actions@github.com
             - run: |
                 cd /ccws
-                export WORKSPACE_SRC=${GITHUB_WORKSPACE}
+                export WORKSPACE_SRC=${GITHUB_WORKSPACE}/src
                 make wsupdate_pkgs_shallow
                 make
               env:

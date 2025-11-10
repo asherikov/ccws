@@ -30,48 +30,58 @@ on:
                 required: false
                 default: ''
                 type: string
+            profile:
+                required: false
+                default: 'reldebug'
+                type: string
         secrets:
             cloudsmith_token:
                 required: false
 
-defaults:
-    run:
-        working-directory: /ccws
-
-env:
-    WORKSPACE_SRC: ${GITHUB_WORKSPACE}
-    PACKAGE_GITHUB_REPO_URL: ${{ github.server_url }}/${{ inputs.package_github_repo }}.git
-    CCACHE_DISABLE: true
-
 jobs:
     deb:
         runs-on: ubuntu-latest
-        container:
-            image: asherikov/ccws_${{ inputs.distro }}
-            options: --security-opt seccomp:unconfined
         steps:
-            - uses: asherikov/ccws/.github/actions/workspace_checkout@master
-              with:
-                  workspace_github_repo: ${{ inputs.workspace_github_repo }}
-                  workspace_version: ${{ inputs.workspace_version }}
-                  package_github_repo: ${{ inputs.package_github_repo }}
-                  package_version: ${{ inputs.package_version }}
+            - uses: docker/setup-qemu-action@v3
+            - run: docker pull asherikov/ccws_${{ inputs.distro }}
             - run: |
-                make ${{ inputs.build_target }} BUILD_PROFILE=deb,reldebug JOBS=2
-              env:
-                EMAIL: example@example.com
-                AUTHOR: CI
+                mkdir -p src
+                docker run --rm \
+                    --volume ./src:/ccws/workspace/src \
+                    asherikov/ccws_${{ inputs.distro }} \
+                    sh -c " \
+                        git fetch --all \
+                        && git checkout master \
+                        && make checkout_src \
+                            SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
+                            SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
+                            PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
+                            PKG_VERSION=${{ inputs.package_version }}"
             - run: |
-                find ${WORKSPACE_DIR}/artifacts/ -iname *.deb
-              shell: bash
-            - if: ${{ inputs.distro == 'jammy' }}
-              run: |
-                python3 -m pip install cloudsmith-cli
-            - if: ${{ inputs.distro != 'jammy' }}
-              run: |
-                python3 -m pip install --break-system-packages cloudsmith-cli
+                mkdir -p artifacts
+                docker run --rm --privileged \
+                    --volume ./src:/ccws/workspace/src \
+                    --volume ./artifacts:/ccws/workspace/artifacts \
+                    --env BUILD_PROFILE=${{ inputs.profile }} \
+                    --env CCACHE_DISABLE=true \
+                    asherikov/ccws_${{ inputs.distro }} \
+                    sh -c " \
+                        git fetch --all \
+                        && git checkout master \
+                        && apt update \
+                        && make dep_install BUILD_PROFILE=reldebug \
+                        && make bp_install_build \
+                        && make cross_install IMAGE=ubuntu:${{ inputs.distro }} \
+                        && make cross_mount \
+                        && make ${{ inputs.build_target }} BUILD_PROFILE=deb,${{ inputs.profile }} JOBS=2"
             - if: ${{ inputs.cloudsmith_repo != '' }}
               run: |
-                find ${WORKSPACE_DIR}/artifacts/ -iname *.deb | xargs --no-run-if-empty -I {} cloudsmith push deb ${{ inputs.cloudsmith_repo }} {}
-              env:
-                CLOUDSMITH_API_KEY: ${{ secrets.cloudsmith_token }}
+                docker run --rm \
+                    --volume ./artifacts:/ccws/workspace/artifacts \
+                    --env CLOUDSMITH_API_KEY=${{ secrets.cloudsmith_token }} \
+                    asherikov/ccws_${{ inputs.distro }} \
+                    sh -c " \
+                        git fetch --all \
+                        && git checkout master \
+                        && make cloudsmith_install \
+                        && make cloudsmith_push_all REPO=${{ inputs.cloudsmith_repo }}"

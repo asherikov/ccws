@@ -26,12 +26,12 @@ private_cross_mount_specialfs:
 		&& sudo mv ${CCWS_SYSROOT_MOUNTPOINT}/etc/resolv.conf ${CCWS_SYSROOT_MOUNTPOINT}/etc/resolv.conf.back \
 		&& sudo cp /etc/resolv.conf ${CCWS_SYSROOT_MOUNTPOINT}/etc/resolv.conf \
 		|| true
-	sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT_MOUNTPOINT}/etc/resolv.conf" || true
-	sudo mount --bind /dev "${CCWS_SYSROOT_MOUNTPOINT}/dev"
-	sudo mount --bind /tmp "${CCWS_SYSROOT_MOUNTPOINT}/tmp"
-	sudo mount --bind /proc "${CCWS_SYSROOT_MOUNTPOINT}/proc"
+	-sudo mount --bind /etc/resolv.conf "${CCWS_SYSROOT_MOUNTPOINT}/etc/resolv.conf"
+	-sudo mount --bind /dev "${CCWS_SYSROOT_MOUNTPOINT}/dev"
+	-sudo mount --bind /tmp "${CCWS_SYSROOT_MOUNTPOINT}/tmp"
+	-sudo mount --bind /proc "${CCWS_SYSROOT_MOUNTPOINT}/proc"
 	# suppress noisy warnings
-	sudo mount --bind /dev/null "${CCWS_SYSROOT_MOUNTPOINT}/etc/ld.so.preload" || true
+	-sudo mount --bind /dev/null "${CCWS_SYSROOT_MOUNTPOINT}/etc/ld.so.preload"
 
 # workaround for docker -- loopback device partitions not created in /dev
 # https://github.com/moby/moby/issues/27886#issuecomment-417074845

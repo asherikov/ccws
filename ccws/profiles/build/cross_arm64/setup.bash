@@ -15,6 +15,10 @@ CCWS_TRIPLE_ARCH=aarch64
 CCWS_TRIPLE_SYS=linux
 CCWS_TRIPLE_ABI=gnu
 
+# host and build distros must match for tis profile
+OS_DISTRO_HOST=${OS_DISTRO_BUILD}
+export OS_DISTRO_HOST
+
 # setup common
 source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 
