@@ -2,7 +2,6 @@ export BUILD_PROFILE?=cross_arm64
 export IMAGE?=ros:jazzy-ros-base-noble
 
 test:
-	docker pull --platform linux/arm64 ros:jazzy-ros-base-noble
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} bp_install_build
@@ -17,4 +16,7 @@ test:
 	${MAKE} PKG=cdinit BUILD_PROFILE=deb,${BUILD_PROFILE}
 	${MAKE} deb_lint PKG=cdinit BUILD_PROFILE=deb,${BUILD_PROFILE}
 	${MAKE} cross_umount
-
+	# alternative root extraction
+	${MAKE} docker_install
+	docker pull --platform linux/arm64 ros:jazzy-ros-base-noble
+	${MAKE} docker_export_local IMAGE=${IMAGE}

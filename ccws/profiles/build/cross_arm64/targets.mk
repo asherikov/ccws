@@ -11,7 +11,7 @@ bp_cross_arm64_install_build_noble:
 	bash -c "${SETUP_SCRIPT}; sudo ${APT_INSTALL} g++-\$${CCWS_GCC_VERSION}-aarch64-linux-gnu"
 
 bp_cross_arm64_get:
-	${MAKE} docker_mountpoint PLATFORM=arm64 IMAGE=${IMAGE}
+	${MAKE} docker_mountpoint PLATFORM=arm64/v8 IMAGE=${IMAGE}
 
 bp_cross_arm64_initialize: assert_BUILD_PROFILE_must_be_cross_arm64
 	# 1. copy qemu in order to be able to do chroot

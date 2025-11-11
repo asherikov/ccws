@@ -36,6 +36,7 @@ then
         --bind=/usr/bin/env \
         --bind=/usr/bin/perl \
         --bind=/usr/bin/make \
+        --bind=/usr/bin/gmake \
         --bind=/usr/bin/ccache \
         --bind=/usr/bin/cmake)
 

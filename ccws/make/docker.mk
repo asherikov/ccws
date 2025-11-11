@@ -37,21 +37,24 @@ docker_install:
 	sudo systemctl enable docker
 
 
-# make docker_extract PLATFORM=arm64 IMAGE=ubuntu:latest
-docker_extract:
-	mkdir -p "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/"
+# make docker_export PLATFORM=arm64 IMAGE=ubuntu:latest
+docker_export_local:
+	mkdir -p "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs"
 	# https://labs.iximiuz.com/tutorials/extracting-container-image-filesystem
-	docker create "${IMAGE}" \
-		| xargs -I {} sh -c "docker container export '{}' -o "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs.tar.gz" \
-		&& docker container rm '{}'"
+	cd "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs" \
+		&& docker create "${IMAGE}" \
+		| xargs -I {} sh -c "(docker container export '{}' | sudo tar -x) && docker container rm '{}'"
+
+docker_export_remote:
+	${CCWS_DIR}/scripts/docker-image-extract -p linux/${PLATFORM} -o "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs" "${IMAGE}"
 
 private_docker_mountpoint:
 	mkdir -p "${CCWS_SYSROOT_DIR}"
 	cd "${CCWS_SYSROOT_DIR}" \
-		&& (test ! -d mountpoint || ((sudo umount --recursive mountpoint || true) && mv mountpoint mountpoint_`date +%s`)) \
-		&& mkdir -p mountpoint
-	cd "${CCWS_SYSROOT_DIR}/mountpoint" && sudo tar -xf "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs.tar.gz"
+		&& (test ! -d mountpoint || ((sudo umount --recursive mountpoint || true) && mv mountpoint mountpoint_`date +%s`))
+	sudo mv "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs" "${CCWS_SYSROOT_DIR}/mountpoint"
 
 # make docker_mountpoint PLATFORM=arm64 IMAGE=ubuntu:latest
-docker_mountpoint: docker_extract
+docker_mountpoint: docker_export_remote
 	${MAKE} wswraptarget TARGET=private_docker_mountpoint
+

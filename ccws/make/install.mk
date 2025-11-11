@@ -3,7 +3,8 @@ PIP3_INSTALL?=python3 -m pip install
 
 install_ccws_deps:
 	# moreutils: ts (timestamping utility)
-	sudo ${APT_INSTALL} wget gnupg2 moreutils ca-certificates git
+	# TODO curl seems to be better in some cases, e.g., docker container fetching
+	sudo ${APT_INSTALL} wget gnupg2 moreutils ca-certificates git curl
 	${MAKE} install_ros_key
 	${MAKE} install_ccws_deps_${OS_DISTRO_BUILD}
 	${MAKE} install_wshandler_${OS_DISTRO_BUILD}
