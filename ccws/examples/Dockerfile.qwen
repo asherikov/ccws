@@ -1,7 +1,7 @@
 FROM asherikov/ccws_noble:latest
 
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
-ENV PIP3_INSTALL="python3 -m pip install"
+ENV PIPX_INSTALL="python3 -m pipx install"
 
 ARG SANDBOX_NAME="qwen-code-sandbox"
 ARG CLI_VERSION_ARG

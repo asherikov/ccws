@@ -3,7 +3,7 @@ FROM ${BASE_IMAGE}
 
 # these would override CCWS commands
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
-ENV PIP3_INSTALL="python3 -m pip install"
+ENV PIPX_INSTALL="python3 -m pipx install"
 ENV CCWS_CACHE=/cache
 
 ENV PIP_CACHE_DIR=/cache/pip
@@ -12,7 +12,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # 1. docker-clean is removed since we mount cache volumes for storing apt data
 # 2. Remove EXTERNALLY-MANAGED to work around `externally-managed-environment` pip
 #    error in Ubuntu >=24
-#    TODO: use venv instead
 #    https://askubuntu.com/questions/1465218/pip-error-on-ubuntu-externally-managed-environment-%C3%97-this-environment-is-extern
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \

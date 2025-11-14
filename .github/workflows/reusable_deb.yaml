@@ -42,6 +42,7 @@ jobs:
     deb:
         runs-on: ubuntu-latest
         steps:
+            # https://github.com/docker/setup-qemu-action
             - uses: docker/setup-qemu-action@v3
             - run: docker pull asherikov/ccws_${{ inputs.distro }}
             - run: |

@@ -1,5 +1,11 @@
 APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
 PIP3_INSTALL?=python3 -m pip install
+PIPX_INSTALL?=python3 -m pipx install
+CCWS_BIN_DIR?=${CCWS_ROOT}/tools/bin
+export PIPX_BIN_DIR=${CCWS_BIN_DIR}
+export PIPX_HOME=${CCWS_ROOT}/tools/pipx
+export PATH::=${CCWS_BIN_DIR}:${PATH}
+
 
 install_ccws_deps:
 	# moreutils: ts (timestamping utility)
@@ -23,7 +29,7 @@ install_ccws_build_deps: install_ccws_deps
 	sudo ${APT_INSTALL} build-essential ccache proot gdb
 
 install_python3:
-	sudo ${APT_INSTALL} python3 python3-pip
+	sudo ${APT_INSTALL} python3 python3-pip pipx python3-venv
 
 install_ccws_deps_ros1:
 	sh -c 'test -f /etc/apt/sources.list.d/ros-latest.list \

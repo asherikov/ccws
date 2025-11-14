@@ -17,21 +17,24 @@ bp_static_checks_install_build_focal:
 
 #ubuntu22
 bp_static_checks_install_build_jammy: install_python3
-	${PIP3_INSTALL} catkin-lint
+	${PIPX_INSTALL} catkin-lint
 
 #ubuntu24
 bp_static_checks_install_build_noble: install_python3
 	sudo ${APT_INSTALL} catkin-lint
 
 bp_static_checks_install_build_python_%: install_python3
-	${PIP3_INSTALL} pylint
-	${PIP3_INSTALL} flake8
-	${PIP3_INSTALL} mypy
-	# required by mypy
-	${PIP3_INSTALL} types-PyYAML
+	${PIPX_INSTALL} pylint
+	${PIPX_INSTALL} flake8
+	#${PIP3_INSTALL} mypy
+	## required by mypy
+	#${PIP3_INSTALL} types-PyYAML
 
 bp_static_checks_install_build_python_noble: install_python3
-	sudo ${APT_INSTALL} flake8 pylint mypy python3-typeshed
+	sudo ${APT_INSTALL} pylint python3-typeshed
+	# mypy
+	# apt package is broken in github build container
+	${PIPX_INSTALL} flake8
 
 
 bp_static_checks_build_common:
@@ -60,8 +63,7 @@ bp_static_checks_build: bp_static_checks_build_common
 bp_static_checks_build_python:
 	${MAKE} pylint
 	${MAKE} flake8
-	${MAKE} mypy
-
+	#${MAKE} mypy
 
 
 cppcheck:

@@ -358,7 +358,7 @@ Known issues
   reason is tightened memory security with ASLR (address space layout
   randomization) in modern Linux kernels, see
   <https://github.com/google/sanitizers/issues/1614>. The issue can be
-  alleviated by setting `sudo sysctl vm.mmap_rnd_bits=28`.
+  resolved by setting `sudo sysctl vm.mmap_rnd_bits=28`.
 
 - Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
   e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
@@ -367,9 +367,12 @@ Known issues
   debian packages. Newer version of `proot` has to be used, see
   <https://github.com/proot-me/proot/issues/312>.
 
-- Workspace prefix is cropped from paths in debug info, you have to set path
-  substitutions in gdb to resolve them correctly
-  `set substitute-path / <path_to_wrokspace>`.
+- Workspace prefix is intentionally cropped from paths in debug info, you have
+  to set path substitutions in gdb to resolve them correctly, i.e., `set
+  substitute-path / <path_to_workspace>`.
+
+- Crosscompilation may require installation of workspace dependencies on the
+  build host.
 
 
 Related software
@@ -467,12 +470,6 @@ Containers and images
 - System images as OCI artifacts <https://oras.land/docs/>.
 - Generate system images in layered, container-like fashion
   <https://osinside.github.io/kiwi/overview.html>.
-- Root filesystem for crosscompilation from a container.
-
-`CCWS` dependencies
--------------------
-
-- Use venv for python dependencies.
 
 Bookmarks (not going to be supported)
 -------------------------------------

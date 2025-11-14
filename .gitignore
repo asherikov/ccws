@@ -5,6 +5,7 @@
 /artifacts
 /cache
 /sysroot
+tools
 ccws/make/config.mk
 ccws/pkg_template/vendor*
 .clangd

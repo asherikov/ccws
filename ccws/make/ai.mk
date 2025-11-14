@@ -17,5 +17,5 @@ qwen_ccws:
 		-v "${CCWS_BUILD_DIR_BASE}:/ccws/workspace/build" \
 		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
-		-v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/artifacts" \
+		-v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot" \
 		asherikov/ccws_qwen_noble
