@@ -50,3 +50,12 @@ dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
         find ~+ -path '*include/*' -type d | sed -e 's/\(.*\)/INCLUDE_PATH+=\"\1\"/' >> \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile.append; \
         doxygen \$${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile"
 
+bp_doxygen_gh_pages:
+	cd "${GH_PAGES_DIR}" \
+		&& git fetch --all \
+		&& git checkout gh-pages \
+		&& find ./ -not -name '.*' -maxdepth 1 | xargs rm -rf \
+		&& cp -r ${CCWS_ARTIFACTS_DIR}/* ./ \
+		&& git add -f * \
+		&& git commit -a -m "${MESSAGE}" \
+		&& git push

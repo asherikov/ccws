@@ -15,6 +15,10 @@ on:
                 default: true
                 type: string
 
+env:
+    WORKSPACE_SRC: ${{ github.workspace }}
+    BUILD_PROFILE: doxygen
+
 jobs:
     dox:
         container: asherikov/ccws_${{ inputs.distro }}
@@ -26,22 +30,16 @@ jobs:
               with:
                 submodules: true
                 fetch-depth: 0
-            - run: |
-                git config --global user.name github-actions
-                git config --global user.email github-actions@github.com
+                path: ./
             - run: |
                 cd /ccws
-                export WORKSPACE_SRC=${GITHUB_WORKSPACE}/src
+                git fetch --all
+                git checkout master
                 make wsupdate_pkgs_shallow
                 make
-              env:
-                BUILD_PROFILE: doxygen
             - if: ${{ inputs.push == 'true' }}
               run: |
-                cd ${GITHUB_WORKSPACE}/gh-pages
-                git checkout gh-pages
-                find ./ -not -name '.*' -maxdepth 1 | xargs rm -rf
-                cp -r /ccws/workspace/artifacts/doxygen/* ./
-                git add -f *
-                git commit -a -m "Automated update ${{ inputs.version }}"
-                git push
+                git config --global user.name github-actions
+                git config --global user.email github-actions@github.com
+                cd /ccws
+                make bp_doxygen_gh_pages GH_PAGES_DIR=${WORKSPACE_SRC}/gh-pages MESSAGE="Automated update ${{ inputs.version }}"

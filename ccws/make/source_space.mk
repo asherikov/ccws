@@ -71,6 +71,7 @@ checkout_src:
 		|| (git clone "${SOURCE_SPACE_REPO}" "${WORKSPACE_SRC}" \
 			&& cd "${WORKSPACE_SRC}" \
 			&& git checkout "${SOURCE_SPACE_VERSION}" \
+			&& git submodule update --init --recursive \
 			&& cd "${CCWS_ROOT}" \
 			&& (test -z "${PKG_VERSION}" || make set_repo_version REPO="${PKG_REPO}" VERSION="${PKG_VERSION}"))
 	test -n "${SOURCE_SPACE_VERSION}" \

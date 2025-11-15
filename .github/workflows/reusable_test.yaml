@@ -38,6 +38,7 @@ defaults:
 
 env:
     WORKSPACE_SRC: ${GITHUB_WORKSPACE}/src
+    CCACHE_DISABLE: true
 
 jobs:
     static:
@@ -46,7 +47,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: static_checks
-            CCACHE_DISABLE: true
         steps:
             - run: |
                 make checkout_src \
@@ -62,7 +62,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: scan_build
-            CCACHE_DISABLE: true
         steps:
             - run: |
                 make checkout_src \
@@ -81,7 +80,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: reldebug
-            CCACHE_DISABLE: true
         steps:
             - run: |
                 make checkout_src \
@@ -101,7 +99,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: addr_undef_sanitizers
-            CCACHE_DISABLE: true
         steps:
             - run: |
                 make checkout_src \
@@ -121,7 +118,6 @@ jobs:
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: thread_sanitizer
-            CCACHE_DISABLE: true
         steps:
             - run: |
                 make checkout_src \
