@@ -5,10 +5,10 @@
 /artifacts
 /cache
 /sysroot
-tools
 ccws/make/config.mk
 ccws/pkg_template/vendor*
+ccws/qwen/*
+ccws/tools/*
 .clangd
-ccws/scripts/yq
 !/src/flake.nix
 !/src/flake.lock

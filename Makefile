@@ -59,9 +59,12 @@ export CCWS_INSTALL_DIR=${CCWS_INSTALL_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 export CCWS_ARTIFACTS_DIR?=${CCWS_ARTIFACTS_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 #export CCWS_SYSROOT_DIR=${CCWS_SYSROOT_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 
+export CCWS_TOOLS_DIR?=${CCWS_DIR}/tools
+export PATH::=${CCWS_TOOLS_DIR}/bin:${PATH}
+
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
-export JOBS?=$(shell ${CCWS_DIR}/scripts/guess_jobs.sh ${MEMORY_PER_JOB_MB})
+export JOBS?=$(shell "${CCWS_TOOLS_DIR}/bin/guess_jobs.sh" ${MEMORY_PER_JOB_MB})
 
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
@@ -80,7 +83,7 @@ SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}/setup.b
 CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${CCWS_SOURCE_DIR}
 CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${CCWS_SOURCE_DIR}
 CMD_PKG_GRAPH=colcon graph --base-paths ${CCWS_SOURCE_DIR} --dot --dot-cluster
-CMD_WSHANDLER=${CCWS_DIR}/scripts/wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
+CMD_WSHANDLER=wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
 CCWS_XARGS=xargs --no-run-if-empty -I {}
 
 
@@ -165,7 +168,7 @@ private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive
 		--event-handlers console_direct+ \
 		--merge-install \
 		--executor sequential \
-		--base-paths ${CCWS_SOURCE_DIR} \
+		--base-paths "${CCWS_SOURCE_DIR}" \
 		--build-base "${CCWS_BUILD_DIR}" \
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" -DCMAKE_INSTALL_PREFIX="${CCWS_INSTALL_DIR_HOST}" \

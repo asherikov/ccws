@@ -1,10 +1,8 @@
 APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
 PIP3_INSTALL?=python3 -m pip install
 PIPX_INSTALL?=python3 -m pipx install
-CCWS_BIN_DIR?=${CCWS_ROOT}/tools/bin
-export PIPX_BIN_DIR=${CCWS_BIN_DIR}
-export PIPX_HOME=${CCWS_ROOT}/tools/pipx
-export PATH::=${CCWS_BIN_DIR}:${PATH}
+export PIPX_BIN_DIR=${CCWS_TOOLS_DIR}/bin
+export PIPX_HOME=${CCWS_TOOLS_DIR}/pipx
 
 
 install_ccws_deps:
@@ -41,7 +39,7 @@ install_ccws_deps_ros2:
 		|| (echo "deb [arch=amd64,arm64] http://repo.ros2.org/ubuntu/main ${OS_DISTRO_BUILD} main" | sudo tee /etc/apt/sources.list.d/ros2-latest.list && sudo apt update)'
 
 install_wshandler_bionic:
-	"${CCWS_DIR}/scripts/wshandler" -y yq --policy download install "${CCWS_DIR}/scripts/"
+	wshandler -y yq --policy download install "${CCWS_TOOLS_DIR}/bin/"
 
 install_wshandler_focal: install_wshandler_bionic
 	# passthrough

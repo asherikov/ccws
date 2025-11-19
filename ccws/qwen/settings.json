@@ -1,0 +1,50 @@
+{
+  "general": {
+    "preferredEditor": "nvim",
+    "disableAutoUpdate": "true",
+    "disableUpdateNag": "true"
+  },
+  "ui": {
+    "hideBanner": true
+  },
+  "tools": {
+    "approvalMode": "yolo"
+  },
+  "telemetry": {
+    "enabled": true,
+    "target": "local",
+    "otlpEndpoint": "",
+    "outfile": "/ccws/workspace/artifacts/qwen/log/telemetry.log",
+    "logPrompts": true
+  },
+  "privacy": {
+    "usageStatisticsEnabled": true
+  },
+  "model": {
+    "enableOpenAILogging": false,
+    "openAILoggingDir": "/ccws/workspace/artifacts/qwen/log",
+    "summarizeToolOutput": {
+      "run_shell_command": {
+        "tokenBudget": 100
+      }
+    }
+  },
+  "context": {
+    "fileName": [
+      "context.md"
+    ],
+    "includeDirectories": [
+      "/ccws/.qwen"
+    ],
+    "loadFromIncludeDirectories": true,
+    "fileFiltering": {
+      "respectGitIgnore": false
+    }
+  },
+  "$version": 2,
+  "security": {
+    "auth": {
+      "selectedType": "qwen-oauth"
+    }
+  }
+}

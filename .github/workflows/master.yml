@@ -25,7 +25,7 @@ jobs:
             - run: sudo apt --yes --no-install-recommends install gcc-9 g++-9 gcc-10 g++-10
             - run: sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
             - run: sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
-            - run: ./ccws/scripts/bootstrap.sh
+            - run: ./ccws/tools/bin/bootstrap.sh
             - run: make -f ccws/tests/test_main.mk ROS_DISTRO=noetic
 
     jammy_ros2:
@@ -80,7 +80,7 @@ jobs:
             - uses: actions/checkout@v5
             - run: sudo apt update
             - run: sudo apt upgrade --yes
-            - run: ./ccws/scripts/bootstrap.sh
+            - run: ./ccws/tools/bin/bootstrap.sh
             - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
               env:
                 CCACHE_DISABLE: true

@@ -38,5 +38,5 @@ RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
 --mount=type=cache,target=/cache/pip,sharing=locked \
-    ./ccws/scripts/bootstrap.sh \
+    ./ccws/tools/bin/bootstrap.sh \
     && make install_all_profiles

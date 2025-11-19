@@ -46,7 +46,7 @@ docker_export_local:
 		| xargs -I {} sh -c "(docker container export '{}' | sudo tar -x) && docker container rm '{}'"
 
 docker_export_remote:
-	${CCWS_DIR}/scripts/docker-image-extract -p linux/${PLATFORM} -o "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs" "${IMAGE}"
+	docker-image-extract -p linux/${PLATFORM} -o "${CCWS_CACHE}/${CCWS_BUILD_PROFILES_ID}/docker/${IMAGE}_rootfs" "${IMAGE}"
 
 private_docker_mountpoint:
 	mkdir -p "${CCWS_SYSROOT_DIR}"
