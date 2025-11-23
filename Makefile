@@ -181,5 +181,11 @@ private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive
 help:
 	@grep -v "^	" Makefile ${CCWS_DIR}/make/*.mk | grep -v "^ " | grep -v "^$$" | grep -v "^\." | grep -v ".mk:$$"
 
+readme:
+	cp README.md README.md.back
+	# crop old toc
+	sed '/^Introduction$$/,$$!d' README.md.back > README.md
+	pandoc --standalone --columns=80 --markdown-headings=setext --tab-stop=4 --from=gfm --to=gfm --toc --toc-depth=2 README.md -o README.fmt.md
+	mv README.fmt.md README.md
 
-.PHONY: build clean test install
+.PHONY: build clean test install default all

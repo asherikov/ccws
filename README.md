@@ -1,3 +1,30 @@
+- [Introduction](#introduction)
+  - [Features](#features)
+  - [Build profiles](#build-profiles)
+  - [Execution profiles](#execution-profiles)
+  - [Dependencies](#dependencies)
+- [Usage](#usage)
+  - [Initial setup](#initial-setup)
+  - [Compilation](#compilation)
+  - [Running](#running)
+  - [Testing](#testing)
+  - [Documentation](#documentation)
+  - [Debian package generation](#debian-package-generation)
+  - [Cross-compilation](#cross-compilation)
+- [Advanced usage](#advanced-usage)
+  - [`CCWS` docker image](#ccws-docker-image)
+  - [`CCWS` in CI](#ccws-in-ci)
+  - [Extending `CCWS`](#extending-ccws)
+  - [Coding agents](#coding-agents)
+- [Known issues](#known-issues)
+- [Related software](#related-software)
+- [TODO](#todo)
+  - [Bookmarks (not going to be
+    supported)](#bookmarks-not-going-to-be-supported)
+
+Introduction
+============
+
 <table>
   <tr>
     <th>CI status</th>
@@ -9,10 +36,6 @@
   </tr>
 </table>
 
-
-Introduction
-============
-
 `CCWS` is a development environment for ROS, which integrates functionality of
 traditional `catkin` workspaces and CI pipelines in order to facilitate
 (cross-)compilation, testing, linting, documetation and binary package
@@ -23,7 +46,6 @@ solution, but rather a basis for development of a vendor-specific workflow.
 `CCWS` is ROS version agnostic, and should work in most cases for both ROS1 and
 ROS2.
 
-
 Features
 --------
 
@@ -32,37 +54,38 @@ Features
   conflict with each other and can be used in parallel without using separate
   clones of the workspace and packages.
 
-- Execution profiles -- simple shell mixins that are intended to modify run
-  time environment, e.g., execute nodes in `valgrind`, alter node crash
-  handling, etc.
+- Execution profiles -- simple shell mixins that are intended to modify run time
+  environment, e.g., execute nodes in `valgrind`, alter node crash handling,
+  etc.
 
 - A number of features implemented via build profiles:
-    - Cross compilation to several common platforms.
 
-    - Documentation generation for the whole workspace or selected packages
-      using `doxygen`, similar to <https://github.com/mikepurvis/catkin_tools_document>.
+  - Cross compilation to several common platforms.
 
-    - Linting with `clang-tidy` and `scan_build`.
+  - Documentation generation for the whole workspace or selected packages using
+    `doxygen`, similar to <https://github.com/mikepurvis/catkin_tools_document>.
 
-    - Various static checks as in <https://github.com/sscpac/statick>, in
-      particular:
-        - `cppcheck`
-        - `catkin_lint` <https://github.com/fkie/catkin_lint>
-        - `yamllint`
-        - `shellcheck`
+  - Linting with `clang-tidy` and `scan_build`.
 
-    - Binary debian package generation.
+  - Various static checks as in <https://github.com/sscpac/statick>, in
+    particular:
+
+    - `cppcheck`
+    - `catkin_lint` <https://github.com/fkie/catkin_lint>
+    - `yamllint`
+    - `shellcheck`
+
+  - Binary debian package generation.
 
 - Package template which demonstrates how to use some of the features.
 
 - The number of parallel jobs can be selected based on available RAM instead of
   CPU cores, since RAM is likely to be the limiting factor.
 
-- Based entirely on `make` and shell scripts. All scripts and configurations
-  are kept in the workspace and easy to adjust for specific needs.
+- Based entirely on `make` and shell scripts. All scripts and configurations are
+  kept in the workspace and easy to adjust for specific needs.
 
 - Integration with AI coding agent (`qwen`).
-
 
 Build profiles
 --------------
@@ -70,11 +93,12 @@ Build profiles
 Profile configurations are located in `ccws/profiles/build`, `common`
 subdirectory contains default parameters, which can be overriden by specific
 profiles:
-- [default] `reldebug` -- default compiler, cmake build type is
+
+- \[default\] `reldebug` -- default compiler, cmake build type is
   `RelWithDebInfo`
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
-  static checks. `clang-tidy` parameters are defined in cmake toolchain and
-  must be enabled in packages as shown in package template `CMakeLists`.
+  static checks. `clang-tidy` parameters are defined in cmake toolchain and must
+  be enabled in packages as shown in package template `CMakeLists`.
 - `clang_tidy` -- a simplified version of `scan_build` without `clang` and
   `scan_build`.
 - `thread_sanitizer` -- compilation with thread sanitizer.
@@ -89,9 +113,9 @@ profiles:
 - `deb` -- debian package generation (see below).
 
 Legacy:
+
 - `cross_jetson_xavier` -- cross-compilation for Jetson Xavier.
 - `cross_jetson_nano` -- cross-compilation for Jetson Nano.
-
 
 Execution profiles
 ------------------
@@ -100,46 +124,44 @@ Execution profiles set environment variables that can be used in launch scripts
 to alter run time behavior as demonstrated in
 `ccws/pkg_template/catkin/launch/bringup.launch`, currently available profiles
 are:
+
 - `common` -- a set of common ROS parameters, e.g., `ROS_HOME`, it is
   automatically included in binary packages.
-- `test` -- sets `CCWS_NODE_CRASH_ACTION` variable so that nodes that respect
-  it become `required`, i.e., termination of such nodes would result in crash
-  of test scripts and can thus be easily detected.
+- `test` -- sets `CCWS_NODE_CRASH_ACTION` variable so that nodes that respect it
+  become `required`, i.e., termination of such nodes would result in crash of
+  test scripts and can thus be easily detected.
 - `valgrind` -- sets `CCWS_NODE_LAUNCH_PREFIX` to `valgrind` and some variables
   that control behavior of `valgrind`.
 - `core_pattern` -- sets core pattern to save core files in the artifacts
   directory.
 - `address_sanitizer` -- helper for `addr_undef_sanitizers` profile.
 
-Execution profiles have no effect on build process and are taken into account
-in `*test*` targets or debian packages. `test` execution profile is always used
-in tests and additional profiles can be provided with `EXEC_PROFILE="<profile1>
-<profile2>"`. These targets load profiles using `setup.bash` script located in
-the root folder of `CCWS`, which can also be used manually, e.g., `source
-setup.bash [<build_profile> [<exec_profile1> ...]]`. Note that the setup script
-always includes `common` profile, and uses `test` execution profile if no other
-execution profiles are specified.
-
+Execution profiles have no effect on build process and are taken into account in
+`*test*` targets or debian packages. `test` execution profile is always used in
+tests and additional profiles can be provided with
+`EXEC_PROFILE="<profile1> <profile2>"`. These targets load profiles using
+`setup.bash` script located in the root folder of `CCWS`, which can also be used
+manually, e.g., `source setup.bash [<build_profile> [<exec_profile1> ...]]`.
+Note that the setup script always includes `common` profile, and uses `test`
+execution profile if no other execution profiles are specified.
 
 Dependencies
 ------------
 
-Dependencies can be installed using `make bp_install_build
-BUILD_PROFILE=<profile>[,<profile>...]`, which is going to install the
-following tools and profile specific dependencies:
+Dependencies can be installed using
+`make bp_install_build BUILD_PROFILE=<profile>[,<profile>...]`, which is going
+to install the following tools and profile specific dependencies:
+
 - `colcon`
 - `yq` -- <https://github.com/asherikov/wshandler> dependency
 - `cmake`
 - `ccache` -- can be disabled in cmake toolchains
 - `wget`
 
-
-
 Usage
 =====
 
 See `.ccws/test_main.mk` for command usage hints.
-
 
 Initial setup
 -------------
@@ -150,21 +172,20 @@ Initial setup
 - Install dependencies using `make bp_install_build BUILD_PROFILE=<profile>`
   targets, cross compilation profiles would require some extra steps as
   described below. In some minimalistic environments you may need to run
-  `./ccws/tools/bin/bootstrap.sh` before using `bp_install_build` target in order to
-  install `make` and other utils.
-- Clone packages in `src` subdirectory, or create new using `make new PKG=<pkg>`.
-
+  `./ccws/tools/bin/bootstrap.sh` before using `bp_install_build` target in
+  order to install `make` and other utils.
+- Clone packages in `src` subdirectory, or create new using
+  `make new PKG=<pkg>`.
 
 Compilation
 -----------
 
 - `make build PKG="<pkg>"` where `<pkg>` is one or more space separated package
   names.
-- `make <pkg>` -- a shortcut for `make build`, but `<pkg>` can be a substring
-  of package name. All packages matching the given substring will be built.
+- `make <pkg>` -- a shortcut for `make build`, but `<pkg>` can be a substring of
+  package name. All packages matching the given substring will be built.
 - The number of jobs can be overriden with `JOBS=X` parameter.
 - `make build PKG=<pkg> BUILD_PROFILE=scan_build` overrides default profile.
-
 
 Running
 -------
@@ -174,19 +195,18 @@ Running
   `install/<profile>/local_setup.sh`, but in this case some of `CCWS`
   functionality won't be available.
 
-
 Testing
 -------
-- `make test PKG=<pkg>` test with `colcon`, or `make wstest` to test all.
-- `make ctest PKG=<pkg>` bypass `colcon` and run `ctest` directly or `make
-  wsctest` to test all.
 
+- `make test PKG=<pkg>` test with `colcon`, or `make wstest` to test all.
+- `make ctest PKG=<pkg>` bypass `colcon` and run `ctest` directly or
+  `make wsctest` to test all.
 
 Documentation
 -------------
+
 - `make BUILD_PROFILE=doxygen`, `firefox artifacts/doxygen/index.html`
 - See example at <http://www.sherikov.net/sharf/>
-
 
 Debian package generation
 -------------------------
@@ -200,22 +220,23 @@ single debian 'superpackage'. Unlike `bloom` `CCWS` generates binary packages
 directly instead of generating source packages first.
 
 Binary package generation is implemented as a build profile mixin that can be
-overlayed over an arbitrary build profile: `make <pkg>
-BUILD_PROFILE=deb,reldebug`.
+overlayed over an arbitrary build profile:
+`make <pkg> BUILD_PROFILE=deb,reldebug`.
 
 `CCWS` approach has a number of advantages:
 
 - Binary compatibility issues are minimized compared to traditional ROS
   approach:
-    - no need to worry about compatibilities between multiple standalone binary
-      packages and perform ABI checks;
 
-    - if base ROS packages are included, it is also possible to avoid binary
-      incompatibilities between syncs of the same ROS release (those actually
-      happen).
+  - no need to worry about compatibilities between multiple standalone binary
+    packages and perform ABI checks;
 
-- Package repository management can be sloppier compared to ROS when it comes
-  to tags, versions, git submodules, etc, e.g., there is no need to maintain
+  - if base ROS packages are included, it is also possible to avoid binary
+    incompatibilities between syncs of the same ROS release (those actually
+    happen).
+
+- Package repository management can be sloppier compared to ROS when it comes to
+  tags, versions, git submodules, etc, e.g., there is no need to maintain
   release repos for all packages.
 
 - Debian 'superpackages' are easier to handle than both standalone packages and
@@ -223,17 +244,17 @@ BUILD_PROFILE=deb,reldebug`.
   working branches and easily copied and installed on the target.
 
 - Debian packages have some advantages over docker containers in general:
-    - Zero overhead during execution.
 
-    - Straightforward access to hardware.
+  - Zero overhead during execution.
 
-    - Easy installation of system services, udev rules, configs, etc.
+  - Straightforward access to hardware.
+
+  - Easy installation of system services, udev rules, configs, etc.
 
 - Multiple variants of binary 'superpackage' can be installed simultaneously if
   they are built using different `VERSION` parameter. Note that it alters
   installation path, so some workspace packages that are being "smart" with
   `cmake` may require cleaning build directory if they have been built earlier.
-
 
 ### Building packages
 
@@ -241,7 +262,6 @@ Generally, it is necessary to install packages to the filesystem root during
 compilation in order to get all paths right in `catkin` `cmake` files and
 properly install system files. `CCWS` avoids this using `proot` similarly to
 cross-compilation profiles.
-
 
 Cross-compilation
 -----------------
@@ -258,31 +278,31 @@ The general workflow is documented below, for more technical details see
 `ccws/doc/cross-compilation.md` and `CCWS` CI test in `.ccws/test_cross.mk`
 (ROS1) and `.ccws/test_cross_ros2.mk` (ROS2):
 
-1. Install profile dependencies with `make bp_install_build
-   BUILD_PROFILE=<profile>`
-2. Obtain system image:
-    - `cross_raspberry_pi` -- `bp_install_build` target automatically
-      downloads standard image;
+1.  Install profile dependencies with
+    `make bp_install_build BUILD_PROFILE=<profile>`
+2.  Obtain system image:
+    - `cross_raspberry_pi` -- `bp_install_build` target automatically downloads
+      standard image;
     - `cross_arm64` -- use `docker_mountpoint` `make` target, which extracts
       root filesystem from a docker image;
-    - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain
-      these images automatically, you have to manualy copy system partition
-      image to `ccws/profiles/cross_jetson_xavier/system.img`.
-3. Initialize source repositories:
+    - `cross_jetson_xavier`, `cross_jetson_nano` -- `CCWS` does not obtain these
+      images automatically, you have to manualy copy system partition image to
+      `ccws/profiles/cross_jetson_xavier/system.img`.
+3.  Initialize source repositories:
     - `make wsinit REPOS="https://github.com/asherikov/staticoma.git"`
-    - [when building all ROS1 packages (does not work with ROS2)] add ROS1
-      dependencies of all your packages to the workspace `make dep_to_repolist
-      ROS_DISTRO=melodic`, or a specific package `make dep_to_repolist
-      PKG=<pkg> ROS_DISTRO=melodic`;
+    - \[when building all ROS1 packages (does not work with ROS2)\] add ROS1
+      dependencies of all your packages to the workspace
+      `make dep_to_repolist ROS_DISTRO=melodic`, or a specific package
+      `make dep_to_repolist PKG=<pkg> ROS_DISTRO=melodic`;
     - fetch all packages `make wsupdate`.
-4. Install system dependencies of packages in your workspace to the system
-   image: `make cross_install PKG=staticoma BUILD_PROFILE=<profile> ROS_DISTRO=<distro>`
-5. Compile packages:
+4.  Install system dependencies of packages in your workspace to the system
+    image:
+    `make cross_install PKG=staticoma BUILD_PROFILE=<profile> ROS_DISTRO=<distro>`
+5.  Compile packages:
     - mount sysroot with `make cross_mount BUILD_PROFILE=<profile>`
     - build packages, e.g. `make staticoma BUILD_PROFILE=<profile>` or build and
       generate deb package `make PKG=staticoma BUILD_PROFILE=deb,<profile>`
     - unmount sysroot when done with `make cross_umount BUILD_PROFILE=<profile>`
-
 
 Advanced usage
 ==============
@@ -297,32 +317,30 @@ testing, but it is recommended to build a tailored image using
 The image can be used in the following way:
 
 - `docker pull asherikov/ccws_noble` (or `asherikov/ccws_jammy`)
-- `mkdir tmp_ws` # sources, build, install, cache will go here
+- `mkdir tmp_ws` \# sources, build, install, cache will go here
 - `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws_noble bash`
 - `make wsinit REPOS="https://github.com/asherikov/qpmad.git"`
 - `...`
-
 
 `CCWS` in CI
 ------------
 
 See `ccws/examples/Jenkinsfile.example`, `.github/workflows/reusable_*` and
-https://github.com/asherikov/sharf/tree/main/.github/workflows for examples.
-
+<https://github.com/asherikov/sharf/tree/main/.github/workflows> for examples.
 
 Extending `CCWS`
 ----------------
 
 `CCWS` functionality can be extended in multiple ways:
-- by adding new build profiles, e.g., `make bp_new
-  BUILD_PROFILE=vendor_static_checks,static_checks`, all profiles starting with
-  `vendor` prefix are ignored by git;
+
+- by adding new build profiles, e.g.,
+  `make bp_new BUILD_PROFILE=vendor_static_checks,static_checks`, all profiles
+  starting with `vendor` prefix are ignored by git;
 - by adding execution profiles;
 - `make` targets can be added by creating a
   `ccws/profiles/build/vendor/<filename>.mk` file;
 - common `cmake` toolchain suffix can be added to
   `ccws/profiles/build/vendor/toolchain_suffix.cmake`.
-
 
 Coding agents
 -------------
@@ -330,7 +348,7 @@ Coding agents
 Basic integration with <https://github.com/QwenLM/qwen-code> is provided, which
 can be used in two ways:
 
-- `make qwen`: runs original <ghcr.io/qwenlm/qwen-code> docker container using
+- `make qwen`: runs original `ghcr.io/qwenlm/qwen-code` docker container using
   source space as the agent workspace.
 
 - `make qwen_ccws`: runs custom build container, see
@@ -341,7 +359,6 @@ can be used in two ways:
 
 In both cases `qwen` configuration is stored in `.ccws/qwen` directory of the
 source space. See `ccws/make/ai.mk` for more details.
-
 
 Known issues
 ============
@@ -357,8 +374,8 @@ Known issues
   or `FATAL: ThreadSanitizer: unexpected memory mapping` when executed: the
   reason is tightened memory security with ASLR (address space layout
   randomization) in modern Linux kernels, see
-  <https://github.com/google/sanitizers/issues/1614>. The issue can be
-  resolved by setting `sudo sysctl vm.mmap_rnd_bits=28`.
+  <https://github.com/google/sanitizers/issues/1614>. The issue can be resolved
+  by setting `sudo sysctl vm.mmap_rnd_bits=28`.
 
 - Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
   e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
@@ -368,12 +385,11 @@ Known issues
   <https://github.com/proot-me/proot/issues/312>.
 
 - Workspace prefix is intentionally cropped from paths in debug info, you have
-  to set path substitutions in gdb to resolve them correctly, i.e., `set
-  substitute-path / <path_to_workspace>`.
+  to set path substitutions in gdb to resolve them correctly, i.e.,
+  `set substitute-path / <path_to_workspace>`.
 
 - Crosscompilation may require installation of workspace dependencies on the
   build host.
-
 
 Related software
 ================
@@ -382,8 +398,8 @@ Related software
   noninteractive, "one-shot" design, no sanitizers, emulated cross compilation.
 - <https://github.com/ros-tooling/cross_compile/> -- emulated cross compilation
   for ROS and ROS2.
-- <https://github.com/HesselM/rpicross_notes> -- cross compilation for
-  Raspberry Pi done in a different way.
+- <https://github.com/HesselM/rpicross_notes> -- cross compilation for Raspberry
+  Pi done in a different way.
 - <https://github.com/ros-tooling/action-ros-ci> -- `github` action that covers
   some of `CCWS` functionality.
 - <https://github.com/ros-infrastructure/ros_buildfarm>,
@@ -393,8 +409,8 @@ Related software
 - <https://github.com/colcon/colcon-bundle> provides functionality similar to
   'superpackages' allowing to pack install space into a single archive.
   Naturally, it does not provide all the package features like dependencies,
-  install scripts, etc. Moreover, it does not rely on chroot-like environment
-  to ensure correct paths.
+  install scripts, etc. Moreover, it does not rely on chroot-like environment to
+  ensure correct paths.
 - <https://github.com/b-robotized/ros_team_workspace> -- python based
   environment that also aims at workspace handling automation. Unlike `CCWS`
   which is primarily a build/deployment environment, it has more ROS-specific
@@ -402,74 +418,64 @@ Related software
   build features `CCWS` has.
 - <https://github.com/athackst/vscode_ros2_workspace> -- VSCode-specific
   workspace environment, that provides various build and static analysis
-  options, but not as many as `CCWS`.
-  analysis features.
+  options, but not as many as `CCWS`. analysis features.
 
 TODO
 ====
 
-Testing
--------
+- Testing
 
-- Fuzzing <https://github.com/rosin-project/ros2_fuzz>,
-  <https://github.com/sslab-gatech/RoboFuzz>,
-  <https://github.com/AFLplusplus/AFLplusplus>,
-  <https://github.com/google/clusterfuzzlite>.
-- Add code coverage profile.
-- cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`
+  - Fuzzing <https://github.com/rosin-project/ros2_fuzz>,
+    <https://github.com/sslab-gatech/RoboFuzz>,
+    <https://github.com/AFLplusplus/AFLplusplus>,
+    <https://github.com/google/clusterfuzzlite>.
+  - Add code coverage profile.
+  - cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`
 
-Static checks
--------------
+- Static checks
 
-- <https://github.com/myint/cppclean> might be useful for unnecessary header
-  detection, but looks stale.
-- <https://github.com/mrtazz/checkmake> might be useful for makefile linting.
-- <https://github.com/include-what-you-use/include-what-you-use>
-- Potential replacement for `scan_build`
-  <https://github.com/Ericsson/codechecker> with extra checks and caching.
+  - <https://github.com/include-what-you-use/include-what-you-use>
+  - Potential replacement for `scan_build`
+    <https://github.com/Ericsson/codechecker> with extra checks and caching.
 
-Dynamic checks
---------------
+- Dynamic checks
 
-- Execution profile with <https://github.com/yugr/libdebugme> to automatically
-  start debugger on a signal.
-- <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
-  execution profile -- an overkill in general case though.
+  - Execution profile with <https://github.com/yugr/libdebugme> to automatically
+    start debugger on a signal.
+  - <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
+    execution profile -- an overkill in general case though.
 
-Build performance
------------------
+- Build performance
 
-- Replace `ccache` with <https://gitlab.com/bits-n-bites/buildcache>.
-- <https://github.com/ejfitzgerald/clang-tidy-cache> or
-  <https://gitlab.com/bits-n-bites/buildcache> can be used to cache `clang-tidy`
-  runs.
-- Cache cmake checks with <https://github.com/cristianadam/cmake-checks-cache>,
-  <https://github.com/polysquare/cmake-forward-cache> might be useful too.
-- Build time analysis with clang <https://github.com/aras-p/ClangBuildAnalyzer>
-  and / or <https://github.com/jrmadsen/compile-time-perf>.
-- Distributed compilation support with <https://github.com/distcc/distcc> can
-  be useful.
+  - Replace `ccache` with <https://gitlab.com/bits-n-bites/buildcache>.
+  - <https://github.com/ejfitzgerald/clang-tidy-cache> or
+    <https://gitlab.com/bits-n-bites/buildcache> can be used to cache
+    `clang-tidy` runs.
+  - Cache cmake checks with
+    <https://github.com/cristianadam/cmake-checks-cache>,
+    <https://github.com/polysquare/cmake-forward-cache> might be useful too.
+  - Build time analysis with clang
+    <https://github.com/aras-p/ClangBuildAnalyzer> and / or
+    <https://github.com/jrmadsen/compile-time-perf>.
+  - Distributed compilation support with <https://github.com/distcc/distcc> can
+    be useful.
 
-Build
------
+- Build
 
-- Reproducible builds <https://reproducible-builds.org/>.
+  - Reproducible builds <https://reproducible-builds.org/>.
 
-Packaging
----------
+- Packaging
 
-- Investigate generation of debug and development packages, in particular
-  stripping of static libraries and headers.
-- <https://github.com/jordansissel/fpm> -- generic binary package generator,
-  potential replacement for `dpkg-deb`.
+  - Investigate generation of debug and development packages, in particular
+    stripping of static libraries and headers.
+  - <https://github.com/jordansissel/fpm> -- generic binary package generator,
+    potential replacement for `dpkg-deb`.
 
-Containers and images
----------------------
+- Containers and images
 
-- Build/deploy containers.
-- System images as OCI artifacts <https://oras.land/docs/>.
-- Generate system images in layered, container-like fashion
-  <https://osinside.github.io/kiwi/overview.html>.
+  - System images as OCI artifacts <https://oras.land/docs/>.
+  - Generate system images in layered, container-like fashion
+    <https://osinside.github.io/kiwi/overview.html>.
 
 Bookmarks (not going to be supported)
 -------------------------------------
@@ -489,5 +495,9 @@ Bookmarks (not going to be supported)
 - Add `CodeQL` profile (<https://github.com/github/codeql>).
 - Use <https://libguestfs.org/> or <https://github.com/alperakcan/fuse-ext2>
   instead of loop devices, to avoid using sudo. There are some issues in Ubuntu
-  though, bug 759725, see <https://libguestfs.org/guestfs-faq.1.html>.
-  `guestfs` is too slow to be practical.
+  though, bug 759725, see <https://libguestfs.org/guestfs-faq.1.html>. `guestfs`
+  is too slow to be practical.
+- <https://github.com/mrtazz/checkmake> does not appear to be very useful.
+- <https://github.com/oxsecurity/megalinter> multi-purpose linter wrapper.
+- <https://github.com/myint/cppclean> might be useful for unnecessary header
+  detection, but looks stale.
