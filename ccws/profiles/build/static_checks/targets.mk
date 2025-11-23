@@ -177,7 +177,7 @@ pylint:
 flake8:
 	bash -c "${SETUP_SCRIPT}; \
 		DIR_EXCEPTIONS=\$$(echo \$${CCWS_STATIC_DIR_EXCEPTIONS} | sed -e 's/^://' -e 's/:/,/g'); \
-		flake8 --config \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/flake8 --exclude \"\$${DIR_EXCEPTIONS}\" '${CCWS_SOURCE_DIR}'"
+		flake8 --config \$${CCWS_PRIMARY_BUILD_PROFILE_DIR}/flake8 --exclude \"\$${DIR_EXCEPTIONS},site-packages\" '${CCWS_SOURCE_DIR}'"
 
 mypy:
 	${MAKE} static_checks_generic_dir_filter TARGET=$@

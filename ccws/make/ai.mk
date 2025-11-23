@@ -10,6 +10,7 @@ qwen:
 		ghcr.io/qwenlm/qwen-code /bin/bash -c "cd /ccws_src; qwen"
 
 qwen_dir:
+	mkdir -p ${DIR}/.ccws/qwen
 	${MAKE} qwen_ccws QWEN_SRC_OUTER=${DIR} QWEN_SRC_INNER=${QWEN_SRC_INNER}/`basename ${DIR}`
 
 qwen_ccws:
@@ -23,7 +24,7 @@ qwen_ccws:
 		-v "${CCWS_DIR}/qwen:/root/.qwen/" \
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
-		-v "${CCWS_SOURCE_DIR}/.ccws/qwen:/ccws/.qwen/" \
+		-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
 		-v "${CCWS_BUILD_DIR_BASE}/qwen:/ccws/workspace/build" \
 		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \

@@ -1,7 +1,7 @@
 GNUMAKEFLAGS+= --no-print-directory
 export GNUMAKEFLAGS
 
-export CCWS_ROOT=$(shell pwd)
+export CCWS_ROOT::=$(shell pwd)
 export CCWS_DIR=${CCWS_ROOT}/ccws
 
 -include ${CCWS_DIR}/make/config.mk
@@ -24,11 +24,11 @@ BUILD_PROFILE?=reldebug
 # TODO DEPRECATED[use BUILD_PROFILE] used in build profile mixins and profile creation targets
 BASE_BUILD_PROFILE?=
 
-export CCWS_BUILD_PROFILES=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE}" | sed -e 's/,,//g' -e 's/,$$//g')
-export CCWS_BUILD_PROFILES_ID=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
-export CCWS_PRIMARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
-export CCWS_SECONDARY_BUILD_PROFILE=$(shell echo ${CCWS_BUILD_PROFILES} | cut --only-delimited -f 2 -d ',')
-export CCWS_BUILD_PROFILES_TAIL=$(shell echo ${CCWS_BUILD_PROFILES} | cut --only-delimited -f 2- -d ',')
+export CCWS_BUILD_PROFILES::=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE}" | sed -e 's/,,//g' -e 's/,$$//g')
+export CCWS_BUILD_PROFILES_ID::=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
+export CCWS_PRIMARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
+export CCWS_SECONDARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2 -d ',')
+export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',')
 
 
 # default package type
@@ -67,12 +67,12 @@ MEMORY_PER_JOB_MB?=2048
 export JOBS?=$(shell "${CCWS_TOOLS_DIR}/bin/guess_jobs.sh" ${MEMORY_PER_JOB_MB})
 
 
-export OS_DISTRO_BUILD?=$(shell lsb_release -cs)
+export OS_DISTRO_BUILD?=$(shell lsb_release -cs 2> /dev/null || echo "UKNOWN")
 
 # default package to build can be specified in source directory or via command line,
 # when not provided usually all packages in the workspace are processed
 export PKG?=$(shell (cat "${CCWS_SOURCE_DIR}/.ccws/package" 2> /dev/null | sed -e 's/[[:space:]]*\#.*//' -e '/^[[:space:]]*$$/d' | paste -d ' ' -s) || echo "")
-export PKG_ID=$(shell echo "${PKG}" | md5sum | cut -f 1 -d ' ')
+export PKG_ID::=$(shell echo "${PKG}" | md5sum | cut -f 1 -d ' ')
 
 
 # helpers
