@@ -64,7 +64,7 @@ export PATH::=${CCWS_TOOLS_DIR}/bin:${PATH}
 
 # maximum amout of memory required for a single compilation job -- used to compute job limit
 MEMORY_PER_JOB_MB?=2048
-export JOBS?=$(shell "${CCWS_TOOLS_DIR}/bin/guess_jobs.sh" ${MEMORY_PER_JOB_MB})
+export JOBS?=$(shell "${CCWS_TOOLS_DIR}/bin/ccws_guess_jobs.sh" ${MEMORY_PER_JOB_MB})
 
 
 export OS_DISTRO_BUILD?=$(shell lsb_release -cs 2> /dev/null || echo "UKNOWN")

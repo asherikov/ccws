@@ -16,11 +16,16 @@ qwen_dir:
 qwen_ccws:
 	mkdir -p "${CCWS_SOURCE_DIR}/.ccws/qwen"
 	mkdir -p "${CCWS_ARTIFACTS_DIR_BASE}/qwen/log"
-	# usable only from container anyway
+	# shared apt cache
+	mkdir -p "${CCWS_CACHE}/apt/cache"
+	mkdir -p "${CCWS_CACHE}/apt/lists"
+	# build dir is usable only from container anyway
 	mkdir -p "${CCWS_BUILD_DIR_BASE}/qwen"
 	docker run --rm -ti \
 		-e "CCWS_CACHE=/cache" \
 		-v "${CCWS_CACHE}:/cache" \
+		-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
+		-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
 		-v "${CCWS_DIR}/qwen:/root/.qwen/" \
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
@@ -28,5 +33,6 @@ qwen_ccws:
 		-v "${CCWS_BUILD_DIR_BASE}/qwen:/ccws/workspace/build" \
 		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
-		-v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot" \
 		asherikov/ccws_qwen_noble
+	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"
+

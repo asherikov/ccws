@@ -40,5 +40,8 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 
 RUN npm install -g @qwen-code/qwen-code
 
+# Caches are mounted
+RUN echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/01-ccws-qwen-keep-debs
+
 # Default entrypoint when none specified
-CMD ["qwen"]
+CMD ["tmux", "-u", "new-session", "qwen"]

@@ -12,3 +12,4 @@ ccws/tools/*
 .clangd
 !/src/flake.nix
 !/src/flake.lock
+*.back

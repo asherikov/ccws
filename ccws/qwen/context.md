@@ -26,10 +26,17 @@
 # Rules for code generation
 
 - Be concise:
-    - Avoid adding comments and logging statements.
+    - Do not insert output or logging statements.
+    - Comment lines should not exceed 10% of a file.
     - Produce minimal necessary modifications when implementing features.
     - Reuse existing code instead of coyping it.
 - States of a state machine should not make assumptions on preceding or
   following states.
 - Use 4 spaces for indentation in all file types by default, but preserve
   indentation and formatting in existing files.
+
+## Shell scripts
+
+- Use `env` in shebang.
+- Always use upper case and curly braces in variable names.
+- Always set pipefail option and fail on error.

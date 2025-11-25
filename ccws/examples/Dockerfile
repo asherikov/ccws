@@ -20,7 +20,7 @@ RUN \
     rm /etc/apt/apt.conf.d/docker-clean \
     && apt update \
     && apt upgrade -y \
-    && ${APT_INSTALL} neovim screen git ssh python3 \
+    && ${APT_INSTALL} neovim git ssh python3 tmux \
     && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
     && git config --system --add safe.directory '*' \
     && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts \
@@ -33,6 +33,7 @@ RUN --mount=target=/ccws_docker_context,ro \
 
 WORKDIR /ccws
 ENV WORKSPACE_DIR=/ccws/workspace
+ENV PATH="/ccws/ccws/tools/bin:${PATH}"
 
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
