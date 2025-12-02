@@ -40,8 +40,12 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 
 RUN npm install -g @qwen-code/qwen-code
 
-# Caches are mounted
-RUN echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/01-ccws-qwen-keep-debs
+# caches are mounted
+# add default user to sudoers
+RUN \
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/01-ccws-qwen-keep-debs \
+    && usermod -aG sudo `id -nu 1000` \
+    && chown -R 1000 /ccws
 
 # Default entrypoint when none specified
 CMD ["tmux", "-u", "new-session", "qwen"]

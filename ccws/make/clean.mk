@@ -1,20 +1,20 @@
 # Clean workspace
 wsclean:
-	rm -rf "${CCWS_BUILD_DIR_BASE}"
-	rm -rf "${CCWS_INSTALL_DIR_BASE}"
+	rm -rf "${CCWS_BUILD_DIR_BASE}"/*
+	rm -rf "${CCWS_INSTALL_DIR_BASE}"/*
 	rm -rf "${CCWS_SOURCE_DIR}/.rosinstall.bak"
 
 artifacts_clean:
-	rm -rf "${CCWS_ARTIFACTS_DIR_BASE}"
+	rm -rf "${CCWS_ARTIFACTS_DIR_BASE}"/*
 
 # Purge workspace
 wspurge: wsclean artifacts_clean
-	rm -rf "${CCWS_SOURCE_DIR}"
+	rm -rf "${CCWS_SOURCE_DIR}"/*
 	test ! -d "${CCWS_SYSROOT_DIR_BASE}" || ${MAKE} purge_sysroot
 
 purge_sysroot:
 	sudo umount --recursive "${CCWS_SYSROOT_DIR_BASE}"
-	sudo rm -rf "${CCWS_SYSROOT_DIR_BASE}"
+	sudo rm -rf "${CCWS_SYSROOT_DIR_BASE}"/*
 
 cache_clean:
 	find ${CCWS_CACHE} -maxdepth 1 -mindepth 1 -not -name "\.gitignore" | xargs rm -rf
