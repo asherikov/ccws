@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#!/usr/local/bin/bash -x
-# shellcheck disable=SC2317
+#!/usr/bin/bash -x
+# shellcheck disable=SC2317,SC2329
 
 set -e
 set -o pipefail
@@ -74,6 +74,7 @@ help()
     wsh_echo "    set_version_by_url <PACKAGE_URL> <PACKAGE_VERSION>        # set repository version"
     wsh_echo "    set_version_by_name <PACKAGE_NAME> <PACKAGE_VERSION>      # set repository version"
     wsh_echo "    set_version_to_hash                                       # set all repository versions to hash"
+    wsh_echo "    pin                                                       # alias for set_version_to_hash"
     wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> ({active})] set_version_to_branch <BRANCH_NAME>  # change to the given branch"
     wsh_echo "      active      # switch if the given branch is checked out"
     wsh_echo "    remove <PACKAGE_NAME> ...                                 # remove repository from a list"
@@ -84,8 +85,10 @@ help()
     wsh_echo ""
     wsh_echo "Repository commands:"
     wsh_echo "  Selective commands (<PACKAGE_NAME> may be a pattern):"
-    wsh_echo "    Common parameters:"
+    wsh_echo "    Common arguments:"
     wsh_echo "      [-j|--jobs <NUM_THREADS> {1}]   # use multiple jobs if possible"
+    wsh_echo "      [-U|--unmanaged]                # work on unmanaged repository directories: directory names must be given"
+    wsh_echo "                                      #instead of package names, at least one is required, ignores --jobs"
     wsh_echo "    clean [<PACKAGE_NAME> ...]        # remove repository"
     wsh_echo "    prune [<PACKAGE_NAME> ...]        # git prune"
     wsh_echo "    push [<PACKAGE_NAME> ...]         # git push"
@@ -326,7 +329,7 @@ dir_git_status()
 
 dir_git_unshallow()
 {
-    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     dir_git_assert "${REPO_DIR}"
     pushd "${REPO_DIR}" > /dev/null
     if git fetch --unshallow
@@ -339,7 +342,7 @@ dir_git_unshallow()
 
 dir_git_prune()
 {
-    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     dir_git_assert "${REPO_DIR}"
     pushd "${REPO_DIR}" > /dev/null
     git remote | xargs --no-run-if-empty -I {} git remote prune {}
@@ -348,7 +351,7 @@ dir_git_prune()
 
 dir_git_push()
 {
-    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     dir_git_assert "${REPO_DIR}"
     pushd "${REPO_DIR}" > /dev/null
     git push
@@ -358,7 +361,7 @@ dir_git_push()
 dir_git_update()
 {
     NAME=$1
-    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     REPO_URL="$2"
     REPO_VERSION="$3"
 
@@ -427,7 +430,7 @@ dir_git_update()
             test "${REPO_VERSION}" == '-' || git checkout "${REPO_VERSION}"
 
             # if we are on a branch make sure that it is updated
-            if (git branch --show-current | grep "${REPO_VERSION}")
+            if [ "${REPO_VERSION}" == '-' ] || (git branch --show-current | grep "${REPO_VERSION}")
             then
                 PULL_ENV=(env)
                 PULL_ARGS=()
@@ -477,7 +480,7 @@ dir_git_assert()
 
 dir_git_clean()
 {
-    REPO_DIR="${WSH_WORKSPACE_ROOT:?}/$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     if [ ! -d "${REPO_DIR}" ]
     then
         echo "Cannot remove missing '${REPO_DIR}'";
@@ -582,8 +585,6 @@ initialize_yaml_tool()
 
 check_workspace()
 {
-    WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
-
     initialize_yaml_tool
 
     if [ ${#WSH_REPOLISTS[@]} -eq 0 ]
@@ -1049,6 +1050,8 @@ execute_selective_command()
 {
     COMMAND_NAME="$1"
     WSH_NAME_PATTERNS=("${@:2}")
+    # strip trailing slashes
+    WSH_NAME_PATTERNS=("${WSH_NAME_PATTERNS[@]%/}")
 
     if [ "${COMMAND_NAME}" == "update" ] && [ ${#WSH_NAME_PATTERNS[@]} -eq 0 ]
     then
@@ -1082,7 +1085,7 @@ set_version()
             then
                 cd "${WSH_WORKSPACE_ROOT:?}/${NAME}";
                 case $1 in
-                    set_version_to_hash) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_hash")";;
+                    set_version_to_hash|pin) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_hash")";;
                     set_version_to_branch)
                         case "${WSH_COMMAND_POLICY}" in
                             default|active)
@@ -1141,7 +1144,7 @@ WSH_SOURCE_TYPES="git"
 WSH_COMMAND_POLICY=default
 WSH_JOBS=1
 WSH_INDENT=4
-WSH_XARGS=()
+WSH_XARGS=(xargs --no-run-if-empty -P "${WSH_JOBS}")
 WSH_KEEP_GOING=""
 WSH_YAML_BINARY=
 WSH_REPOLIST=
@@ -1150,6 +1153,7 @@ WSH_REPOLIST_SOURCE=
 WSH_SORT_COMMAND="sort"
 WSH_BACKUP_FILE=
 WSH_TAGS=()
+WSH_UNMANAGED=NO
 WSH_QUIET=NO
 WSH_WORKSPACE_TYPE=repos
 
@@ -1164,19 +1168,20 @@ do
                 wsh_exit 50 "wshandler version is unknown"
             fi;;
 
-        -y|--yaml_tool)     WSH_YAML_TOOL="$2";     shift; shift;;
-        -Y|--yaml_binary)   WSH_YAML_BINARY=$2;     shift; shift;;
-        -r|--root)          WSH_WORKSPACE_ROOT=$2;  shift; shift;;
-        -c|--cache)         WSH_CACHE_DIR=$2;       shift; shift;;
-        -t|--type)          WSH_WORKSPACE_TYPE=$2;  shift; shift;;
-        -j|--jobs)          WSH_JOBS=$2;            shift; shift;;
-        -i|--indent)        WSH_INDENT=$2;          shift; shift;;
-        -p|--policy)        WSH_COMMAND_POLICY=$2;  shift; shift;;
+        -y|--yaml_tool)   WSH_YAML_TOOL="$2";                         shift; shift;;
+        -Y|--yaml_binary) WSH_YAML_BINARY=$2;                         shift; shift;;
+        -r|--root)        WSH_WORKSPACE_ROOT=$2;                      shift; shift;;
+        -c|--cache)       WSH_CACHE_DIR=$2;                           shift; shift;;
+        -t|--type)        WSH_WORKSPACE_TYPE=$2;                      shift; shift;;
+        -j|--jobs)        WSH_JOBS=$2; WSH_XARGS+=(-P "${WSH_JOBS}"); shift; shift;;
+        -i|--indent)      WSH_INDENT=$2;                              shift; shift;;
+        -p|--policy)      WSH_COMMAND_POLICY=$2;                      shift; shift;;
 
-        -k|--keep-going)    WSH_KEEP_GOING="-k";    shift;;
-        -T|--tag)           WSH_TAGS+=("$2");       shift; shift;;
-        -u|--unsorted)      WSH_SORT_COMMAND="cat"; shift;;
-        -q|--quiet)         WSH_QUIET="YES";        shift;;
+        -k|--keep-going)  WSH_KEEP_GOING="-k";                        shift;;
+        -T|--tag)         WSH_TAGS+=("$2");                           shift; shift;;
+        -u|--unsorted)    WSH_SORT_COMMAND="cat";                     shift;;
+        -U|--unmanaged)   WSH_UNMANAGED="YES";                        shift;;
+        -q|--quiet)       WSH_QUIET="YES";                            shift;;
 
         -l|--list)
             test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
@@ -1204,8 +1209,22 @@ do
             exit;;
 
         clean|unshallow|update|prune|push)
-            check_workspace "$1"
-            execute_selective_command "${@}"
+            if [ "${WSH_UNMANAGED}" == "NO" ]
+            then
+                check_workspace "$1"
+                execute_selective_command "${@}"
+            else
+                for DIR in "${@:2}";
+                do
+                    # repo types may be mixed, process one by one
+                    if [ -d "${DIR}/.git" ]
+                    then
+                        "dir_git_$1" "${DIR}" "-" "-"
+                    else
+                        wsh_exit 8 "Unmanaged handling is supported for git repositories only."
+                    fi
+                done
+            fi
             exit;;
 
         is_source_space)
@@ -1220,14 +1239,14 @@ do
 
         remove|remove_by_url)
             check_workspace "$1"
-            for PKG_ID in "$@"
+            for PKG_ID in "${@:2}"
             do
                 backup
                 "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_$1" "${PKG_ID}" < "${WSH_BACKUP_FILE}" > "${WSH_REPOLIST}"
             done
             exit;;
 
-        set_version_by_url|set_version_by_name|set_version_to_hash|set_version_to_branch)
+        set_version_by_url|set_version_by_name|set_version_to_hash|set_version_to_branch|pin)
             check_workspace "$1"
             set_version "${@}"
             exit;;
