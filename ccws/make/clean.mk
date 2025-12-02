@@ -9,7 +9,7 @@ artifacts_clean:
 
 # Purge workspace
 wspurge: wsclean artifacts_clean
-	rm -rf "${CCWS_SOURCE_DIR}"/*
+	rm -rf "${CCWS_SOURCE_DIR}"
 	test ! -d "${CCWS_SYSROOT_DIR_BASE}" || ${MAKE} purge_sysroot
 
 purge_sysroot:

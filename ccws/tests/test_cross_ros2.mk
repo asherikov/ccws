@@ -5,16 +5,16 @@ test:
 	${MAKE} bp_purge
 	${MAKE} wspurge
 	${MAKE} bp_install_build
-	${MAKE} wsinit REPOS="https://github.com/asherikov/cdinit.git"
+	${MAKE} wsinit REPOS="https://github.com/asherikov/pjmsg_mcap_wrapper.git"
 	${MAKE} wsupdate
-	${MAKE} cross_install PKG=cdinit CCWS_CROSS_HOST_PYTHON=YES IMAGE=${IMAGE}
+	${MAKE} cross_install PKG=pjmsg_mcap_wrapper CCWS_CROSS_HOST_PYTHON=YES IMAGE=${IMAGE}
 	${MAKE} cross_mount
 	${MAKE} cross_python_soabi
-	${MAKE} cdinit
+	${MAKE} pjmsg_mcap_wrapper
 	${MAKE} wsclean
 	${MAKE} bp_install_build BUILD_PROFILE=deb
-	${MAKE} PKG=cdinit BUILD_PROFILE=deb,${BUILD_PROFILE}
-	${MAKE} deb_lint PKG=cdinit BUILD_PROFILE=deb,${BUILD_PROFILE}
+	${MAKE} PKG=pjmsg_mcap_wrapper BUILD_PROFILE=deb,${BUILD_PROFILE}
+	${MAKE} deb_lint PKG=pjmsg_mcap_wrapper BUILD_PROFILE=deb,${BUILD_PROFILE}
 	${MAKE} cross_umount
 	# alternative root extraction
 	${MAKE} docker_install

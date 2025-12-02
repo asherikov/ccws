@@ -87,10 +87,11 @@ test_dependencies:
 	${MAKE} wsupdate
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
-	${MAKE} wsclean
 	mv "${TEST_SOURCE_DIR}/examples" ./
 	rm -Rf "${TEST_SOURCE_DIR}"/*
+	${MAKE} wsclean
 	mv examples "${TEST_SOURCE_DIR}"
+	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 
 test_deb:
 	${MAKE} bp_install_build BUILD_PROFILE=deb
