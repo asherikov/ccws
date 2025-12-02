@@ -68,6 +68,10 @@
 #
 # no library specific stuff
 # -abseil-*
+# -boost-use-ranges
+#
+# seems to complain when there is no potential problems, also portability should rather be tested with a build
+# -portability-template-virtual-member-function
 #
 # sometimes useful
 # -bugprone-easily-swappable-parameters
@@ -101,6 +105,8 @@ Checks: '*,
 -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
 -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming,
 -abseil-*,
+-boost-use-ranges,
+-portability-template-virtual-member-function,
 -bugprone-easily-swappable-parameters'
 
 WarningsAsErrors: '*'
