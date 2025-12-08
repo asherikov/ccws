@@ -24,7 +24,7 @@ qwen_ccws:
 	mkdir -p "${CCWS_CACHE}/apt/cache"
 	mkdir -p "${CCWS_CACHE}/apt/lists"
 	# build dir is usable only from container anyway
-	mkdir -p "${CCWS_BUILD_DIR_BASE}/qwen"
+	mkdir -p "${CCWS_CACHE}/qwen/build"
 	docker run --rm -ti \
 		--user `id -u`:`id -g` \
 		-e "CCWS_CACHE=/cache" \
@@ -36,7 +36,7 @@ qwen_ccws:
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
 		-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
-		-v "${CCWS_BUILD_DIR_BASE}/qwen:/ccws/workspace/build" \
+		-v "${CCWS_CACHE}/qwen/build:/ccws/workspace/build" \
 		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
 		asherikov/ccws_qwen_noble

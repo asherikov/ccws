@@ -11,25 +11,25 @@
 - Packages should be created, built, tested, and analysed using ccws framework
   as documented in /ccws/README.md.
 - All ccws commands should be executed with make in /ccws directory.
+- Use ccws targets to clear build directories, never delete directories or
+  files inside /ccws and /ccws/workspace directories.
+- Never try to fix ccws: if compilation fails the issue is either in the
+  package, or the workspacce needs cleaning.
 - All ccws dependencies are preinstalled.
+- ccws builds package dependencies automatically as long as package manifest
+  (package.xml files) are properly formed.
 - Perform builds using a specific ccws profile by passing its name with
   BUILD\_PROFILE parameter to make.
 - ccws takes care of proper compilation and static analysis configuration, do
   not bypass it.
 - Do not execute static analysis tools or compilers without ccws assistance.
-- Packages should be verified using ccws as follows:
-    - run static analysis using static\_checks profile, fix detected issues;
-    - install package dependencies using dep\_install make target;
-    - build package using reldebug build profile;
-    - run tests if they are present in the package.
 
 # Rules for code generation
 
-- Be concise:
-    - Do not insert output or logging statements.
-    - Comment lines should not exceed 10% of a file.
-    - Produce minimal necessary modifications when implementing features.
-    - Reuse existing code instead of coyping it.
+- Never add comments to source files.
+- Do not insert output or logging statements.
+- Produce minimal necessary modifications when implementing features.
+- Reuse existing code instead of copying it.
 - States of a state machine should not make assumptions on preceding or
   following states.
 - Use 4 spaces for indentation in all file types by default, but preserve

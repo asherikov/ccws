@@ -132,13 +132,13 @@ ccache_stats:
 ##
 
 assert_PKG_arg_must_be_specified:
-	test "${PKG}" != ""
+	test "${PKG}" != "" > /dev/null
 
 assert_AUTHOR_must_not_be_empty:
-	test "${AUTHOR}" != ""
+	test "${AUTHOR}" != "" > /dev/null
 
 assert_EMAIL_must_not_be_empty:
-	test "${EMAIL}" != ""
+	test "${EMAIL}" != "" > /dev/null
 
 assert_JOBS_arg_must_be_positive_integer:
 	test "${JOBS}" -gt 0

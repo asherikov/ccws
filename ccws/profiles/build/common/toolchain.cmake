@@ -38,6 +38,8 @@ endif()
 
 # ccws cmake utilities
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+# assuming packages install modules here
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_INSTALL_PREFIX}/share/cmake/Modules/")
 
 
 ###############################################################################
@@ -83,5 +85,5 @@ set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE S
 ###
 
 include("$ENV{CCWS_SOURCE_EXTRAS}/toolchain.cmake" OPTIONAL RESULT_VARIABLE CCWS_SOURCE_EXTRAS_TOOLCHAIN)
-message("Extra toolchain inclusion: ${CCWS_SOURCE_EXTRAS_TOOLCHAIN}")
+#message("Extra toolchain inclusion: ${CCWS_SOURCE_EXTRAS_TOOLCHAIN}")
 
