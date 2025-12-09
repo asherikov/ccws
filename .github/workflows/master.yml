@@ -70,20 +70,25 @@ jobs:
             - uses: actions/checkout@v5
             - run: make -f ccws/tests/test_nix.mk
 
-    cross_raspi:
-        container:
-            image: ros:noetic-ros-base-focal
-            options: --privileged
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v5
-            - run: sudo apt update
-            - run: sudo apt upgrade --yes
-            - run: ./ccws/tools/bin/bootstrap.sh
-            - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
-              env:
-                CCACHE_DISABLE: true
+# disabled due to package version conflict
+#   libssl-dev : Depends: libssl1.1 (= 1.1.1d-0+deb10u6) but 1.1.1d-0+deb10u6+rpt1 is to be installed
+# related
+#   https://github.com/netdata/netdata/issues/11813
+# to be deprecated anyway
+#    cross_raspi:
+#        container:
+#            image: ros:noetic-ros-base-focal
+#            options: --privileged
+#        runs-on: ubuntu-latest
+#
+#        steps:
+#            - uses: actions/checkout@v5
+#            - run: sudo apt update
+#            - run: sudo apt upgrade --yes
+#            - run: ./ccws/tools/bin/bootstrap.sh
+#            - run: make -f ccws/tests/test_cross.mk BUILD_PROFILE=cross_raspberry_pi ROS_DISTRO=melodic
+#              env:
+#                CCACHE_DISABLE: true
 
     noble_docker_cross:
         runs-on: ubuntu-24.04
