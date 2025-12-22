@@ -40,5 +40,7 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 
 RUN npm install -g @qwen-code/qwen-code
 
+USER ccws
+
 # Default entrypoint when none specified
 CMD ["tmux", "-u", "new-session", "qwen"]

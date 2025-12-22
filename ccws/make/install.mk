@@ -1,6 +1,7 @@
 APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install
 PIP3_INSTALL?=python3 -m pip install
 PIPX_INSTALL?=python3 -m pipx install
+PIPX_UNINSTALL?=python3 -m pipx uninstall
 export PIPX_BIN_DIR=${CCWS_TOOLS_DIR}/bin
 export PIPX_HOME=${CCWS_TOOLS_DIR}/pipx
 
@@ -97,7 +98,7 @@ install_all_profiles:
 	${MAKE} bp_install_build BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} bp_install_build BUILD_PROFILE=cppcheck
-	${MAKE} bp_install_build BUILD_PROFILE=cross_raspberry_pi
+	# ${MAKE} bp_install_build BUILD_PROFILE=cross_raspberry_pi
 	${MAKE} bp_install_build BUILD_PROFILE=cross_arm64
 	${MAKE} bp_install_build BUILD_PROFILE=deb
 	${MAKE} bp_install_build BUILD_PROFILE=doxygen
