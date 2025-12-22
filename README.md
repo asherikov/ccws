@@ -95,7 +95,9 @@ subdirectory contains default parameters, which can be overriden by specific
 profiles:
 
 - \[default\] `reldebug` -- default compiler, cmake build type is
-  `RelWithDebInfo`
+  `RelWithDebInfo`.
+- `release` -- default compiler, cmake build type is `Release`, tests are
+  disabled.
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
   static checks. `clang-tidy` parameters are defined in cmake toolchain and must
   be enabled in packages as shown in package template `CMakeLists`.
@@ -468,6 +470,7 @@ TODO
 
   - Investigate generation of debug and development packages, in particular
     stripping of static libraries and headers.
+    <https://linuxvox.com/blog/where-to-place-find-debug-library-on-linux/>
   - <https://github.com/jordansissel/fpm> -- generic binary package generator,
     potential replacement for `dpkg-deb`.
 
@@ -476,6 +479,11 @@ TODO
   - System images as OCI artifacts <https://oras.land/docs/>.
   - Generate system images in layered, container-like fashion
     <https://osinside.github.io/kiwi/overview.html>.
+
+- Other
+
+  - Advanced dependency graph generation
+    <https://github.com/maspe36/colcon_gephi>.
 
 Bookmarks (not going to be supported)
 -------------------------------------
