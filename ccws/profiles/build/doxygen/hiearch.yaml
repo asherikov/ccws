@@ -1,0 +1,9 @@
+views:
+    - id: packages
+      expand: [recursive_all]
+      graphviz:
+          node:
+              shape: box
+              style: "rounded,filled"
+              fillcolor: lightgray
+              node_label_format: '<<table border="0" cellspacing="1" cellpadding="0" title="{id}"><tr><td align="center" href="{id}/index.html" colspan="2">{label}</td></tr><tr><td href="{expanded_from}.svg"><font point-size="8">all</font></td><td href="{expanded_from}_{id}_recursive_all.svg"><font point-size="8">package</font></td></tr></table>>'

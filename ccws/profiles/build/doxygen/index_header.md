@@ -5,10 +5,10 @@ Packages
 Dependency graph
 ----------------
 
-[![](pkg_dependency_graph.svg)](pkg_dependency_graph.svg)
+[![](packages.svg)](packages.svg)
 
 Doxygen documentation
 ---------------------
 
-| **Package** | Dependencies | Dependents |
-| ----------- | :----------: | :--------: |
+| **Package** | Dependency graph |
+| ----------- | :--------------: |
