@@ -2,8 +2,9 @@
 #!/usr/bin/bash -x
 # shellcheck disable=SC2317,SC2329
 
-set -e
+set -Ee
 set -o pipefail
+trap 'wsh_echo "Failed \"${BASH_COMMAND}\" at line ${LINENO} with $?" >&2 && kill 0' ERR
 
 WSH_VERSION=
 
@@ -299,7 +300,7 @@ dir_git_status()
     then
         cd "${REPO_DIR}"
         REPO_VERSION_HASH=$(git rev-parse --verify "${REPO_VERSION}^{commit}" 2> /dev/null || echo -n "-")
-        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n')
+        GIT_ACTUAL_VERSION=$(git describe --dirty --broken --all --long --always | tr -d '\n' || echo -n "-")
         GIT_ACTUAL_HASH=$(dir_git_get_hash || echo -n "-")
     fi
 
@@ -583,6 +584,7 @@ initialize_yaml_tool()
     esac
 }
 
+
 check_workspace()
 {
     initialize_yaml_tool
@@ -591,7 +593,10 @@ check_workspace()
     then
         WSH_WORKSPACE_ROOT="$(realpath "${WSH_WORKSPACE_ROOT:-"./"}")/"
         WSH_REPOLIST="${WSH_WORKSPACE_ROOT}/.${WSH_WORKSPACE_TYPE}"
-        test -f "${WSH_REPOLIST}" || discover_lists "${WSH_WORKSPACE_ROOT}" -maxdepth 1;
+        if [ -d "${WSH_WORKSPACE_ROOT}" ]
+        then
+            test -f "${WSH_REPOLIST}" || discover_lists "${WSH_WORKSPACE_ROOT}" -maxdepth 1;
+        fi
     fi
 
     if [ ${#WSH_REPOLISTS[@]} -eq 0 ] || [ "${WSH_REPOLISTS[0]}" = "" ]
@@ -695,7 +700,7 @@ execute_command()
     do
         wsh_echo ">>> $1: ${SOURCE_TYPE} sources ---"
         "$1" "${SOURCE_TYPE}" "${@:2}"
-        wsh_echo " <<< $1: ${SOURCE_TYPE} sources ---"
+        wsh_echo "<<< $1: ${SOURCE_TYPE} sources ---"
     done
 }
 
@@ -845,28 +850,28 @@ repos_yq_merge()
 
 repos_gojq_merge()
 {
-    "${WSH_YAML_CMD[@]}" --slurp --yaml-output '.[0] * .[1]' "$1" "$2"
+    "${WSH_YAML_CMD[@]}" --slurp --yaml-output '.[1] * .[0]' "$1" "$2"
 }
 
 
 rosinstall_yq_sparse()
 {
-    "${WSH_YAML_CMD[@]}" ".[] | select(.*.local-name == \"$1\") | .git.wshandler.sparse[]" "$2" 2> /dev/null
+    "${WSH_YAML_CMD[@]}" ".[] | select(.*.local-name == \"$1\") | .git.wshandler.sparse[]" "$2" 2> /dev/null || return 0
 }
 
 rosinstall_gojq_sparse()
 {
-    "${WSH_YAML_CMD[@]}" --raw-output ".[] | select(.[].\"local-name\" == \"$1\") | .git.wshandler.sparse" "$2" 2> /dev/null
+    "${WSH_YAML_CMD[@]}" --raw-output ".[] | select(.[].\"local-name\" == \"$1\") | .git.wshandler.sparse" "$2" 2> /dev/null || return 0
 }
 
 repos_yq_sparse()
 {
-    "${WSH_YAML_CMD[@]}" ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null
+    "${WSH_YAML_CMD[@]}" ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null || return 0
 }
 
 repos_gojq_sparse()
 {
-    "${WSH_YAML_CMD[@]}" --raw-output ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null
+    "${WSH_YAML_CMD[@]}" --raw-output ".repositories.\"$1\".wshandler.sparse[]" "$2" 2> /dev/null || return 0
 }
 
 
@@ -1214,6 +1219,7 @@ do
                 check_workspace "$1"
                 execute_selective_command "${@}"
             else
+                initialize_yaml_tool
                 for DIR in "${@:2}";
                 do
                     # repo types may be mixed, process one by one

@@ -6,7 +6,7 @@ test:
 	${MAKE} wspurge
 	${MAKE} bp_install_build
 	${MAKE} wsinit REPOS="https://github.com/asherikov/pjmsg_mcap_wrapper.git"
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} cross_install PKG=pjmsg_mcap_wrapper CCWS_CROSS_HOST_PYTHON=YES IMAGE=${IMAGE}
 	${MAKE} cross_mount
 	${MAKE} cross_python_soabi

@@ -12,7 +12,7 @@ test:
 	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
 	${MAKE} wsscrape_all
 	${MAKE} dep_to_repolist PKG=test_pkg
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} log_output TARGET=wsstatus
 	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile
@@ -77,7 +77,7 @@ test_dependencies:
 	# ---
 	# add dependencies to the workspace and build deb package
 	${MAKE} dep_to_repolist
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} dep_install CCWS_DEP_TYPE=build
 	${MAKE} dep_install
 

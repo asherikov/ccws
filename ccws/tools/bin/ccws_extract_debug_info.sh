@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -Ee
 set -o pipefail
 
 # Function to extract debug information from a file
