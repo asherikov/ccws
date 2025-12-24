@@ -15,7 +15,7 @@ test:
 	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
 	${MAKE} wsscrape_all
 	${MAKE} dep_to_repolist PKG=test_pkg
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} log_output TARGET=wsstatus
 	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile
@@ -58,7 +58,7 @@ test:
 	${MAKE} set_repo_version REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
 	${MAKE} rm REPO="https://github.com/asherikov/ariles.git"
 	${MAKE} add REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} dep_install CCWS_DEP_TYPE=build
 	${MAKE} dep_install
 	${MAKE} ros2param
@@ -84,10 +84,10 @@ test_dependencies:
 	${MAKE} dep_install PKG=test_dependencies
 	${MAKE} wspurge
 	${MAKE} add REPO="https://github.com/ros2/examples" VERSION="${ROS_DISTRO}"
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} dep_to_repolist
 	${MAKE} dep_install
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean

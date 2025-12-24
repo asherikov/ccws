@@ -24,6 +24,8 @@
 
 # shellcheck disable=SC1003
 
+set -e
+
 PLATFORM_DEFAULT="linux/amd64"
 PLATFORM="${PLATFORM_DEFAULT}"
 OUT_DIR="./output"

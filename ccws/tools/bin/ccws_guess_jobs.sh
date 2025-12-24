@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 MEMORY_PER_JOB_MB=${1}
 
 JOBS_GUESS_MEMORY=$(($(grep MemAvailable < /proc/meminfo | grep -o '[0-9]*') / 1024 / MEMORY_PER_JOB_MB))

@@ -7,7 +7,7 @@ test:
 	${MAKE} wsinit REPOS="https://github.com/asherikov/staticoma.git"
 	${MAKE} dep_to_repolist PKG=staticoma
 	${MAKE} dep_to_repolist
-	${MAKE} wsupdate
+	${MAKE} wsupdate_shallow
 	${MAKE} cross_install PKG=staticoma CCWS_CROSS_HOST_PYTHON=YES
 	${MAKE} cross_pack
 	${MAKE} cross_purge
