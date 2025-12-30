@@ -2,8 +2,11 @@ views:
     - id: packages
       expand: [recursive_all]
       graphviz:
+          graph:
+              fontname: "Monospace"
           node:
               shape: box
+              fontname: "Monospace"
               style: "rounded,filled"
               fillcolor: lightgray
-              node_label_format: '<<table border="0" cellspacing="1" cellpadding="0" title="{id}"><tr><td align="center" href="{id}/index.html" colspan="2">{label}</td></tr><tr><td href="{expanded_from}.svg"><font point-size="8">all</font></td><td href="{expanded_from}_{id}_recursive_all.svg"><font point-size="8">package</font></td></tr></table>>'
+              node_label_format: '<<table border="0" cellspacing="1" cellpadding="2" title="{id}" align="center"><tr><td href="{id}/index.html" colspan="2"><font point-size="10">{label}</font></td></tr><tr><td href="{expanded_from}.svg"><font point-size="8">all</font></td><td href="{expanded_from}_{id}_recursive_all.svg"><font point-size="8">package</font></td></tr></table>>'

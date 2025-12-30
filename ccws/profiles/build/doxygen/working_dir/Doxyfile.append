@@ -1,0 +1,1 @@
+TAGFILES+="$(CCWS_DOXYGEN_WORKING_DIR)/@@PKG@@/tags.xml=../@@PKG@@/"

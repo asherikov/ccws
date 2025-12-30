@@ -20,7 +20,7 @@
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
     <tab type="examples" visible="yes" title="" intro=""/>
-    <tab type="user" url="../packages.svg" title="Dependencies"/>
+    <tab type="user" url="../packages_@@PKG@@_recursive_all.svg" title="Dependencies"/>
     <tab type="user" url="../index.html" title="Package index"/>
   </navindex>
 
