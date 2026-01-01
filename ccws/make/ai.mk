@@ -25,14 +25,20 @@ qwen_ccws:
 	mkdir -p "${CCWS_CACHE}/apt/lists"
 	# build dir is usable only from container anyway
 	mkdir -p "${CCWS_CACHE}/qwen/build"
+	#--user `id -u`:`id -g` # interferes with sudo
+	#--ipc host # no constraints on shared memory
 	docker run --rm -ti \
-		--user `id -u`:`id -g` \
+		--ipc host \
 		-e "CCWS_CACHE=/cache" \
+		-e "DISPLAY=${DISPLAY}" \
+		-v /tmp/.X11-unix:/tmp/.X11-unix \
+		-v /dev/dri:/dev/dri \
 		-v "${CCWS_CACHE}:/cache" \
 		-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
 		-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
 		-v "${CCWS_DIR}/qwen:/home/ubuntu/.qwen/" \
 		-v "${CCWS_DIR}/qwen:/root/.qwen/" \
+		-v "${CCWS_DIR}/qwen/tmux.conf:/home/ubuntu/.tmux.conf" \
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
 		-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \

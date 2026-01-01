@@ -24,7 +24,8 @@ RUN \
     && apt update \
     && apt upgrade -y \
     && ${APT_INSTALL} neovim git ssh python3 tmux sudo \
-    && (usermod -l ccws `id -nu 1000` || useradd -u 1000 ccws) \
+    && (usermod -l ccws `id -nu 1000` --home /home/ccws || useradd -u 1000 ccws) \
+    && (mv /home/ubuntu /home/ccws || true) \
     && usermod -aG sudo ccws \
     && (echo "ccws:ccws" | chpasswd) \
     && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
