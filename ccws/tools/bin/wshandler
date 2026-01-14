@@ -87,13 +87,15 @@ help()
     wsh_echo "Repository commands:"
     wsh_echo "  Selective commands (<PACKAGE_NAME> may be a pattern):"
     wsh_echo "    Common arguments:"
-    wsh_echo "      [-j|--jobs <NUM_THREADS> {1}]   # use multiple jobs if possible"
-    wsh_echo "      [-U|--unmanaged]                # work on unmanaged repository directories: directory names must be given"
-    wsh_echo "                                      #instead of package names, at least one is required, ignores --jobs"
-    wsh_echo "    clean [<PACKAGE_NAME> ...]        # remove repository"
-    wsh_echo "    prune [<PACKAGE_NAME> ...]        # git prune"
-    wsh_echo "    push [<PACKAGE_NAME> ...]         # git push"
-    wsh_echo "    unshallow [<PACKAGE_NAME> ...]    # git unshallow"
+    wsh_echo "      [-j|--jobs <NUM_THREADS> {1}]       # use multiple jobs if possible"
+    wsh_echo "      [-U|--unmanaged]                    # work on unmanaged repository directories: directory names must"
+    wsh_echo "                                          #be given instead of package names, at least one is required,"
+    wsh_echo "                                          #ignores --jobs"
+    wsh_echo "    clean [<PACKAGE_NAME> ...]            # remove repository"
+    wsh_echo "    prune [<PACKAGE_NAME> ...]            # git prune"
+    wsh_echo "    push [<PACKAGE_NAME> ...]             # git push"
+    wsh_echo "    unshallow [<PACKAGE_NAME> ...]        # git unshallow"
+    wsh_echo "    feature_branches [<PACKAGE_NAME> ...] # list git feature branches"
     wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs|rebase)] update [<PACKAGE_NAME> ...] # git pull"
     wsh_echo "      default      # plain clone"
     wsh_echo "      shallow      # shallow clone"
@@ -271,7 +273,6 @@ git_clone()
     fi
 }
 
-
 dir_git_uncommitted()
 {
     git status --porcelain | grep . > /dev/null
@@ -328,36 +329,31 @@ dir_git_status()
 }
 
 
-dir_git_unshallow()
+dir_git()
 {
-    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
+    wsh_echo "Performing '$1' on '$2'"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$2"
     dir_git_assert "${REPO_DIR}"
+
     pushd "${REPO_DIR}" > /dev/null
-    if git fetch --unshallow
-    then
-        git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-        git fetch origin
-    fi
+    case $1 in
+        unshallow)
+            if git fetch --unshallow
+            then
+                git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+                git fetch origin
+            fi
+            ;;
+        feature_branches)
+            git for-each-ref --sort=committerdate --format='%(committerdate) %09 %(authorname) %09 %(refname)' \
+                | (grep 'refs/remotes/' | grep -v '\(/main\)\|\(/master\)\|\(/release\)\|\(/gh-pages\)\|\(/HEAD\)' || true)
+            ;;
+        prune)  git remote | xargs --no-run-if-empty -I {} git remote prune {};;
+        push)   git push;;
+    esac
     popd > /dev/null
 }
 
-dir_git_prune()
-{
-    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
-    dir_git_assert "${REPO_DIR}"
-    pushd "${REPO_DIR}" > /dev/null
-    git remote | xargs --no-run-if-empty -I {} git remote prune {}
-    popd > /dev/null
-}
-
-dir_git_push()
-{
-    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
-    dir_git_assert "${REPO_DIR}"
-    pushd "${REPO_DIR}" > /dev/null
-    git push
-    popd > /dev/null
-}
 
 dir_git_update()
 {
@@ -1025,7 +1021,6 @@ execute_clone()
 {
     "$1_clone" "NO" "$2" "$3" "${WSH_WORKSPACE_ROOT}"
 
-    check_workspace update
     execute_selective_command update
 }
 
@@ -1058,6 +1053,8 @@ execute_selective_command()
     # strip trailing slashes
     WSH_NAME_PATTERNS=("${WSH_NAME_PATTERNS[@]%/}")
 
+    check_workspace "${COMMAND_NAME}"
+
     if [ "${COMMAND_NAME}" == "update" ] && [ ${#WSH_NAME_PATTERNS[@]} -eq 0 ]
     then
         update_root
@@ -1065,8 +1062,14 @@ execute_selective_command()
 
     for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
     do
-        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
-            | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}_${COMMAND_NAME}"
+        case ${COMMAND_NAME} in
+            clean|update)
+                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
+                    | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}_${COMMAND_NAME}";;
+            *)
+                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
+                    | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}" "${COMMAND_NAME}";;
+        esac
     done
 }
 
@@ -1213,10 +1216,9 @@ do
             fi
             exit;;
 
-        clean|unshallow|update|prune|push)
+        clean|update|unshallow|prune|push|feature_branches)
             if [ "${WSH_UNMANAGED}" == "NO" ]
             then
-                check_workspace "$1"
                 execute_selective_command "${@}"
             else
                 initialize_yaml_tool
@@ -1225,7 +1227,11 @@ do
                     # repo types may be mixed, process one by one
                     if [ -d "${DIR}/.git" ]
                     then
-                        "dir_git_$1" "${DIR}" "-" "-"
+                        wsh_echo "Processing '${DIR}'"
+                        case $1 in
+                            clean|update)   "dir_git_$1" "${DIR}" "-" "-"   ;;
+                            *)              "dir_git" "$1" "${DIR}" "-" "-" ;;
+                        esac
                     else
                         wsh_exit 8 "Unmanaged handling is supported for git repositories only."
                     fi
