@@ -68,8 +68,8 @@ graph_reverse: assert_PKG_arg_must_be_specified
 
 checkout_src:
 	test -z "${SOURCE_SPACE_VERSION}" \
-		|| (git clone "${SOURCE_SPACE_REPO}" "${WORKSPACE_SRC}" \
-			&& cd "${WORKSPACE_SRC}" \
+		|| (git clone "${SOURCE_SPACE_REPO}" "${CCWS_SOURCE_DIR}" \
+			&& cd "${CCWS_SOURCE_DIR}" \
 			&& git checkout "${SOURCE_SPACE_VERSION}" \
 			&& git submodule update --init --recursive \
 			&& cd "${CCWS_ROOT}" \
@@ -78,3 +78,11 @@ checkout_src:
 		|| (${MAKE} wsinit && ${MAKE} add REPO="${PKG_REPO}" VERSION="${PKG_VERSION}")
 	${MAKE} wsupdate_pkgs_shallow
 
+ws_pin:
+	test -d ${CCWS_SOURCE_DIR}/.git
+	cd ${CCWS_SOURCE_DIR} \
+		&& git checkout release \
+		&& git merge main \
+		&& ${CMD_WSHANDLER} pin \
+		&& git commit -m "pin repositories for ${TAG}" .repos \
+		&& git tag ${TAG}
