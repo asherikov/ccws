@@ -1,5 +1,16 @@
 # Development context
 
+## Environment
+
+- Coding agent is running inside a docker container as a part of ccws
+  framework. Preload corresponding skill on startup.
+- All ccws profile dependencies are preinstalled in the container.
+- sudo password is 'ccws'
+- Unless explicitly requested, you are strictly prohibited to bypass ccws
+  framework in order to: compile packages (colcon, cmake, gcc, etc), install
+  dependencies (apt, pip, etc), run static analysis tools (pylint, cppcheck,
+  etc).
+
 ## Source space
 
 - Package repositories are located in subdirectories of /ccws/workspace/src,

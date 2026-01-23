@@ -8,7 +8,10 @@
     "hideBanner": true
   },
   "tools": {
-    "approvalMode": "yolo"
+    "approvalMode": "yolo",
+    "experimental": {
+      "skills": true
+    }
   },
   "telemetry": {
     "enabled": true,
@@ -46,5 +49,8 @@
     "auth": {
       "selectedType": "qwen-oauth"
     }
+  },
+  "experimental": {
+    "skills": true
   }
 }

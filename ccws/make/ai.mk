@@ -36,9 +36,9 @@ qwen_ccws:
 		-v "${CCWS_CACHE}:/cache" \
 		-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
 		-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
-		-v "${CCWS_DIR}/qwen:/home/ubuntu/.qwen/" \
+		-v "${CCWS_DIR}/qwen:/home/ccws/.qwen/" \
 		-v "${CCWS_DIR}/qwen:/root/.qwen/" \
-		-v "${CCWS_DIR}/qwen/tmux.conf:/home/ubuntu/.tmux.conf" \
+		-v "${CCWS_DIR}/qwen/tmux.conf:/home/ccws/.tmux.conf" \
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
 		-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \

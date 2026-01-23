@@ -171,13 +171,16 @@ Initial setup
 - Override developer and vendor specific parameters by adding them to
   `make/config.mk`, available parameters can be found in the top section of
   `Makefile`.
-- Install dependencies using `make bp_install_build BUILD_PROFILE=<profile>`
-  targets, cross compilation profiles would require some extra steps as
-  described below. In some minimalistic environments you may need to run
-  `./ccws/tools/bin/bootstrap.sh` before using `bp_install_build` target in
-  order to install `make` and other utils.
+- Install profile dependencies using `make bp_install_build
+  BUILD_PROFILE=<profile>` targets, cross compilation profiles would require
+  some extra steps as described below. In some minimalistic environments you
+  may need to run `./ccws/tools/bin/bootstrap.sh` before using
+  `bp_install_build` target in order to install `make` and other utils.
 - Clone packages in `src` subdirectory, or create new using
   `make new PKG=<pkg>`.
+- Install package dependencies using `make dep_install`. Dependencies can be
+  installed selectively by providing package name with `PKG` parameter and/or
+  dependency type with `CCWS_DEP_TYPE` (build|exec|test).
 
 Compilation
 -----------
