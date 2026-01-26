@@ -106,3 +106,5 @@ install_all_profiles:
 	${MAKE} bp_install_build BUILD_PROFILE=scan_build
 	${MAKE} bp_install_build BUILD_PROFILE=static_checks
 	${MAKE} bp_install_build BUILD_PROFILE=thread_sanitizer
+	${MAKE} bp_install_build BUILD_PROFILE=clang_format
+	${MAKE} bp_install_build BUILD_PROFILE=scspell
