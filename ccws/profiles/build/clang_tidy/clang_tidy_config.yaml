@@ -75,6 +75,9 @@
 #
 # sometimes useful
 # -bugprone-easily-swappable-parameters
+#
+# not worth the effort
+# -performance-enum-size
 Checks: '*,
 -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
@@ -107,7 +110,8 @@ Checks: '*,
 -abseil-*,
 -boost-use-ranges,
 -portability-template-virtual-member-function,
--bugprone-easily-swappable-parameters'
+-bugprone-easily-swappable-parameters,
+-performance-enum-size'
 
 WarningsAsErrors: '*'
 #HeaderFilterRegex: '.*'

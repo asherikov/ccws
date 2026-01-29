@@ -58,3 +58,8 @@ private_docker_mountpoint:
 docker_mountpoint: docker_export_remote
 	${MAKE} wswraptarget TARGET=private_docker_mountpoint
 
+docker_save:
+	docker save -o "${CCWS_ARTIFACTS_DIR_BASE}/container.dockerimg" "${IMAGE}"
+
+docker_load:
+	docker load -i "${CCWS_ARTIFACTS_DIR_BASE}/container.dockerimg"

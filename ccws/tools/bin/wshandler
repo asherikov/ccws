@@ -4,7 +4,6 @@
 
 set -Ee
 set -o pipefail
-trap 'wsh_echo "Failed \"${BASH_COMMAND}\" at line ${LINENO} with $?" >&2 && kill 0' ERR
 
 WSH_VERSION=
 
@@ -424,21 +423,24 @@ dir_git_update()
         git fetch
         if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
         then
-            test "${REPO_VERSION}" == '-' || git checkout "${REPO_VERSION}"
-
-            # if we are on a branch make sure that it is updated
-            if [ "${REPO_VERSION}" == '-' ] || (git branch --show-current | grep "${REPO_VERSION}")
+            if [[ $(git branch -a | wc -l) -ne 0 ]]; # if no branches do nothing
             then
-                PULL_ENV=(env)
-                PULL_ARGS=()
-                for POLICY in "${POLICIES[@]}";
-                do
-                    case ${POLICY} in
-                        rebase) PULL_ARGS+=(--rebase);;
-                        nolfs)  PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
-                    esac
-                done
-                "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
+                test "${REPO_VERSION}" == '-' || git checkout "${REPO_VERSION}"
+
+                # if we are on a branch make sure that it is updated
+                if [ "${REPO_VERSION}" == '-' ] || (git branch --show-current | grep "${REPO_VERSION}")
+                then
+                    PULL_ENV=(env)
+                    PULL_ARGS=()
+                    for POLICY in "${POLICIES[@]}";
+                    do
+                        case ${POLICY} in
+                            rebase) PULL_ARGS+=(--rebase);;
+                            nolfs)  PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
+                        esac
+                    done
+                    "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
+                fi
             fi
         fi
     fi
@@ -857,7 +859,7 @@ rosinstall_yq_sparse()
 
 rosinstall_gojq_sparse()
 {
-    "${WSH_YAML_CMD[@]}" --raw-output ".[] | select(.[].\"local-name\" == \"$1\") | .git.wshandler.sparse" "$2" 2> /dev/null || return 0
+    "${WSH_YAML_CMD[@]}" --raw-output ".[] | select(.[].\"local-name\" == \"$1\") | .git.wshandler.sparse[]" "$2" 2> /dev/null || return 0
 }
 
 repos_yq_sparse()
@@ -1265,7 +1267,12 @@ do
 
         dir_*_update|dir_run)
             initialize_yaml_tool
-            "$1" "${@:2}" || test -n "${WSH_KEEP_GOING}"
+            if [ -n "${WSH_KEEP_GOING}" ]
+            then
+                "$1" "${@:2}" || true
+            else
+                "$1" "${@:2}"
+            fi
             exit;;
 
         dir_*)
