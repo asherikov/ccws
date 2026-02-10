@@ -95,6 +95,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v5
+            - run: sudo apt update
+            - run: sudo apt upgrade --yes
             - run: make -f ccws/tests/test_cross_ros2.mk BUILD_PROFILE=cross_arm64 ROS_DISTRO=jazzy
 
     docker_jammy:

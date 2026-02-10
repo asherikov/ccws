@@ -371,10 +371,10 @@ dir_git_update()
     UNMODIFIED=NO
     for POLICY in "${POLICIES[@]}";
     do
-        if [ "${POLICY}" = "unmodified" ]
-        then
-            UNMODIFIED=YES
-        fi
+        case ${POLICY} in
+            unmodified)   UNMODIFIED=YES;;
+            nosubmodules) SUBMODULES=NO;;
+        esac
     done
 
     SPARSE=NO
@@ -425,7 +425,14 @@ dir_git_update()
         then
             if [[ $(git branch -a | wc -l) -ne 0 ]]; # if no branches do nothing
             then
-                test "${REPO_VERSION}" == '-' || git checkout "${REPO_VERSION}"
+                if [ "${REPO_VERSION}" != '-' ]
+                then
+                    git checkout "${REPO_VERSION}"
+                    if [ "${SUBMODULES}" != "NO" ]
+                    then
+                        git submodule update --init --recursive --jobs "${WSH_JOBS}"
+                    fi
+                fi
 
                 # if we are on a branch make sure that it is updated
                 if [ "${REPO_VERSION}" == '-' ] || (git branch --show-current | grep "${REPO_VERSION}")

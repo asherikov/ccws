@@ -512,3 +512,6 @@ Bookmarks (not going to be supported)
 - <https://github.com/oxsecurity/megalinter> multi-purpose linter wrapper.
 - <https://github.com/myint/cppclean> might be useful for unnecessary header
   detection, but looks stale.
+- <https://github.com/cheshirekow/cmake_format> seem to be abandoned, linter
+  not really helpful -- mostly formatting stuff. Same applies to
+  <https://github.com/cmake-lint/cmake-lint>.
