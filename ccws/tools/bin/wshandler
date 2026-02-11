@@ -95,13 +95,14 @@ help()
     wsh_echo "    push [<PACKAGE_NAME> ...]             # git push"
     wsh_echo "    unshallow [<PACKAGE_NAME> ...]        # git unshallow"
     wsh_echo "    feature_branches [<PACKAGE_NAME> ...] # list git feature branches"
-    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> ({default}|shallow|nolfs|rebase)] update [<PACKAGE_NAME> ...] # git pull"
+    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> update [<PACKAGE_NAME> ...] # git pull"
     wsh_echo "      default      # plain clone"
     wsh_echo "      shallow      # shallow clone"
     wsh_echo "      nolfs        # disable git LFS"
     wsh_echo "      rebase       # do git pull with rebase"
     wsh_echo "      unmodified   # only unmodified repos"
     wsh_echo "      nosubmodules # do not checkout submodules"
+    wsh_echo "      origin       # check origin URL matches list, remove and reclone if mismatch"
     wsh_echo ""
     wsh_echo "  Generic commands:"
     wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git '<COMMAND>'  # execute command in each repository"
@@ -228,20 +229,20 @@ git_clone()
     VERSION=$3
     DIR=$4
 
-    CLONE_ENV=(env)
-    SUBMODULES=YES
+    GIT=(env)
     for POLICY in "${POLICIES[@]}";
     do
         case ${POLICY} in
             # --no-tags -- we need tags
             # --single-branch -- implied by --depth
             shallow)      CLONE_ARGS+=(--depth 1 --shallow-submodules);;
-            nolfs)        CLONE_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
+            nolfs)        GIT+=("GIT_LFS_SKIP_SMUDGE=1");;
             nosubmodules) SUBMODULES=NO;;
         esac
     done
+    GIT+=("git")
 
-    if [ "${SUBMODULES}" = "YES" ]
+    if [ "${SUBMODULES}" != "NO" ]
     then
         CLONE_ARGS+=(--recurse-submodules)
     fi
@@ -258,15 +259,23 @@ git_clone()
 
     if [ "${VERSION}" == '-' ] || [ -z "${VERSION}" ]
     then
-        "${CLONE_ENV[@]}" git clone "${CLONE_ARGS[@]}" "${SOURCE_DESTINATION[@]}"
+        "${GIT[@]}" clone "${CLONE_ARGS[@]}" "${SOURCE_DESTINATION[@]}"
     else
-        if ! ("${CLONE_ENV[@]}" git clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
+        if ! ("${GIT[@]}" clone "${CLONE_ARGS[@]}" --branch "${VERSION}" "${SOURCE_DESTINATION[@]}")
         then
             # REPO_VERSION is a hash
             # clone with history to be able to find it
-            "${CLONE_ENV[@]}" git clone --recurse-submodules "${SOURCE_DESTINATION[@]}"
+            "${GIT[@]}" clone "${SOURCE_DESTINATION[@]}"
+
             pushd "${DIR}" > /dev/null
-            "${CLONE_ENV[@]}" git checkout "${VERSION}"
+            wsh_echo "Checking out '${VERSION}' in '$(pwd)'"
+
+            "${GIT[@]}" checkout "${VERSION}"
+            if [ "${SUBMODULES}" != "NO" ]
+            then
+                "${GIT[@]}" submodule update --init --recursive --jobs "${WSH_JOBS}"
+            fi
+
             popd > /dev/null
         fi
     fi
@@ -368,14 +377,19 @@ dir_git_update()
     pushd "${REPO_DIR}" > /dev/null
     IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
 
-    UNMODIFIED=NO
+    GIT=(env)
+    PULL_ARGS=()
     for POLICY in "${POLICIES[@]}";
     do
         case ${POLICY} in
             unmodified)   UNMODIFIED=YES;;
             nosubmodules) SUBMODULES=NO;;
+            nolfs)        GIT+=("GIT_LFS_SKIP_SMUDGE=1");;
+            rebase)       PULL_ARGS+=(--rebase);;
+            origin)       ORIGIN=YES;;
         esac
     done
+    GIT+=("git")
 
     SPARSE=NO
     IFS='.' read -ra GIT_VERSION <<< "$(git version | grep -o '[0-9]*\.[0-9]*\.[0-9]')"
@@ -389,19 +403,31 @@ dir_git_update()
         fi
     fi
 
-    CLONED=NO
     if [ ! -d ".git" ]
     then
         rm -rf "${REPO_DIR:?}/*"
         git_clone "${SPARSE}" "${REPO_URL}" "${REPO_VERSION}" "./"
         CLONED=YES
+    else
+        # Check if origin policy is enabled and if URL matches
+        if [ "${ORIGIN}" = "YES" ]
+        then
+            CURRENT_ORIGIN_URL=$(git remote get-url origin 2>/dev/null || echo "")
+            if [ "${CURRENT_ORIGIN_URL}" != "${REPO_URL}" ]
+            then
+                wsh_echo "Origin URL mismatch for '$1': expected '${REPO_URL}', got '${CURRENT_ORIGIN_URL}'"
+                find ./ -maxdepth 1 -mindepth 1 -exec rm -rf {} \;
+                git_clone "${SPARSE}" "${REPO_URL}" "${REPO_VERSION}" "./"
+                CLONED=YES
+            fi
+        fi
     fi
 
-    if [ "${CLONED}" = "NO" ] || [ "${SPARSE}" = "YES" ]
+    if [ "${CLONED}" != "YES" ] || [ "${SPARSE}" = "YES" ]
     then
         if [ "${SPARSE}" = "YES" ]
         then
-            test "${REPO_VERSION}" == '-' || git sparse-checkout set "${SPARSE_PATHS[@]}"
+            test "${REPO_VERSION}" == '-' || "${GIT[@]}" sparse-checkout set "${SPARSE_PATHS[@]}"
         fi
 
         if [ "${UNMODIFIED}" = "YES" ]
@@ -420,33 +446,24 @@ dir_git_update()
             fi
         fi
 
-        git fetch
+        "${GIT[@]}" fetch
         if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
         then
             if [[ $(git branch -a | wc -l) -ne 0 ]]; # if no branches do nothing
             then
                 if [ "${REPO_VERSION}" != '-' ]
                 then
-                    git checkout "${REPO_VERSION}"
+                    "${GIT[@]}" checkout "${REPO_VERSION}"
                     if [ "${SUBMODULES}" != "NO" ]
                     then
-                        git submodule update --init --recursive --jobs "${WSH_JOBS}"
+                        "${GIT[@]}" submodule update --init --recursive --jobs "${WSH_JOBS}"
                     fi
                 fi
 
                 # if we are on a branch make sure that it is updated
                 if [ "${REPO_VERSION}" == '-' ] || (git branch --show-current | grep "${REPO_VERSION}")
                 then
-                    PULL_ENV=(env)
-                    PULL_ARGS=()
-                    for POLICY in "${POLICIES[@]}";
-                    do
-                        case ${POLICY} in
-                            rebase) PULL_ARGS+=(--rebase);;
-                            nolfs)  PULL_ENV+=("GIT_LFS_SKIP_SMUDGE=1");;
-                        esac
-                    done
-                    "${PULL_ENV[@]}" git pull "${PULL_ARGS[@]}"
+                    "${GIT[@]}" pull "${PULL_ARGS[@]}"
                 fi
             fi
         fi
