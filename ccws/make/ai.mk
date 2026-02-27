@@ -38,6 +38,7 @@ qwen_ccws:
 		-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
 		-v "${CCWS_DIR}/qwen:/home/ccws/.qwen/" \
 		-v "${CCWS_DIR}/qwen:/root/.qwen/" \
+		-v "${CCWS_DIR}/qwen/settings.json.global:/etc/qwen-code/settings.json" \
 		-v "${CCWS_DIR}/qwen/tmux.conf:/home/ccws/.tmux.conf" \
 		-v ".gitignore:/ccws/.qwenignore:ro" \
 		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
