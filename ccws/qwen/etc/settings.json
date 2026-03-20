@@ -41,7 +41,7 @@
       "respectGitIgnore": false
     }
   },
-  "$version": 2,
+  "$version": 3,
   "security": {
     "auth": {
       "selectedType": "qwen-oauth"

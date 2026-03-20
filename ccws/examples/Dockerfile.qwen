@@ -1,4 +1,5 @@
-FROM asherikov/ccws_noble:latest
+ARG BASE_IMAGE=asherikov/ccws_noble:latest
+FROM ${BASE_IMAGE}
 
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
 ENV PIPX_INSTALL="python3 -m pipx install"

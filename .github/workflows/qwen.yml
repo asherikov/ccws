@@ -1,6 +1,20 @@
 on: workflow_dispatch
 
 jobs:
+    docker_jammy:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'jammy'
+                  push: true
+                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
+                  file: ccws/examples/Dockerfile.qwen
+                  tag: ccws_qwen
+                  base_image: 'asherikov/ccws_jammy:latest'
+
     docker_noble:
         runs-on: ubuntu-latest
         steps:
@@ -13,3 +27,4 @@ jobs:
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
                   file: ccws/examples/Dockerfile.qwen
                   tag: ccws_qwen
+                  base_image: 'asherikov/ccws_noble:latest'
