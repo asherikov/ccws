@@ -14,7 +14,7 @@ inputs:
         default: ccws/examples/Dockerfile
     base_image:
         required: false
-        default: ubuntu:${{ inputs.distro }}
+        default: ""
     tag:
         required: false
         default: ccws
@@ -38,5 +38,6 @@ runs:
             context: .
             push: ${{ inputs.push }}
             tags: asherikov/${{ inputs.tag }}_${{ inputs.distro }}:latest,asherikov/${{ inputs.tag }}_${{ inputs.distro }}:${{ github.ref_name }}
-            build-args: "BASE_IMAGE=${{ inputs.base_image }}"
+            build-args: "BASE_IMAGE=${{ inputs.base_image == '' && inputs.base_image || format('ubuntu:{0}', inputs.distro) }}"
+
 
