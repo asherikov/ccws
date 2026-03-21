@@ -38,6 +38,6 @@ runs:
             context: .
             push: ${{ inputs.push }}
             tags: asherikov/${{ inputs.tag }}_${{ inputs.distro }}:latest,asherikov/${{ inputs.tag }}_${{ inputs.distro }}:${{ github.ref_name }}
-            build-args: "BASE_IMAGE=${{ inputs.base_image == '' && inputs.base_image || format('ubuntu:{0}', inputs.distro) }}"
+            build-args: "BASE_IMAGE=${{ inputs.base_image == '' && format('ubuntu:{0}', inputs.distro) || inputs.base_image }}"
 
 
