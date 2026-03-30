@@ -79,7 +79,7 @@ cppcheck:
 	rm -f '${CCWS_BUILD_DIR}/$@/cppcheck.err'
 	bash -c "${SETUP_SCRIPT}; \
 		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs -P ${JOBS} --no-run-if-empty -I {} \
 		cppcheck \
 			-j 1 \
 			--relative-paths \
@@ -121,7 +121,7 @@ flawfinder:
 	find "${CCWS_SOURCE_DIR}" -type f \( -iname '*.cpp' -or -iname '*.h' \) > ${CCWS_BUILD_DIR}/$@/input
 	bash -c " \
 		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty -P ${JOBS} -I {} flawfinder --singleline --dataonly --quiet --minlevel=0 {}"
 
 
 yamllint:
@@ -129,7 +129,7 @@ yamllint:
 	find "${CCWS_SOURCE_DIR}" -type f -iname '*.yaml' > ${CCWS_BUILD_DIR}/$@/input
 	bash -c "${SETUP_SCRIPT}; \
 		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --max-procs=${JOBS} --no-run-if-empty -I {} \
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs -P ${JOBS} --no-run-if-empty -I {} \
 		env LC_ALL=C.UTF-8 yamllint -d \"{extends: default, \
                       rules: { \
                         colons: {max-spaces-before: 0, max-spaces-after: -1}, \
@@ -153,7 +153,7 @@ shellcheck:
 			&& find "${CCWS_SOURCE_DIR}" -iname '*.sh' -or -iname '*.bash' ) \
 			> ${CCWS_BUILD_DIR}/$@/input; \
 		source ${CCWS_BUILD_DIR}/$@/filter > ${CCWS_BUILD_DIR}/$@/input.filtered; \
-		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty --max-procs=${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
+		cat ${CCWS_BUILD_DIR}/$@/input.filtered | xargs --no-run-if-empty -P ${JOBS} -I {} shellcheck -x \$${CCWS_SHELLCHECK_EXCEPTIONS} {}"
 
 
 catkin_lint:
