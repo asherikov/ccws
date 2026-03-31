@@ -13,7 +13,7 @@ qwen_dir:
 	mkdir -p ${DIR}/.ccws/qwen
 	${MAKE} qwen_ccws QWEN_SRC_OUTER=${DIR} QWEN_SRC_INNER=${QWEN_SRC_INNER}/`basename ${DIR}`
 
-qwen_ccws:
+qwen_ccws: ssh_keygen_if_none
 	mkdir -p "${CCWS_BUILD_DIR_BASE}"
 	mkdir -p "${CCWS_INSTALL_DIR_BASE}"
 	mkdir -p "${CCWS_ARTIFACTS_DIR_BASE}"
@@ -27,25 +27,33 @@ qwen_ccws:
 	mkdir -p "${CCWS_CACHE}/qwen/build"
 	#--user `id -u`:`id -g` # interferes with sudo
 	#--ipc host # no constraints on shared memory
-	docker run --rm -ti \
-		--ipc host \
-		-e "CCWS_CACHE=/cache" \
-		-e "DISPLAY=${DISPLAY}" \
-		-v /tmp/.X11-unix:/tmp/.X11-unix \
-		-v /dev/dri:/dev/dri \
-		-v "${CCWS_CACHE}:/cache" \
-		-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
-		-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
-		-v "${CCWS_DIR}/qwen/user:/home/ccws/.qwen/" \
-		-v "${CCWS_DIR}/qwen/user:/root/.qwen/" \
-		-v "${CCWS_DIR}/qwen/global:/etc/qwen-code/" \
-		-v "${CCWS_DIR}/qwen/tmux.conf:/home/ccws/.tmux.conf" \
-		-v ".gitignore:/ccws/.qwenignore:ro" \
-		-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
-		-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
-		-v "${CCWS_CACHE}/qwen/build:/ccws/workspace/build" \
-		-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
-		-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
-		asherikov/ccws_qwen_noble
+	eval `ssh-agent` \
+		&& ssh-add "${CCWS_SSH_KEY}" \
+		&& docker run --rm -ti \
+			--ipc host \
+			--net host \
+			`test ! -f "${CCWS_DIR}/qwen/user/env" || echo "--env-file=${CCWS_DIR}/qwen/user/env"` \
+			-e "CCWS_CACHE=/cache" \
+			-e "DISPLAY=${DISPLAY}" \
+			-e "SSH_AUTH_SOCK=$${SSH_AUTH_SOCK}" \
+			`test ! -f "${CCWS_DIR}/qwen/user/apt" || echo "--volume=${CCWS_DIR}/qwen/user/apt:/etc/apt/apt.conf.d/00-qwen"` \
+			-v /tmp/.X11-unix:/tmp/.X11-unix \
+			-v /dev/dri:/dev/dri \
+			-v "$${SSH_AUTH_SOCK}:$${SSH_AUTH_SOCK}" \
+			-v "${CCWS_CACHE}:/cache" \
+			-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
+			-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
+			-v "${CCWS_DIR}/qwen/user:/home/ccws/.qwen/" \
+			-v "${CCWS_DIR}/qwen/user:/root/.qwen/" \
+			-v "${CCWS_DIR}/qwen/global:/etc/qwen-code/" \
+			-v "${CCWS_DIR}/qwen/tmux.conf:/home/ccws/.tmux.conf" \
+			-v ".gitignore:/ccws/.qwenignore:ro" \
+			-v "${QWEN_SRC_OUTER}:${QWEN_SRC_INNER}" \
+			-v "${QWEN_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
+			-v "${CCWS_CACHE}/qwen/build:/ccws/workspace/build" \
+			-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
+			-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
+			asherikov/ccws_qwen_noble \
+		; kill $${SSH_AGENT_PID}
 	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"
 
