@@ -1,11 +1,15 @@
 {
   "general": {
     "preferredEditor": "nvim",
-    "disableAutoUpdate": "true",
-    "disableUpdateNag": "true"
+    "enableAutoUpdate": "false"
   },
   "ui": {
-    "hideBanner": true
+    "hideBanner": true,
+    "hideTips": true,
+    "showCitations": false,
+    "accessibility": {
+      "disableLoadingPhrases": true
+    }
   },
   "tools": {
     "approvalMode": "yolo"
@@ -18,7 +22,7 @@
     "logPrompts": true
   },
   "privacy": {
-    "usageStatisticsEnabled": true
+    "usageStatisticsEnabled": false
   },
   "model": {
     "enableOpenAILogging": false,

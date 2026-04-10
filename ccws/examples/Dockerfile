@@ -28,6 +28,7 @@ RUN \
     && (mv /home/ubuntu /home/ccws || true) \
     && usermod -aG sudo ccws \
     && (echo "ccws:ccws" | chpasswd) \
+    && echo "ccws ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ccws \
     && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
     && git config --system --add safe.directory '*' \
     && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts \
@@ -49,3 +50,9 @@ RUN \
 --mount=type=cache,target=/cache/pip,sharing=locked \
     ./ccws/tools/bin/bootstrap.sh \
     && make install_all_profiles
+
+RUN --mount=target=/ccws_docker_context,ro \
+    mkdir -p /ccws/skills \
+    && cp -r /ccws_docker_context/ccws/skills/ccws /ccws/skills/ \
+    && hiearch --install-skill /ccws/skills/ \
+    && chown -R ccws /ccws/skills

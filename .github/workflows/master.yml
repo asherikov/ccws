@@ -107,6 +107,13 @@ jobs:
               with:
                   distro: 'jammy'
                   push: false
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'jammy'
+                  push: false
+                  file: ccws/examples/Dockerfile.qwen
+                  tag: ccws_qwen
+                  base_image: 'asherikov/ccws_jammy:latest'
 
     docker_noble:
         runs-on: ubuntu-latest
@@ -116,3 +123,10 @@ jobs:
               with:
                   distro: 'noble'
                   push: false
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'noble'
+                  push: false
+                  file: ccws/examples/Dockerfile.qwen
+                  tag: ccws_qwen
+                  base_image: 'asherikov/ccws_noble:latest'
