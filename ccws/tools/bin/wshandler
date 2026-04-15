@@ -48,6 +48,9 @@ help()
     wsh_echo "                                                      #should be set after -r and -t."
     wsh_echo "  -T|--tag <TAG>                 {}                   # Filter repositories by tags"
     wsh_echo "                                                      #can be specified multiple times"
+    wsh_echo "  -e|--env-subst                                      # Perform environment variable substitution"
+    wsh_echo "                                                      #in repository lists (disabled by default),"
+    wsh_echo "                                                      #gettext envsubst has to be installed"
     wsh_echo "  -q|--quiet                                          # Suppress most of the output"
     wsh_echo ""
     wsh_echo "Repository list commands:"
@@ -172,7 +175,7 @@ git_scrape()
         FIND_ARGS+=(-mindepth 2)
     fi
     REPO_DIRS=$(cd "${SCRAPE_ROOT}" && find ./ "${FIND_ARGS[@]}" -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
-    UNKNOWN_REPO_DIRS=$(comm -2 -3 <(echo "${REPO_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | sort))
+    UNKNOWN_REPO_DIRS=$(comm -2 -3 <(echo "${REPO_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | sort))
 
     for REPO_DIR in ${UNKNOWN_REPO_DIRS}
     do
@@ -523,7 +526,7 @@ status()
             echo "name|version|actual version|HM|repository";
             echo "----|-------|--------------|--|----------";
         fi
-        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" | while read -r -a tuple; do "dir_${SOURCE_TYPE}_status" "${tuple[@]}"; done | "${WSH_SORT_COMMAND}"
+        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | while read -r -a tuple; do "dir_${SOURCE_TYPE}_status" "${tuple[@]}"; done | "${WSH_SORT_COMMAND}"
     )
 
     FORMAT_STRING=""
@@ -537,12 +540,15 @@ status()
         FORMAT_STRING+="%-${MAX_LEN}.${MAX_LEN}s"
     done
 
+    IFS=$'\n' readarray -t ROWS <<< "${DATA}"
+
     if [ "${WSH_QUIET}" = "NO" ]
     then
         echo "Flags: H - version hash mismatch, M - uncommited changes"
+        # 2 -- the number of rows in the table header
+        echo "Total repositories: $((${#ROWS[@]} - 2))"
     fi
 
-    IFS=$'\n' readarray -t ROWS <<< "${DATA}"
     for ROW in "${ROWS[@]}"
     do
         IFS='|' read -ra COLS <<< "${ROW}"
@@ -553,8 +559,6 @@ status()
 
     if [ "${WSH_QUIET}" = "NO" ]
     then
-        echo
-
         WSH_COMMAND_POLICY=show
         scrape "${SOURCE_TYPE}" "${WSH_WORKSPACE_ROOT}"
     fi
@@ -670,7 +674,7 @@ check_workspace()
 
             for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
             do
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${REPOLIST}" \
+                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${REPOLIST}") \
                     | while read -r NAME REPO VERSION; \
                     do \
                         MERGE_NAME="${RELATIVE_PATH}${NAME}"; \
@@ -1013,7 +1017,7 @@ dir_run()
 
 execute_foreach()
 {
-    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
+    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
 }
 
 execute_branch()
@@ -1032,7 +1036,7 @@ execute_branch()
             execute_foreach git "git branch -a | grep '${BRANCH}'";;
         merge)
             TARGET_BRANCH=${3:-"main"}
-            "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < "${WSH_REPOLIST}" | cut -f 1 -d ' ' | while read -r NAME; do dir_git_merge "${NAME}" "${BRANCH}" "${TARGET_BRANCH}"; done
+            "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | while read -r NAME; do dir_git_merge "${NAME}" "${BRANCH}" "${TARGET_BRANCH}"; done
             ;;
         *) help 1;;
     esac
@@ -1090,10 +1094,10 @@ execute_selective_command()
     do
         case ${COMMAND_NAME} in
             clean|update)
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
+                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
                     | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}_${COMMAND_NAME}";;
             *)
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}" \
+                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
                     | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}" "${COMMAND_NAME}";;
         esac
     done
@@ -1143,7 +1147,7 @@ set_version()
                 execute_add "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}";
             fi;
             test "${TYPE}" == "ALL" || exit 0;
-        done < <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < "${WSH_REPOLIST}")
+        done < <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}"))
     done
 
     test "${UPDATED}" = "YES" || wsh_exit 61 "Nothing to update."
@@ -1190,6 +1194,7 @@ WSH_TAGS=()
 WSH_UNMANAGED=NO
 WSH_QUIET=NO
 WSH_WORKSPACE_TYPE=repos
+WSH_ENV_SUBST="cat"
 
 while [[ $# -gt 0 ]]
 do
@@ -1216,6 +1221,7 @@ do
         -u|--unsorted)    WSH_SORT_COMMAND="cat";                     shift;;
         -U|--unmanaged)   WSH_UNMANAGED="YES";                        shift;;
         -q|--quiet)       WSH_QUIET="YES";                            shift;;
+        -e|--env-subst)   WSH_ENV_SUBST="envsubst";                   shift;;
 
         -l|--list)
             test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
@@ -1304,7 +1310,8 @@ do
             exit;;
 
         install_test_deps)
-            apt_install shellcheck
+            # gettext-base -> envsubst
+            apt_install shellcheck gettext-base
             exit;;
 
         install)
