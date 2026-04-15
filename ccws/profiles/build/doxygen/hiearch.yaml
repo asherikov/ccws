@@ -4,9 +4,10 @@ views:
       graphviz:
           graph:
               fontname: "Monospace"
+              rankdir: LR
           node:
               shape: box
               fontname: "Monospace"
               style: "rounded,filled"
               fillcolor: lightgray
-              node_label_format: '<<table border="0" cellspacing="1" cellpadding="2" title="{id}" align="center"><tr><td href="{id}/index.html" colspan="2"><font point-size="10">{label}</font></td></tr><tr><td href="{expanded_from}.svg"><font point-size="8">all</font></td><td href="{expanded_from}_{id}_recursive_all.svg"><font point-size="8">package</font></td></tr></table>>'
+              node_label_format: '<<table border="0" cellspacing="1" cellpadding="2" title="{id}" align="center"><tr><td href="{id}/index.html" colspan="2"><font point-size="10" color="blue"><u>{label}</u></font></td></tr><tr><td href="{expanded_from}.svg"><font point-size="8" color="blue"><u>all</u></font></td><td href="{expanded_from}_{id}_recursive_all.svg"><font point-size="8" color="blue"><u>package</u></font></td></tr></table>>'
