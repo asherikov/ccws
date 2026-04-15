@@ -4,9 +4,9 @@ FROM ${BASE_IMAGE}
 # these would override CCWS commands
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
 ENV PIPX_INSTALL="python3 -m pipx install"
-ENV CCWS_CACHE=/cache
+ENV CCWS_CACHE=/cache/ccws
 
-ENV PIP_CACHE_DIR=/cache/pip
+ENV PIP_CACHE_DIR=${CCWS_CACHE}/pip
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 1. docker-clean is removed since we mount cache volumes for storing apt data

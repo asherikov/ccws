@@ -211,6 +211,11 @@ fi
 CCWS_CACHE=${CCWS_CACHE:-"${WORKSPACE_DIR}/cache"}
 export CCWS_CACHE
 
+if [ -z "${PIP_CACHE_DIR}" ]
+then
+    PIP_CACHE_DIR=${CCWS_CACHE}/pip
+    export PIP_CACHE_DIR
+fi
 
 ##########################################################################################
 # ccache
