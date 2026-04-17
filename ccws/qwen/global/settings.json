@@ -45,10 +45,5 @@
       "respectGitIgnore": false
     }
   },
-  "$version": 3,
-  "security": {
-    "auth": {
-      "selectedType": "qwen-oauth"
-    }
-  }
+  "$version": 3
 }
