@@ -42,7 +42,7 @@ RUN --mount=target=/ccws_docker_context,ro \
 
 WORKDIR /ccws
 ENV WORKSPACE_DIR=/ccws/workspace
-ENV PATH="/ccws/ccws/tools/bin:${PATH}"
+#ENV PATH="/ccws/ccws/tools/bin:${PATH}"
 
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -54,5 +54,5 @@ RUN \
 RUN --mount=target=/ccws_docker_context,ro \
     mkdir -p /ccws/skills \
     && cp -r /ccws_docker_context/ccws/skills/ccws /ccws/skills/ \
-    && hiearch --install-skill /ccws/skills/ \
+    && ./ccws/tools/bin/hiearch --install-skill /ccws/skills/ \
     && chown -R ccws /ccws/skills
