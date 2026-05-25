@@ -98,14 +98,16 @@ help()
     wsh_echo "    push [<PACKAGE_NAME> ...]             # git push"
     wsh_echo "    unshallow [<PACKAGE_NAME> ...]        # git unshallow"
     wsh_echo "    feature_branches [<PACKAGE_NAME> ...] # list git feature branches"
-    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> update [<PACKAGE_NAME> ...] # git pull"
-    wsh_echo "      default      # plain clone"
-    wsh_echo "      shallow      # shallow clone"
-    wsh_echo "      nolfs        # disable git LFS"
-    wsh_echo "      rebase       # do git pull with rebase"
-    wsh_echo "      unmodified   # only unmodified repos"
-    wsh_echo "      nosubmodules # do not checkout submodules"
-    wsh_echo "      origin       # check origin URL matches list, remove and reclone if mismatch"
+    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]>] [-P|--prefer-version <REF>] update [<PACKAGE_NAME> ...] # git pull"
+    wsh_echo "      # policies:"
+    wsh_echo "        default      # plain clone"
+    wsh_echo "        shallow      # shallow clone"
+    wsh_echo "        nolfs        # disable git LFS"
+    wsh_echo "        rebase       # do git pull with rebase"
+    wsh_echo "        unmodified   # only unmodified repos"
+    wsh_echo "        nosubmodules # do not checkout submodules"
+    wsh_echo "        origin       # check origin URL matches list, remove and reclone if mismatch"
+    wsh_echo "      # <REF> -- Prefer specified tag or branch over the version in the repository list"
     wsh_echo ""
     wsh_echo "  Generic commands:"
     wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git '<COMMAND>'  # execute command in each repository"
@@ -366,12 +368,27 @@ dir_git()
 }
 
 
+prefer_version()
+{
+    if [ -n "${WSH_PREFER_VERSION}" ]
+    then
+        if git ls-remote --exit-code "${REPO_URL}" "${WSH_PREFER_VERSION}" > /dev/null 2>&1
+        then
+            wsh_echo "Preferencing version '${WSH_PREFER_VERSION}' over '${REPO_VERSION}' for '${NAME}'"
+            REPO_VERSION="${WSH_PREFER_VERSION}"
+            touch "${WSH_CACHE_DIR}/prefer_version_matched"
+        fi
+    fi
+}
+
 dir_git_update()
 {
     NAME=$1
     REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
     REPO_URL="$2"
     REPO_VERSION="$3"
+
+    prefer_version
 
     mkdir -p "${REPO_DIR}"
 
@@ -703,12 +720,22 @@ check_workspace()
     WSH_CACHE_DIR=${WSH_CACHE_DIR:-"${WSH_WORKSPACE_ROOT}/.wshandler"}
     WSH_BACKUP_FILE="${WSH_CACHE_DIR}/repolist.back"
 
+    if [ -n "${WSH_PREFER_VERSION}" ]
+    then
+        rm -f "${WSH_CACHE_DIR}/prefer_version_matched"
+        mkdir -p "${WSH_CACHE_DIR}"
+    fi
+
     test -d "${WSH_WORKSPACE_ROOT}" || (wsh_echo "'${WSH_WORKSPACE_ROOT}' does not exist" && false)
 
     WSHANDLER=("$(realpath "${BASH_SOURCE[0]}")" -l "${WSH_REPOLIST}" -y "${WSH_YAML_TOOL}" -Y "${WSH_YAML_BINARY}" -r "${WSH_WORKSPACE_ROOT}" -c "${WSH_CACHE_DIR}" -t "${WSH_WORKSPACE_TYPE}" -p "${WSH_COMMAND_POLICY}")
     if [ -n "${WSH_KEEP_GOING}" ]
     then
         WSHANDLER+=("${WSH_KEEP_GOING}")
+    fi
+    if [ -n "${WSH_PREFER_VERSION}" ]
+    then
+        WSHANDLER+=("-P" "${WSH_PREFER_VERSION}")
     fi
 }
 
@@ -1101,6 +1128,11 @@ execute_selective_command()
                     | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}" "${COMMAND_NAME}";;
         esac
     done
+
+    if [ "${COMMAND_NAME}" == "update" ] && [ -n "${WSH_PREFER_VERSION}" ] && [ ! -f "${WSH_CACHE_DIR}/prefer_version_matched" ]
+    then
+        wsh_exit 62 "No repository matched prefer-version '${WSH_PREFER_VERSION}'"
+    fi
 }
 
 set_version()
@@ -1195,6 +1227,7 @@ WSH_UNMANAGED=NO
 WSH_QUIET=NO
 WSH_WORKSPACE_TYPE=repos
 WSH_ENV_SUBST="cat"
+WSH_PREFER_VERSION=""
 
 while [[ $# -gt 0 ]]
 do
@@ -1207,21 +1240,22 @@ do
                 wsh_exit 50 "wshandler version is unknown"
             fi;;
 
-        -y|--yaml_tool)   WSH_YAML_TOOL="$2";                         shift; shift;;
-        -Y|--yaml_binary) WSH_YAML_BINARY=$2;                         shift; shift;;
-        -r|--root)        WSH_WORKSPACE_ROOT=$2;                      shift; shift;;
-        -c|--cache)       WSH_CACHE_DIR=$2;                           shift; shift;;
-        -t|--type)        WSH_WORKSPACE_TYPE=$2;                      shift; shift;;
-        -j|--jobs)        WSH_JOBS=$2; WSH_XARGS+=(-P "${WSH_JOBS}"); shift; shift;;
-        -i|--indent)      WSH_INDENT=$2;                              shift; shift;;
-        -p|--policy)      WSH_COMMAND_POLICY=$2;                      shift; shift;;
+        -y|--yaml_tool)      WSH_YAML_TOOL="$2";                         shift; shift;;
+        -Y|--yaml_binary)    WSH_YAML_BINARY=$2;                         shift; shift;;
+        -r|--root)           WSH_WORKSPACE_ROOT=$2;                      shift; shift;;
+        -c|--cache)          WSH_CACHE_DIR=$2;                           shift; shift;;
+        -t|--type)           WSH_WORKSPACE_TYPE=$2;                      shift; shift;;
+        -j|--jobs)           WSH_JOBS=$2; WSH_XARGS+=(-P "${WSH_JOBS}"); shift; shift;;
+        -i|--indent)         WSH_INDENT=$2;                              shift; shift;;
+        -p|--policy)         WSH_COMMAND_POLICY=$2;                      shift; shift;;
 
-        -k|--keep-going)  WSH_KEEP_GOING="-k";                        shift;;
-        -T|--tag)         WSH_TAGS+=("$2");                           shift; shift;;
-        -u|--unsorted)    WSH_SORT_COMMAND="cat";                     shift;;
-        -U|--unmanaged)   WSH_UNMANAGED="YES";                        shift;;
-        -q|--quiet)       WSH_QUIET="YES";                            shift;;
-        -e|--env-subst)   WSH_ENV_SUBST="envsubst";                   shift;;
+        -k|--keep-going)     WSH_KEEP_GOING="-k";                        shift;;
+        -T|--tag)            WSH_TAGS+=("$2");                           shift; shift;;
+        -P|--prefer-version) WSH_PREFER_VERSION="$2";                    shift; shift;;
+        -u|--unsorted)       WSH_SORT_COMMAND="cat";                     shift;;
+        -U|--unmanaged)      WSH_UNMANAGED="YES";                        shift;;
+        -q|--quiet)          WSH_QUIET="YES";                            shift;;
+        -e|--env-subst)      WSH_ENV_SUBST="envsubst";                   shift;;
 
         -l|--list)
             test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
