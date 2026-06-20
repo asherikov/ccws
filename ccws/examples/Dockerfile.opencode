@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=asherikov/ccws_noble:latest
+ARG BASE_IMAGE=asherikov/ccws:noble
 FROM ${BASE_IMAGE}
 
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"

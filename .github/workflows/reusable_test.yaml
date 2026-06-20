@@ -43,7 +43,7 @@ env:
 jobs:
     static:
         if: ${{ contains(fromJSON(inputs.profiles), 'static_checks') }}
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: static_checks
@@ -58,7 +58,7 @@ jobs:
 
     scan_build:
         if: ${{ contains(fromJSON(inputs.profiles), 'scan_build') }}
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: scan_build
@@ -76,7 +76,7 @@ jobs:
 
     reldebug:
         if: ${{ contains(fromJSON(inputs.profiles), 'reldebug') }}
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: reldebug
@@ -95,7 +95,7 @@ jobs:
 
     addr_undef_sanitizers:
         if: ${{ contains(fromJSON(inputs.profiles), 'addr_undef_sanitizers') }}
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: addr_undef_sanitizers
@@ -114,7 +114,7 @@ jobs:
 
     thread_sanitizer:
         if: ${{ contains(fromJSON(inputs.profiles), 'thread_sanitizer') }}
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
             BUILD_PROFILE: thread_sanitizer

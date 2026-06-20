@@ -2,7 +2,7 @@ CCWS_AI?=qwen
 CCWS_AI_SRC_OUTER?=${CCWS_SOURCE_DIR}
 CCWS_AI_SRC_INNER?=/ccws/workspace/src
 
-CCWS_AI_CONTAINER?=asherikov/ccws_${CCWS_AI}_noble
+CCWS_AI_CONTAINER?=asherikov/ccws_${CCWS_AI}:noble
 
 SHOGGOTH_CFG_DIR?=${HOME}/.config/shoggoth
 
@@ -68,15 +68,15 @@ qwen_ccws:
 			${CCWS_AI_CONTAINER} \
 		; kill $${SSH_AGENT_PID}
 	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"
-	# asherikov/ccws_qwen_noble
+	# asherikov/ccws_qwen:noble
 
 shoggoth:
 	rm -rf "${CCWS_CACHE}/shoggoth/src"
 	mkdir -p "${CCWS_CACHE}/shoggoth/src"
 	${MAKE} ${CCWS_AI}_ccws \
 		CCWS_SOURCE_DIR="${CCWS_CACHE}/shoggoth/src" \
-		CCWS_AI_CONTAINER=docker-registry.shoggoth.local/slave_noble
+		CCWS_AI_CONTAINER=slave.s.local/slave_noble
 
 shoggoth_dir:
 	${MAKE} ${CCWS_AI}_dir \
-		CCWS_AI_CONTAINER=docker-registry.shoggoth.local/slave_noble
+		CCWS_AI_CONTAINER=slave.s.local/slave_noble

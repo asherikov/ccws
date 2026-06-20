@@ -171,16 +171,17 @@ Initial setup
 - Override developer and vendor specific parameters by adding them to
   `make/config.mk`, available parameters can be found in the top section of
   `Makefile`.
-- Install profile dependencies using `make bp_install_build
-  BUILD_PROFILE=<profile>` targets, cross compilation profiles would require
-  some extra steps as described below. In some minimalistic environments you
-  may need to run `./ccws/tools/bin/bootstrap.sh` before using
-  `bp_install_build` target in order to install `make` and other utils.
+- Install profile dependencies using
+  `make bp_install_build BUILD_PROFILE=<profile>` targets, cross compilation
+  profiles would require some extra steps as described below. In some
+  minimalistic environments you may need to run `./ccws/tools/bin/bootstrap.sh`
+  before using `bp_install_build` target in order to install `make` and other
+  utils.
 - Clone packages in `src` subdirectory, or create new using
   `make new PKG=<pkg>`.
 - Install package dependencies using `make dep_install`. Dependencies can be
   installed selectively by providing package name with `PKG` parameter and/or
-  dependency type with `CCWS_DEP_TYPE` (build|exec|test).
+  dependency type with `CCWS_DEP_TYPE` (build\|exec\|test).
 
 Compilation
 -----------
@@ -321,9 +322,9 @@ testing, but it is recommended to build a tailored image using
 
 The image can be used in the following way:
 
-- `docker pull asherikov/ccws_noble` (or `asherikov/ccws_jammy`)
+- `docker pull asherikov/ccws:noble` (or `asherikov/ccws:jammy`)
 - `mkdir tmp_ws` \# sources, build, install, cache will go here
-- `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws_noble bash`
+- `docker run --rm -ti -v ./tmp_ws:/ccws/workspace asherikov/ccws:noble bash`
 - `make wsinit REPOS="https://github.com/asherikov/qpmad.git"`
 - `...`
 
@@ -357,7 +358,7 @@ can be used in two ways:
   source space as the agent workspace.
 
 - `make qwen_ccws`: runs custom build container, see
-  `ccws/examples/Dockerfile.qwen` (`asherikov/ccws_qwen_noble` on docker hub),
+  `ccws/examples/Dockerfile.qwen` (`asherikov/ccws_qwen:noble` on docker hub),
   which includes both `CCWS` and `qwen-code` allowing the agent to use `CCWS`
   when executing commands. Source, build, install, and other directories are
   mounted as volumes.
@@ -487,6 +488,9 @@ TODO
 
   - Advanced dependency graph generation
     <https://github.com/maspe36/colcon_gephi>.
+  - Modern documentation generator <https://github.com/sourcey/sourcey>.
+  - Better integration with GitHub, e.g.,
+    <https://github.com/cpp-linter/cpp-linter-action>.
 
 Bookmarks (not going to be supported)
 -------------------------------------
@@ -512,6 +516,6 @@ Bookmarks (not going to be supported)
 - <https://github.com/oxsecurity/megalinter> multi-purpose linter wrapper.
 - <https://github.com/myint/cppclean> might be useful for unnecessary header
   detection, but looks stale.
-- <https://github.com/cheshirekow/cmake_format> seem to be abandoned, linter
-  not really helpful -- mostly formatting stuff. Same applies to
+- <https://github.com/cheshirekow/cmake_format> seem to be abandoned, linter not
+  really helpful -- mostly formatting stuff. Same applies to
   <https://github.com/cmake-lint/cmake-lint>.

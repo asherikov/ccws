@@ -45,13 +45,13 @@ jobs:
             # https://github.com/docker/setup-qemu-action
             - uses: docker/setup-qemu-action@v3
             - run: |
-                docker pull asherikov/ccws_${{ inputs.distro }}
+                docker pull asherikov/ccws:${{ inputs.distro }}
                 mkdir -p artifacts
                 mkdir -p src
             - run: |
                 docker run --rm \
                     --volume ./src:/ccws/workspace/src \
-                    asherikov/ccws_${{ inputs.distro }} \
+                    asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
                         make checkout_src \
                             SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
@@ -65,7 +65,7 @@ jobs:
                     --volume ./artifacts:/ccws/workspace/artifacts \
                     --env BUILD_PROFILE=${{ inputs.profile }} \
                     --env CCACHE_DISABLE=true \
-                    asherikov/ccws_${{ inputs.distro }} \
+                    asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
                         apt update \
                         && make dep_install BUILD_PROFILE=reldebug \
@@ -79,7 +79,7 @@ jobs:
                     --volume ./artifacts:/ccws/workspace/artifacts \
                     --env BUILD_PROFILE=${{ inputs.profile }} \
                     --env CCACHE_DISABLE=true \
-                    asherikov/ccws_${{ inputs.distro }} \
+                    asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
                         apt update \
                         && make dep_install \
@@ -89,7 +89,7 @@ jobs:
                 docker run --rm \
                     --volume ./artifacts:/ccws/workspace/artifacts \
                     --env CLOUDSMITH_API_KEY=${{ secrets.cloudsmith_token }} \
-                    asherikov/ccws_${{ inputs.distro }} \
+                    asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
                         make cloudsmith_install \
                         && make cloudsmith_push_all REPO=${{ inputs.cloudsmith_repo }}"

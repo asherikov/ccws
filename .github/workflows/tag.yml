@@ -22,7 +22,7 @@ jobs:
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
                   file: ccws/examples/Dockerfile.qwen
                   tag: ccws_qwen
-                  base_image: 'asherikov/ccws_jammy:latest'
+                  base_image: 'asherikov/ccws:jammy'
 
     docker_noble:
         runs-on: ubuntu-latest
@@ -42,4 +42,4 @@ jobs:
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
                   file: ccws/examples/Dockerfile.qwen
                   tag: ccws_qwen
-                  base_image: 'asherikov/ccws_noble:latest'
+                  base_image: 'asherikov/ccws:noble'

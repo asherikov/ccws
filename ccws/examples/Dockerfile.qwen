@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=asherikov/ccws_noble:latest
+ARG BASE_IMAGE=asherikov/ccws:noble
 FROM ${BASE_IMAGE}
 
 ENV APT_INSTALL="env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommends install"
@@ -11,7 +11,7 @@ ENV CLI_VERSION=$CLI_VERSION_ARG
 
 
 # Import NodeSource GPG key and add repository for Node.js
-RUN wget -qO - https://deb.nodesource.com/setup_20.x | sudo bash
+RUN wget -qO - https://deb.nodesource.com/setup_22.x | sudo bash
 
 # Install dependencies
 RUN \
@@ -32,7 +32,9 @@ RUN \
         procps \
         psmisc \
         lsof \
-        socat
+        socat \
+        rsync \
+        lsof
 
 # Set up npm global package folder
 RUN mkdir -p /usr/local/share/npm-global

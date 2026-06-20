@@ -21,7 +21,7 @@ env:
 
 jobs:
     dox:
-        container: asherikov/ccws_${{ inputs.distro }}
+        container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         permissions:
             contents: write
