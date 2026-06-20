@@ -1,6 +1,6 @@
 ---
 name: ccws
-description: CCWS (colcon workspace) development environment for colcon-compatible packages. Use when working with ROS packages, pure CMake packages, or other colcon-compatible projects. Provides cross-compilation, testing, linting, documentation generation, and binary package creation.
+description: CCWS (colcon workspace) development environment for colcon-compatible packages. Use when working with ROS packages (contain package.xml), colcon packages (contain colcon.pkg), or pure CMake packages. Provides cross-compilation, testing, linting, documentation generation, and binary package creation.
 ---
 
 # CCWS

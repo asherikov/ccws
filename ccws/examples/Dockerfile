@@ -25,7 +25,7 @@ RUN \
     && apt upgrade -y \
     && ${APT_INSTALL} neovim git ssh python3 tmux sudo \
     && (usermod -l ccws `id -nu 1000` --home /home/ccws || useradd -u 1000 ccws) \
-    && (mv /home/ubuntu /home/ccws || true) \
+    && (mv /home/ubuntu /home/ccws || mkdir -p /home/ccws/) \
     && usermod -aG sudo ccws \
     && (echo "ccws:ccws" | chpasswd) \
     && echo "ccws ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ccws \
@@ -38,7 +38,9 @@ RUN --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
     && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
-    && chown -R ccws /ccws
+    && cp /ccws/ccws/examples/tmux.conf /home/ccws/.tmux.conf \
+    && ln -s /home/ccws/.tmux.conf /root/.tmux.conf \
+    && chown -R ccws /ccws /home/ccws
 
 WORKDIR /ccws
 ENV WORKSPACE_DIR=/ccws/workspace
@@ -51,8 +53,3 @@ RUN \
     ./ccws/tools/bin/bootstrap.sh \
     && make install_all_profiles
 
-RUN --mount=target=/ccws_docker_context,ro \
-    mkdir -p /ccws/skills \
-    && cp -r /ccws_docker_context/ccws/skills/ccws /ccws/skills/ \
-    && ./ccws/tools/bin/hiearch --install-skill /ccws/skills/ \
-    && chown -R ccws /ccws/skills

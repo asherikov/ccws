@@ -41,7 +41,10 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 
 RUN npm install -g @qwen-code/qwen-code
 
-RUN mkdir -p /home/ccws/.qwen && chown -R ccws /home/ccws
+RUN \
+    mkdir -p /home/ccws/.qwen/ \
+    && ln -s /home/ccws/.qwen /root/.qwen \
+    && chown -R ccws /home/ccws/
 
 USER ccws
 
