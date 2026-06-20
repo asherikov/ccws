@@ -10,8 +10,7 @@ private_deb_compile:
 	mkdir -p "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
 	# trim first profile (must be deb) and proceed with the rest
 	${MAKE} bp_${CCWS_SECONDARY_BUILD_PROFILE}_build CCWS_BUILD_PROFILES=${CCWS_BUILD_PROFILES_TAIL}
-	echo "#!/bin/bash -x"                                                           >  "${CCWS_SOURCE_SCRIPT}"
-	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               >> "${CCWS_SOURCE_SCRIPT}"
+	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               > "${CCWS_SOURCE_SCRIPT}"
 	echo "CCWS_PACKAGE_VERSION=\"${VERSION}:\$${CCWS_PACKAGE_VERSION}\""            >> "${CCWS_SOURCE_SCRIPT}"
 	cat "${EXEC_PROFILES_DIR}/common/setup.bash" | grep -v "^#!"                    >> "${CCWS_SOURCE_SCRIPT}"
 	test "${EXEC_PROFILE}" = "" || echo "${EXEC_PROFILE}" \
@@ -61,6 +60,8 @@ private_dpkg_deb_jammy:
 private_dpkg_deb_noble:
 	dpkg-deb -Zzstd -z9 --root-owner-group --threads-max=${JOBS} --build "${CCWS_INSTALL_DIR_BUILD_ROOT}" "${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb"
 
+private_dpkg_deb_resolute: private_dpkg_deb_noble
+	# ubuntu 26
 
 private_deb_version_hash: assert_PKG_arg_must_be_specified
 	mkdir -p ${CCWS_BUILD_DIR}/.ccws/version_hash/

@@ -73,7 +73,21 @@ cross_umount_all:
 	losetup | grep `pwd` | cut -f 1 -d " " | ${CCWS_XARGS} sudo losetup -d {}
 
 cross_common_install_build:
+	${MAKE} cross_common_install_build_${OS_DISTRO_BUILD}
+
+cross_common_install_build_focal:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
+	sudo service binfmt-support restart
+	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DIR}\""
+
+cross_common_install_build_jammy: cross_common_install_build_focal
+	# ubuntu 22
+	#
+cross_common_install_build_noble: cross_common_install_build_focal
+	# ubuntu 24
+
+cross_common_install_build_resolute:
+	sudo ${APT_INSTALL} qemu-user qemu-user-binfmt binfmt-support
 	sudo service binfmt-support restart
 	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DIR}\""
 

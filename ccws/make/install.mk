@@ -74,6 +74,9 @@ install_ccws_deps_jammy: install_ccws_deps_ros2
 install_ccws_deps_noble: install_ccws_deps_jammy
 	#ubuntu24
 
+install_ccws_deps_resolute: install_ccws_deps_jammy
+	#ubuntu26
+
 
 bp_install_build:
 	echo "${CCWS_BUILD_PROFILES}" \

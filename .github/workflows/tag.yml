@@ -43,3 +43,23 @@ jobs:
                   file: ccws/examples/Dockerfile.qwen
                   tag: ccws_qwen
                   base_image: 'asherikov/ccws:noble'
+
+    docker_resolute:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'resolute'
+                  push: true
+                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - uses: ./.github/actions/docker
+              with:
+                  distro: 'resolute'
+                  push: true
+                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
+                  file: ccws/examples/Dockerfile.qwen
+                  tag: ccws_qwen
+                  base_image: 'asherikov/ccws:resolute'

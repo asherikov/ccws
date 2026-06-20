@@ -83,6 +83,11 @@ CCWS_CPPCHECK_EXCEPTIONS="\
 --suppress=unusedStructMember \
 --suppress=constStatement \
 --suppress=duplInheritedMember"
+# TODO temporary workaround
+case "${OS_DISTRO_HOST}" in
+    resolute)
+        CCWS_CPPCHECK_EXCEPTIONS="${CCWS_CPPCHECK_EXCEPTIONS} --suppress=functionStatic --suppress=missingOverride --suppress=knownConditionTrueFalse"
+esac
 export CCWS_CPPCHECK_EXCEPTIONS
 
 

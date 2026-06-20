@@ -124,6 +124,9 @@ then
             noble)
                 ROS_VERSION=2
                 ROS_DISTRO=jazzy;;
+            resolute)
+                ROS_VERSION=2
+                ROS_DISTRO=lyrical;;
         esac
     fi
 fi
@@ -163,6 +166,8 @@ case "${OS_DISTRO_HOST}" in
         CCWS_LLVM_VERSION=15;;
     noble)
         CCWS_LLVM_VERSION=20;;
+    resolute)
+        CCWS_LLVM_VERSION=22;;
 esac
 export CCWS_LLVM_VERSION
 

@@ -23,6 +23,9 @@ bp_static_checks_install_build_jammy: install_python3
 bp_static_checks_install_build_noble: install_python3
 	sudo ${APT_INSTALL} catkin-lint
 
+bp_static_checks_install_build_resolute: bp_static_checks_install_build_noble
+	#ubuntu26
+
 bp_static_checks_install_build_python_%: install_python3
 	${PIPX_INSTALL} pylint
 	${PIPX_INSTALL} flake8
