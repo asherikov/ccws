@@ -44,7 +44,7 @@ private_bp_doxygen_dox:
 	rm -Rf ${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG} ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}
 	mkdir -p ${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG} ${CCWS_DOXYGEN_WORKING_DIR}
 	cp -r ${CCWS_DOXYGEN_CONFIG_DIR}/working_dir ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}
-	sed -i -e "s/@@PKG@@/${PKG}/" -e "s/@@JOBS@@/${JOBS}/" ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/*
+	sed -i -e "s/@@PKG@@/${PKG}/g" -e "s/@@JOBS@@/${JOBS}/g" ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/*
 	-${CMD_PKG_NAME_LIST} --packages-up-to ${PKG} --packages-skip ${PKG} \
 		| xargs --no-run-if-empty -I {} cat "${CCWS_DOXYGEN_WORKING_DIR}/{}/Doxyfile.append" >> ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}/Doxyfile
 	cd `${CMD_PKG_LIST} | grep "^${PKG}[[:blank:]]" | sed "s/.*\t\(.*\)\t.*/\1/"` \
