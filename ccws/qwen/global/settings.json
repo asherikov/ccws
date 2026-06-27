@@ -1,14 +1,16 @@
 {
   "general": {
     "preferredEditor": "nvim",
-    "enableAutoUpdate": "false"
+    "enableAutoUpdate": false
   },
   "ui": {
     "hideBanner": true,
     "hideTips": true,
     "showCitations": false,
+    "shellOutputMaxLines": 10,
+    "enableFollowupSuggestions": false,
     "accessibility": {
-      "disableLoadingPhrases": true
+      "enableLoadingPhrases": false
     }
   },
   "tools": {
