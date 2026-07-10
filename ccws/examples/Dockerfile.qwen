@@ -46,7 +46,9 @@ RUN npm install -g @qwen-code/qwen-code
 RUN \
     mkdir -p /home/ccws/.qwen/ \
     && ln -s /home/ccws/.qwen /root/.qwen \
-    && chown -R ccws /home/ccws/
+    && chown -R ccws /home/ccws/ \
+    && mkdir -p /etc/qwen-code/ \
+    && cp /ccws/ccws/qwen/global/settings.json /etc/qwen-code/
 
 USER ccws
 

@@ -18,6 +18,16 @@ wsh_exit()
     exit "$1"
 }
 
+wsh_repo_tuples()
+{
+    if [ -n "${WSH_SED}" ]
+    then
+        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$@" | sed "${WSH_SED}"
+    else
+        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$@"
+    fi
+}
+
 help()
 {
     EXIT_CODE=${1:-"0"}
@@ -52,6 +62,8 @@ help()
     wsh_echo "                                                      #in repository lists (disabled by default),"
     wsh_echo "                                                      #gettext envsubst has to be installed"
     wsh_echo "  -q|--quiet                                          # Suppress most of the output"
+    wsh_echo "  -s|--sed <SED_COMMAND>         {}                   # Apply sed command to output of"
+    wsh_echo "                                                      #repo tuples (e.g., to overwrite repository URLs)"
     wsh_echo ""
     wsh_echo "Repository list commands:"
     wsh_echo "  Information:"
@@ -76,8 +88,8 @@ help()
     wsh_echo "    add git <PACKAGE_NAME> <PACKAGE_URL> <PACKAGE_VERSION>    # add a repository"
     wsh_echo "    set_version_by_url <PACKAGE_URL> <PACKAGE_VERSION>        # set repository version"
     wsh_echo "    set_version_by_name <PACKAGE_NAME> <PACKAGE_VERSION>      # set repository version"
-    wsh_echo "    set_version_to_hash                                       # set all repository versions to hash"
-    wsh_echo "    pin                                                       # alias for set_version_to_hash"
+    wsh_echo "    set_version_to_hash                                       # deprecated, use pin"
+    wsh_echo "    pin                                                       # set versions to tags when available, hash otherwise"
     wsh_echo "    [-p|--policy <POLICY1[,POLICY2]> ({active})] set_version_to_branch <BRANCH_NAME>  # change to the given branch"
     wsh_echo "      active      # switch if the given branch is checked out"
     wsh_echo "    remove <PACKAGE_NAME> ...                                 # remove repository from a list"
@@ -95,7 +107,11 @@ help()
     wsh_echo "                                          #ignores --jobs"
     wsh_echo "    clean [<PACKAGE_NAME> ...]            # remove repository"
     wsh_echo "    prune [<PACKAGE_NAME> ...]            # git prune"
-    wsh_echo "    push [<PACKAGE_NAME> ...]             # git push"
+    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]>] push [<PACKAGE_NAME> ...]  # git push"
+    wsh_echo "                                          #sets upstream or pushes tags as needed"
+    wsh_echo "      # policies:"
+    wsh_echo "        default    # push all repositories"
+    wsh_echo "        version    # skip repositories whose current version matches the repository list"
     wsh_echo "    unshallow [<PACKAGE_NAME> ...]        # git unshallow"
     wsh_echo "    feature_branches [<PACKAGE_NAME> ...] # list git feature branches"
     wsh_echo "    [-p|--policy <POLICY1[,POLICY2]>] [-P|--prefer-version <REF>] update [<PACKAGE_NAME> ...] # git pull"
@@ -177,7 +193,7 @@ git_scrape()
         FIND_ARGS+=(-mindepth 2)
     fi
     REPO_DIRS=$(cd "${SCRAPE_ROOT}" && find ./ "${FIND_ARGS[@]}" -type d -name ".git" | sed -e 's|^./||' -e "s|/.git$||" | sort)
-    UNKNOWN_REPO_DIRS=$(comm -2 -3 <(echo "${REPO_DIRS}" | tr ' ' '\n') <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | sort))
+    UNKNOWN_REPO_DIRS=$(comm -2 -3 <(echo "${REPO_DIRS}" | tr ' ' '\n') <(wsh_repo_tuples git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | sort))
 
     for REPO_DIR in ${UNKNOWN_REPO_DIRS}
     do
@@ -296,6 +312,17 @@ dir_git_get_hash()
     git rev-parse --verify HEAD
 }
 
+dir_git_get_tag()
+{
+    TAG=$(git tag --points-at HEAD --sort=-version:refname --sort=-creatordate 2>/dev/null | head -n 1)
+    if [ -n "${TAG}" ]
+    then
+        echo "${TAG}"
+    else
+        dir_git_get_hash
+    fi
+}
+
 dir_git_get_branch()
 {
     git rev-parse --verify --abbrev-ref HEAD
@@ -345,6 +372,7 @@ dir_git_status()
 dir_git()
 {
     wsh_echo "Performing '$1' on '$2'"
+    NAME="$2"
     REPO_DIR="${WSH_WORKSPACE_ROOT}$2"
     dir_git_assert "${REPO_DIR}"
 
@@ -362,7 +390,6 @@ dir_git()
                 | (grep 'refs/remotes/' | grep -v '\(/main\)\|\(/master\)\|\(/release\)\|\(/gh-pages\)\|\(/HEAD\)' || true)
             ;;
         prune)  git remote | xargs --no-run-if-empty -I {} git remote prune {};;
-        push)   git push;;
     esac
     popd > /dev/null
 }
@@ -533,6 +560,57 @@ dir_git_clean()
 }
 
 
+dir_git_push()
+{
+    NAME="$1"
+    REPO_DIR="${WSH_WORKSPACE_ROOT}$1"
+    REPO_URL="$2"
+    REPO_VERSION="$3"
+
+    dir_git_assert "${REPO_DIR}"
+
+    pushd "${REPO_DIR}" > /dev/null
+    PUSH_DO=YES
+    IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
+    for POLICY in "${POLICIES[@]}"
+    do
+        case ${POLICY} in
+            default)
+                ;;
+            version)
+                if [ -n "${REPO_VERSION}" ] && [ "${REPO_VERSION}" != "-" ]
+                then
+                    REPO_VERSION_HASH=$(git rev-parse --verify "${REPO_VERSION}^{commit}" 2> /dev/null || echo -n "-")
+                    GIT_ACTUAL_HASH=$(dir_git_get_hash || echo -n "-")
+                    if [ "${REPO_VERSION_HASH}" != "-" ] && [ "${REPO_VERSION_HASH}" = "${GIT_ACTUAL_HASH}" ]
+                    then
+                        wsh_echo "Skipping '${NAME}': version matches repository list."
+                        PUSH_DO=NO
+                    fi
+                fi
+                ;;
+            *)
+                wsh_exit 23 "Unsupported push policy '${POLICY}'.";;
+        esac
+    done
+    if [ "${PUSH_DO}" = "YES" ]
+    then
+        CURRENT_TAG=$(git tag --points-at HEAD 2>/dev/null | head -n 1)
+        if [ -n "${CURRENT_TAG}" ]
+        then
+            git push origin "${CURRENT_TAG}"
+        elif ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' > /dev/null 2>&1
+        then
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git push --set-upstream origin "${CURRENT_BRANCH}"
+        else
+            git push
+        fi
+    fi
+    popd > /dev/null
+}
+
+
 status()
 {
     SOURCE_TYPE=$1
@@ -543,7 +621,7 @@ status()
             echo "name|version|actual version|HM|repository";
             echo "----|-------|--------------|--|----------";
         fi
-        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | while read -r -a tuple; do "dir_${SOURCE_TYPE}_status" "${tuple[@]}"; done | "${WSH_SORT_COMMAND}"
+        wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | while read -r -a tuple; do "dir_${SOURCE_TYPE}_status" "${tuple[@]}"; done | "${WSH_SORT_COMMAND}"
     )
 
     FORMAT_STRING=""
@@ -691,7 +769,7 @@ check_workspace()
 
             for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
             do
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${REPOLIST}") \
+                wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${REPOLIST}") \
                     | while read -r NAME REPO VERSION; \
                     do \
                         MERGE_NAME="${RELATIVE_PATH}${NAME}"; \
@@ -736,6 +814,10 @@ check_workspace()
     if [ -n "${WSH_PREFER_VERSION}" ]
     then
         WSHANDLER+=("-P" "${WSH_PREFER_VERSION}")
+    fi
+    if [ -n "${WSH_SED}" ]
+    then
+        WSHANDLER+=("-s" "${WSH_SED}")
     fi
 }
 
@@ -1044,7 +1126,7 @@ dir_run()
 
 execute_foreach()
 {
-    "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$1" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
+    wsh_repo_tuples "$1" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
 }
 
 execute_branch()
@@ -1063,7 +1145,7 @@ execute_branch()
             execute_foreach git "git branch -a | grep '${BRANCH}'";;
         merge)
             TARGET_BRANCH=${3:-"main"}
-            "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | while read -r NAME; do dir_git_merge "${NAME}" "${BRANCH}" "${TARGET_BRANCH}"; done
+            wsh_repo_tuples git < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | while read -r NAME; do dir_git_merge "${NAME}" "${BRANCH}" "${TARGET_BRANCH}"; done
             ;;
         *) help 1;;
     esac
@@ -1120,11 +1202,11 @@ execute_selective_command()
     for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
     do
         case ${COMMAND_NAME} in
-            clean|update)
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
+            clean|update|push)
+                wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
                     | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}_${COMMAND_NAME}";;
             *)
-                "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
+                wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") \
                     | "${WSH_XARGS[@]}" -n 3 "${WSHANDLER[@]}" "dir_${SOURCE_TYPE}" "${COMMAND_NAME}";;
         esac
     done
@@ -1155,7 +1237,7 @@ set_version()
             then
                 cd "${WSH_WORKSPACE_ROOT:?}/${NAME}";
                 case $1 in
-                    set_version_to_hash|pin) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_hash")";;
+                    set_version_to_hash|pin) TARGET_VERSION="$("dir_${SOURCE_TYPE}_get_tag")";;
                     set_version_to_branch)
                         case "${WSH_COMMAND_POLICY}" in
                             default|active)
@@ -1179,7 +1261,7 @@ set_version()
                 execute_add "${SOURCE_TYPE}" "${NAME}" "${REPO}" "${TARGET_VERSION}";
             fi;
             test "${TYPE}" == "ALL" || exit 0;
-        done < <("${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}"))
+        done < <(wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}"))
     done
 
     test "${UPDATED}" = "YES" || wsh_exit 61 "Nothing to update."
@@ -1228,6 +1310,7 @@ WSH_QUIET=NO
 WSH_WORKSPACE_TYPE=repos
 WSH_ENV_SUBST="cat"
 WSH_PREFER_VERSION=""
+WSH_SED=""
 
 while [[ $# -gt 0 ]]
 do
@@ -1256,6 +1339,7 @@ do
         -U|--unmanaged)      WSH_UNMANAGED="YES";                        shift;;
         -q|--quiet)          WSH_QUIET="YES";                            shift;;
         -e|--env-subst)      WSH_ENV_SUBST="envsubst";                   shift;;
+        -s|--sed)            WSH_SED="$2";                               shift; shift;;
 
         -l|--list)
             test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
@@ -1295,7 +1379,7 @@ do
                     then
                         wsh_echo "Processing '${DIR}'"
                         case $1 in
-                            clean|update)   "dir_git_$1" "${DIR}" "-" "-"   ;;
+                            clean|update|push)   "dir_git_$1" "${DIR}" "-" "-"   ;;
                             *)              "dir_git" "$1" "${DIR}" "-" "-" ;;
                         esac
                     else
@@ -1325,6 +1409,7 @@ do
             exit;;
 
         set_version_by_url|set_version_by_name|set_version_to_hash|set_version_to_branch|pin)
+            test "$1" = "set_version_to_hash" && wsh_echo "'set_version_to_hash' is deprecated, use 'pin' instead"
             check_workspace "$1"
             set_version "${@}"
             exit;;

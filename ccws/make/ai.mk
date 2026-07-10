@@ -55,7 +55,7 @@ qwen_ccws:
 			-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
 			-v "${CCWS_DIR}/qwen/user:/home/ccws/.qwen/" \
 			-v "${CCWS_DIR}/qwen/global:/etc/qwen-code/" \
-			-v "${CCWS_DIR}/skills:/home/ccws/.qwen/skills" \
+			-v "${CCWS_ROOT}/agentic_coding_plugin/skills:/home/ccws/.qwen/skills" \
 			-v "${CCWS_DIR}/examples/tmux.conf:/home/ccws/.tmux.conf" \
 			-v "${HOME}/.config/nvim/init.vim:/home/ccws/.config/nvim/init.vim" \
 			-v "${HOME}/.config/nvim/init.vim:/root/.config/nvim/init.vim" \
