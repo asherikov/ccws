@@ -2,7 +2,7 @@ CCWS_AI?=qwen
 CCWS_AI_SRC_OUTER?=${CCWS_SOURCE_DIR}
 CCWS_AI_SRC_INNER?=/ccws/workspace/src
 
-CCWS_AI_CONTAINER?=asherikov/ccws_${CCWS_AI}:noble
+CCWS_AI_CONTAINER?=asherikov/ccws_${CCWS_AI}:resolute
 
 SHOGGOTH_CFG_DIR?=${HOME}/.config/shoggoth
 

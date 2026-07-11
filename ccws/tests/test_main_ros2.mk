@@ -55,7 +55,7 @@ test:
 	# ---
 	${MAKE} wspurge
 	${MAKE} wsinit
-	${MAKE} add REPO="https://github.com/asherikov/ariles.git" VERSION="pkg_ws_2"
+	${MAKE} add REPO="https://github.com/asherikov/ariles.git" VERSION="head_2"
 	${MAKE} wsupdate_shallow
 	${MAKE} dep_install
 	${MAKE} ros2param

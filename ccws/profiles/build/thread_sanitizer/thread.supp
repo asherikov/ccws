@@ -10,3 +10,6 @@ mutex:libspdlog.so.*
 
 race:libfastrtps.so.*
 race:libfastcdr.so.*
+
+# false positive? while waiting for transforms to be available
+race:libtf2.so*

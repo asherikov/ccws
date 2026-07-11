@@ -57,6 +57,14 @@
 # #pragma unroll
 # -altera-unroll-loops
 #
+# https://clang.llvm.org/extra/clang-tidy/checks/altera/id-dependent-backward-branch.html
+# triggered by std::this_thread in a loop, which is hardly a major issue
+# -altera-id-dependent-backward-branch
+#
+# https://clang.llvm.org/extra/clang-tidy/checks/altera/struct-pack-align.html
+# microoptimization?
+# -altera-struct-pack-align
+#
 # allow std::bind
 # -modernize-avoid-bind
 #
@@ -68,7 +76,7 @@
 #
 # no library specific stuff
 # -abseil-*
-# -boost-use-ranges
+# -boost-use-ranges,-llvm-use-ranges
 #
 # seems to complain when there is no potential problems, also portability should rather be tested with a build
 # -portability-template-virtual-member-function
@@ -78,6 +86,20 @@
 #
 # not worth the effort
 # -performance-enum-size
+#
+# not an issue
+# -portability-avoid-pragma-once
+#
+# unnecessary noise for return statements
+# -readability-redundant-parentheses
+#
+# weak motivation https://llvm.org/docs/CodingStandards.html#restrict-visibility
+# prefer anonymous namespaces as a more generic tool
+# -llvm-prefer-static-over-anonymous-namespace
+#
+# https://clang.llvm.org/extra/clang-tidy/checks/misc/multiple-inheritance.html
+# not uncommon and no motivation
+# -misc-multiple-inheritance
 Checks: '*,
 -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
@@ -103,15 +125,19 @@ Checks: '*,
 -misc-no-recursion,-misc-include-cleaner,
 -llvm-header-guard,
 -readability-avoid-const-params-in-decls,
--altera-unroll-loops,
+-altera-unroll-loops,-altera-id-dependent-backward-branch,-altera-struct-pack-align,
 -modernize-avoid-bind,
 -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
 -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming,
 -abseil-*,
--boost-use-ranges,
+-boost-use-ranges,-llvm-use-ranges
 -portability-template-virtual-member-function,
 -bugprone-easily-swappable-parameters,
--performance-enum-size'
+-performance-enum-size,
+-portability-avoid-pragma-once,
+-readability-redundant-parentheses,
+-llvm-prefer-static-over-anonymous-namespace,
+-misc-multiple-inheritance'
 
 WarningsAsErrors: '*'
 #HeaderFilterRegex: '.*'
