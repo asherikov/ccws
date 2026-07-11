@@ -33,10 +33,11 @@ private_cross_jetson_initialize_bionic:
 
 
 private_cross_jetson_initialize_generic:
-	# 1. copy qemu in order to be able to do chroot
+	# 1. copy qemu in order to be able to do chroot, binary name depends on Ubuntu version
 	# 2. 'wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo chroot ./ apt-key add -;'
 	#    may not work, using workaround from https://github.com/Microsoft/WSL/issues/3286
-	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/
+	sudo cp /usr/bin/qemu-aarch64-static ${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/ \
+		|| sudo cp /usr/bin/qemu-aarch64 ${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/
 	# might be necessary in some docker environments
 	sudo update-binfmts --enable qemu-aarch64
 	# ROS keys

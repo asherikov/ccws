@@ -9,7 +9,7 @@ dep_%:
 
 private_dep_resolve: private_dep_list
 	mkdir -p '${CCWS_ROSDEP_CACHE}/rosdep'
-	test -d '${CCWS_ROSDEP_CACHE}/rosdep/sources.cache/' || env ROS_HOME='${CCWS_ROSDEP_CACHE}' rosdep update
+	test -d '${CCWS_ROSDEP_CACHE}/rosdep/sources.cache/' || env ROS_HOME='${CCWS_ROSDEP_CACHE}' rosdep update --os=ubuntu:${OS_DISTRO_HOST}
 	${MAKE} private_dep_resolve_list
 	${MAKE} private_dep_resolve_deb
 	${MAKE} private_dep_resolve_pip

@@ -1,5 +1,5 @@
 export BUILD_PROFILE?=cross_arm64
-export IMAGE?=ros:jazzy-ros-base-noble
+export IMAGE?=ros:${ROS_DISTRO}-ros-base-${DISTRO}
 
 test:
 	${MAKE} bp_purge
@@ -18,5 +18,5 @@ test:
 	${MAKE} cross_umount
 	# alternative root extraction
 	${MAKE} docker_install
-	docker pull --platform linux/arm64 ros:jazzy-ros-base-noble
+	docker pull --platform linux/arm64 ${IMAGE}
 	${MAKE} docker_export_local IMAGE=${IMAGE}

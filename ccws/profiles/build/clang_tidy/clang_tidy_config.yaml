@@ -130,7 +130,7 @@ Checks: '*,
 -cppcoreguidelines-explicit-virtual-functions,-hicpp-use-override,-modernize-use-override,
 -bugprone-reserved-identifier,-bugprone-infinite-loop,-cert-dcl51-cpp,-cert-dcl37-c,-readability-identifier-naming,
 -abseil-*,
--boost-use-ranges,-llvm-use-ranges
+-boost-use-ranges,-llvm-use-ranges,
 -portability-template-virtual-member-function,
 -bugprone-easily-swappable-parameters,
 -performance-enum-size,

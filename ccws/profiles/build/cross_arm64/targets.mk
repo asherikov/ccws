@@ -14,7 +14,7 @@ bp_cross_arm64_get:
 	${MAKE} docker_mountpoint PLATFORM=arm64/v8 IMAGE=${IMAGE}
 
 bp_cross_arm64_initialize: assert_BUILD_PROFILE_must_be_cross_arm64
-	# 1. copy qemu in order to be able to do chroot
+	# 1. copy qemu in order to be able to do chroot, binary name depends on Ubuntu version
 	# 2. add ROS apt sources in order to avoid weird package conflicts,
 	#    e.g., lack of catkin_pkg_modules in upstream repos.
 	#    https://github.com/ros-infrastructure/catkin_pkg/issues/298
@@ -22,7 +22,8 @@ bp_cross_arm64_initialize: assert_BUILD_PROFILE_must_be_cross_arm64
 	#    apt-cache showpkg python-catkin-pkg
 	bash -c "${SETUP_SCRIPT}; \
 		cd \"\$${CCWS_SYSROOT_MOUNTPOINT}\"; \
-		sudo cp /usr/bin/qemu-aarch64-static \$${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/; \
+		sudo cp /usr/bin/qemu-aarch64-static \$${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/ \
+		|| sudo cp /usr/bin/qemu-aarch64 \$${CCWS_SYSROOT_MOUNTPOINT}/usr/bin/; \
 		sudo update-binfmts --enable qemu-aarch64; \
 		wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee ./etc/apt/trusted.gpg.d/ros.asc; \
     	sudo chroot ./ /bin/sh -c \"\
