@@ -13,3 +13,4 @@ ccws/tools/*
 !/src/flake.nix
 !/src/flake.lock
 *.back
+agentic_coding_plugin/skills/

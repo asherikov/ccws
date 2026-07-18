@@ -54,6 +54,10 @@ fi
 #pwd
 #echo "Command line: $@"
 # shellcheck disable=SC2086
+# --verbose=1
+# PROOT_NO_SECCOMP is currently required in Ubuntu 26
+PROOT_NO_SECCOMP=1
+export PROOT_NO_SECCOMP
 proot --rootfs="${CCWS_SYSROOT_MOUNTPOINT}" \
     --cwd="$(pwd)" \
     ${IFS# profile specific args} \

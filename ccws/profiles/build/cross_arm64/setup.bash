@@ -27,10 +27,21 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 # compiler paths
 #
 
-# 14 currently fails on rapidjson
-# https://github.com/Tencent/rapidjson/issues/2277
-# https://bugs.launchpad.net/ubuntu/+source/rapidjson/+bug/2073996
-CCWS_GCC_VERSION=13
+case "${OS_DISTRO_HOST}" in
+    jammy)
+        CCWS_GCC_VERSION=12;;
+    noble)
+        # 14 currently fails on rapidjson
+        # https://github.com/Tencent/rapidjson/issues/2277
+        # https://bugs.launchpad.net/ubuntu/+source/rapidjson/+bug/2073996
+        CCWS_GCC_VERSION=13;;
+    resolute)
+        # rosdep fails to detect OS in chroot for some reason
+        ROS_OS_OVERRIDE=ubuntu:26.04:resolute
+        export ROS_OS_OVERRIDE
+        CCWS_GCC_VERSION=16;;
+esac
+
 
 CXX=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-g++-${CCWS_GCC_VERSION}
 CC=${CCWS_BUILD_ROOTFS}/usr/bin/${CCWS_TRIPLE}-gcc-${CCWS_GCC_VERSION}

@@ -162,6 +162,7 @@ private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive
 	mkdir -p "${CCWS_ARTIFACTS_DIR}"
 	# override make flags to enable multithreaded builds
 	# CMAKE_INSTALL_PREFIX does not have effect if set only in toolchain when rebuilding
+	#--log-level debug
 	env MAKEFLAGS="-j${JOBS}" ${CCWS_BUILD_WRAPPER} colcon \
 		--log-base ${CCWS_LOG_DIR} \
 		build \

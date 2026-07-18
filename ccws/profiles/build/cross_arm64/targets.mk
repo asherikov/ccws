@@ -5,9 +5,6 @@ bp_cross_arm64_install_build: cross_common_install_build bp_common_install_build
 	${MAKE} bp_cross_arm64_install_build_${OS_DISTRO_BUILD}
 
 bp_cross_arm64_install_build_%:
-	echo "'${OS_DISTRO_BUILD}' is not supported by '${BUILD_PROFILE}'"
-
-bp_cross_arm64_install_build_noble:
 	bash -c "${SETUP_SCRIPT}; sudo ${APT_INSTALL} g++-\$${CCWS_GCC_VERSION}-aarch64-linux-gnu"
 
 bp_cross_arm64_get:

@@ -375,6 +375,10 @@ Known issues
   docker parameter. Disabling `seccomp` for `proot` with `PROOT_NO_SECCOMP=1`
   seems to be unnecessary.
 
+- `proot` segfault while building on arm64 in Ubuntu 22, e.g., while building
+  debian packages. Newer version of `proot` has to be used, see
+  <https://github.com/proot-me/proot/issues/312>.
+
 - Programs compiled with sanitizers (`addr_undef_sanitizers` or
   `thread_sanitizer` build profiles) output `2: AddressSanitizer:DEADLYSIGNAL`
   or `FATAL: ThreadSanitizer: unexpected memory mapping` when executed: the
@@ -385,10 +389,6 @@ Known issues
 
 - Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
   e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
-
-- `proot` segfault while building on arm64 in Ubuntu 22, e.g., while building
-  debian packages. Newer version of `proot` has to be used, see
-  <https://github.com/proot-me/proot/issues/312>.
 
 - Workspace prefix is intentionally cropped from paths in debug info, you have
   to set path substitutions in gdb to resolve them correctly, i.e.,
