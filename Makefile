@@ -174,6 +174,7 @@ private_build: assert_PKG_arg_must_be_specified assert_JOBS_arg_must_be_positive
 		--install-base "${CCWS_INSTALL_DIR_BUILD}" \
 		--cmake-args -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" -DCMAKE_INSTALL_PREFIX="${CCWS_INSTALL_DIR_HOST}" \
 		--packages-up-to ${PKG}
+	date
 
 ##
 ## Other targets
