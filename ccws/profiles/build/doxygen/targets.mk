@@ -2,6 +2,11 @@ bp_doxygen_install_build: install_ccws_deps install_python3
 	sudo ${APT_INSTALL} doxygen graphviz pandoc
 	-${PIPX_UNINSTALL} hiearch
 	${PIPX_INSTALL} hiearch
+	# - Old versions of doxygen support only 2.x -- stick to it for compatibility
+	# - do not install to cache directory -- may not persist
+	# - do not use git submodule -- ccws .git may be stripped
+	git clone --branch 2.7.9 --recurse-submodules --shallow-submodules --depth 1 \
+		https://github.com/mathjax/MathJax.git ${BUILD_PROFILES_DIR}/doxygen/mathjax
 
 doxclean:
 	bash -c "${SETUP_SCRIPT} \
@@ -9,6 +14,7 @@ doxclean:
 		&& rm -Rf \$${CCWS_DOXYGEN_WORKING_DIR}"
 
 bp_doxygen_build: doxclean assert_doxygen_installed
+	mkdir -p ${CCWS_DOXYGEN_OUTPUT_DIR}
 	-${MAKE_QUIET} wslist | xargs -I {} bash -c "${MAKE} dox PKG={}"
 	${MAKE} wswraptarget TARGET=private_bp_doxygen_build_index
 
@@ -41,6 +47,8 @@ dox: assert_PKG_arg_must_be_specified assert_doxygen_installed
 	${MAKE} wswraptarget TARGET=private_bp_doxygen_dox
 
 private_bp_doxygen_dox:
+	test -d ${CCWS_DOXYGEN_OUTPUT_DIR}/mathjax \
+		|| cp -r ${CCWS_DOXYGEN_CONFIG_DIR}/mathjax ${CCWS_DOXYGEN_OUTPUT_DIR}/mathjax
 	rm -Rf ${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG} ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}
 	mkdir -p ${CCWS_DOXYGEN_OUTPUT_DIR}/${PKG} ${CCWS_DOXYGEN_WORKING_DIR}
 	cp -r ${CCWS_DOXYGEN_CONFIG_DIR}/working_dir ${CCWS_DOXYGEN_WORKING_DIR}/${PKG}
