@@ -2,10 +2,9 @@
 
 ## Environment
 
-- Coding agent is running inside a docker container as a part of ccws
-  framework. Preload corresponding skill on startup.
+- Coding agent is running inside a docker container.
+- Use ccws framework described by the corresponding skill when appropriate.
 - All ccws profile dependencies are preinstalled in the container.
-- sudo password is 'ccws'
 - Unless explicitly requested, you are strictly prohibited to bypass ccws
   framework in order to: compile packages (colcon, cmake, gcc, etc), install
   dependencies (apt, pip, etc), run static analysis tools (pylint, cppcheck,
@@ -37,7 +36,9 @@
 
 # Rules for code generation
 
+- Never edit files outside of source space unless scplicitly requested.
 - Never add comments to source files.
+- Never remove comments unless they describe removed code.
 - Do not insert output or logging statements.
 - Produce minimal necessary modifications when implementing features.
 - Reuse existing code instead of copying it.
@@ -45,6 +46,9 @@
   following states.
 - Use 4 spaces for indentation in all file types by default, but preserve
   indentation and formatting in existing files.
+- Never edit files outside of explicitly specified scope, such as a directory,
+  package, or repository in the source space without explicit user request or
+  interactive approval.
 
 ## Shell scripts
 

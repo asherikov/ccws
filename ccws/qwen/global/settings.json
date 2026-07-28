@@ -16,6 +16,11 @@
   "tools": {
     "approvalMode": "yolo"
   },
+  "memory": {
+    "enableManagedAutoMemory": false,
+    "enableManagedAutoDream": false,
+    "enableAutoSkill": false
+  },
   "telemetry": {
     "enabled": true,
     "target": "local",
@@ -25,6 +30,9 @@
   },
   "privacy": {
     "usageStatisticsEnabled": false
+  },
+  "output": {
+    "showTimestamps": true
   },
   "model": {
     "enableOpenAILogging": false,
