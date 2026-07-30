@@ -20,9 +20,14 @@ wsh_exit()
 
 wsh_repo_tuples()
 {
-    if [ -n "${WSH_SED}" ]
+    if [ ${#WSH_SED[@]} -gt 0 ]
     then
-        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$@" | sed "${WSH_SED}"
+        local SED_ARGS=()
+        for SED_EXPR in "${WSH_SED[@]}"
+        do
+            SED_ARGS+=(-e "${SED_EXPR}")
+        done
+        "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$@" | sed "${SED_ARGS[@]}"
     else
         "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_repo_tuples" "$@"
     fi
@@ -63,7 +68,8 @@ help()
     wsh_echo "                                                      #gettext envsubst has to be installed"
     wsh_echo "  -q|--quiet                                          # Suppress most of the output"
     wsh_echo "  -s|--sed <SED_COMMAND>         {}                   # Apply sed command to output of"
-    wsh_echo "                                                      #repo tuples (e.g., to overwrite repository URLs)"
+    wsh_echo "                                                      #repo tuples (e.g., to overwrite repository URLs),"
+    wsh_echo "                                                      #can be specified multiple times"
     wsh_echo ""
     wsh_echo "Repository list commands:"
     wsh_echo "  Information:"
@@ -76,7 +82,7 @@ help()
     wsh_echo "        default   # plain clone"
     wsh_echo "        shallow   # shallow clone"
     wsh_echo "        nolfs     # disable git LFS"
-    wsh_echo "    clone git <LIST_REPOSITORY> [<BRANCH>]    # clone workspace from a given repository"
+    wsh_echo "    [-P|--prefer-version <REF>] clone git <LIST_REPOSITORY> [<BRANCH>]    # clone workspace from a given repository"
     wsh_echo "    init [git <PACKAGE_REPOSITORY> ...]       # initialize new workspace"
     wsh_echo ""
     wsh_echo "  Modification:"
@@ -124,6 +130,16 @@ help()
     wsh_echo "        nosubmodules # do not checkout submodules"
     wsh_echo "        origin       # check origin URL matches list, remove and reclone if mismatch"
     wsh_echo "      # <REF> -- Prefer specified tag or branch over the version in the repository list"
+    wsh_echo "                # also applied to the workspace root repository on clone and update"
+    wsh_echo "    [-p|--policy <POLICY1[,POLICY2]>] version_number [<VERSION>] [<REPO> ...]  # bump or set package version"
+    wsh_echo "      # in CMakeLists.txt, package.xml, pyproject.toml, vcpkg.json"
+    wsh_echo "      # one of the following is required:"
+    wsh_echo "        bump_major  # increment major version, reset minor and patch to 0"
+    wsh_echo "        bump_minor  # increment minor version, reset patch to 0"
+    wsh_echo "        bump_patch  # increment patch version"
+    wsh_echo "        set         # set version directly, requires <VERSION> argument"
+    wsh_echo "      # optional:"
+    wsh_echo "        tag         # commit changes and create a git tag after updating files"
     wsh_echo ""
     wsh_echo "  Generic commands:"
     wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git '<COMMAND>'  # execute command in each repository"
@@ -161,10 +177,26 @@ update_root()
         then
             wsh_echo "Processing workspace root ${WSH_WORKSPACE_ROOT}"
             git fetch
+
+            ROOT_VERSION=""
+            if [ -n "${WSH_PREFER_VERSION}" ]
+            then
+                if git ls-remote --exit-code origin "${WSH_PREFER_VERSION}" > /dev/null 2>&1
+                then
+                    wsh_echo "Preferencing version '${WSH_PREFER_VERSION}' for workspace root"
+                    ROOT_VERSION="${WSH_PREFER_VERSION}"
+                    touch "${WSH_CACHE_DIR}/prefer_version_matched"
+                fi
+            fi
+
             if git diff --exit-code > /dev/null && git diff --cached --exit-code > /dev/null
             then
+                if [ -n "${ROOT_VERSION}" ]
+                then
+                    git checkout "${ROOT_VERSION}" || true
+                fi
                 # if we are on a branch make sure that it is updated
-                if (git branch --show-current | grep "${REPO_VERSION}")
+                if [ -n "$(git branch --show-current)" ]
                 then
                     PULL_ENV=(env)
                     PULL_ARGS=()
@@ -815,9 +847,12 @@ check_workspace()
     then
         WSHANDLER+=("-P" "${WSH_PREFER_VERSION}")
     fi
-    if [ -n "${WSH_SED}" ]
+    if [ ${#WSH_SED[@]} -gt 0 ]
     then
-        WSHANDLER+=("-s" "${WSH_SED}")
+        for SED_EXPR in "${WSH_SED[@]}"
+        do
+            WSHANDLER+=("-s" "${SED_EXPR}")
+        done
     fi
 }
 
@@ -1158,7 +1193,15 @@ execute_commit()
 
 execute_clone()
 {
-    "$1_clone" "NO" "$2" "$3" "${WSH_WORKSPACE_ROOT}"
+    CLONE_VERSION="$3"
+
+    if [ -n "${WSH_PREFER_VERSION}" ] && git ls-remote --exit-code "$2" "${WSH_PREFER_VERSION}" > /dev/null 2>&1
+    then
+        wsh_echo "Preferencing version '${WSH_PREFER_VERSION}' over '${CLONE_VERSION}' for workspace root"
+        CLONE_VERSION="${WSH_PREFER_VERSION}"
+    fi
+
+    "$1_clone" "NO" "$2" "${CLONE_VERSION}" "${WSH_WORKSPACE_ROOT}"
 
     execute_selective_command update
 }
@@ -1267,6 +1310,251 @@ set_version()
     test "${UPDATED}" = "YES" || wsh_exit 61 "Nothing to update."
 }
 
+
+version_number_bump()
+{
+    local VERSION="$1"
+    local POLICY="$2"
+
+    local MAJOR MINOR PATCH
+    IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION}"
+
+    case "${POLICY}" in
+        bump_major)
+            echo "$((MAJOR + 1)).0.0";;
+        bump_minor)
+            echo "${MAJOR}.$((MINOR + 1)).0";;
+        bump_patch)
+            echo "${MAJOR}.${MINOR}.$((PATCH + 1))";;
+    esac
+}
+
+version_number_write()
+{
+    case "$(basename "$1")" in
+        "CMakeLists.txt")
+            # Loads the entire file into the pattern space so that multi-line project()
+            # commands are handled correctly; sed -i alone processes one line at a time
+            # and cannot match patterns spanning multiple lines.
+            sed -i -E -e ':a' -e '$!N;$!ba' \
+                -e "s/(project[[:space:]]*\([^)]*VERSION[[:space:]]+)[0-9]+\.[0-9]+\.[0-9]+/\1$2/" "$1";;
+        "package.xml")
+            sed -i -E "s|(<version[^>]*>)[0-9]+\.[0-9]+\.[0-9]+(</version>)|\1$2\2|" "$1";;
+        "pyproject.toml")
+            sed -i -E "s/^(\s*version\s*=\s*[\"'])[0-9]+\.[0-9]+\.[0-9]+/\1$2/" "$1";;
+        "vcpkg.json")
+            sed -i -E "s/(\"version\"[[:space:]]*:[[:space:]]*\")[0-9]+\.[0-9]+\.[0-9]+/\1$2/" "$1";;
+    esac
+}
+
+version_number_read()
+{
+    case "$(basename "$1")" in
+        "CMakeLists.txt")
+            tr '\n' ' ' < "$1" 2>/dev/null \
+                | sed -E -n 's/.*project[[:space:]]*\([^)]*VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' | head -n 1;;
+        "package.xml")
+            sed -E -n 's/.*<version[^>]*>([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' "$1" 2>/dev/null | head -n 1;;
+        "pyproject.toml")
+            sed -E -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*["'"'"']([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' \
+                "$1" 2>/dev/null | head -n 1;;
+        "vcpkg.json")
+            sed -E -n 's/.*"version"[[:space:]]*:[[:space:]]*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/p' "$1" 2>/dev/null | head -n 1;;
+    esac
+}
+
+version_number_process_dir()
+{
+    pushd "$1" > /dev/null
+
+    local BUMP_POLICY="$2"
+    local DO_TAG="$3"
+    local TARGET_VERSION="$4"
+
+    local CURRENT_VERSION
+    local -a FILES=()
+    local -a PROCESS_DIRS=()
+
+    # Find version files at arbitrary depth; once a directory containing
+    # version files is found, its subdirectories are excluded.
+
+    local FOUND_PATHS
+    # shellcheck disable=SC2046
+    FOUND_PATHS=$(find "./" -type f \( -name "${WSH_VERSION_FILES[0]}" \
+        $(printf -- '-o -name %q ' "${WSH_VERSION_FILES[@]:1}") \) -print0 \
+        2>/dev/null | xargs -0 --no-run-if-empty -I {} realpath -z "{}" | xargs -0 -I {} dirname "{}" | sort -u)
+
+    local -a ALL_DIRS=()
+    readarray -t ALL_DIRS <<< "${FOUND_PATHS}"
+    for DIR in "${ALL_DIRS[@]}"
+    do
+        for PDIR in "${PROCESS_DIRS[@]}"
+        do
+            case "${DIR%/}/" in
+                "${PDIR%/}/"*) continue 2;;
+            esac
+        done
+        for NAME in "${WSH_VERSION_FILES[@]}"
+        do
+            local FILE="${DIR%/}/${NAME}"
+            if [ ! -f "${FILE}" ]
+            then
+                continue;
+            fi
+            FILE_VERSION=$(version_number_read "${FILE}" || true)
+            if [ -z "${CURRENT_VERSION}" ]
+            then
+                CURRENT_VERSION="${FILE_VERSION}"
+            else
+                if [ "${CURRENT_VERSION}" != "${FILE_VERSION}" ]
+                then
+                    if [ "${BUMP_POLICY}" != "set" ]
+                    then
+                        wsh_exit 86 "Version mismatch between files: '${CURRENT_VERSION}' and '${FILE_VERSION}'. Bump policies require consistent versions. Use 'set' to override."
+                    fi
+                    # inconsistent version -> ensure that set policy is applied
+                    # even if target matches some versions
+                    CURRENT_VERSION="force_apply_set_policy"
+                fi
+            fi
+            FILES+=("${FILE}")
+        done
+        PROCESS_DIRS+=("${DIR%/}")
+    done
+
+    # Skip silently if no version files with readable versions were found
+    if [ ${#FILES[@]} -eq 0 ]
+    then
+        return 0
+    fi
+
+    if [ "${BUMP_POLICY}" != "set" ]
+    then
+        TARGET_VERSION=$(version_number_bump "${CURRENT_VERSION}" "${BUMP_POLICY}")
+    fi
+
+    # Update files
+    if [ "${CURRENT_VERSION}" != "${TARGET_VERSION}" ]
+    then
+        for FILE in "${FILES[@]}"
+        do
+            wsh_echo "Updating ${FILE}: '${CURRENT_VERSION}' -> '${TARGET_VERSION}'"
+            version_number_write "${FILE}" "${TARGET_VERSION}" \
+                || wsh_exit 81 "Failed to update version in '${FILE}'"
+        done
+
+        # Tag: commit changes and create a git tag
+        if [ "${DO_TAG}" = "YES" ]
+        then
+            dir_git_assert "./"
+
+            # git add, commit, tag
+            for FILE in "${FILES[@]}"
+            do
+                git add "${FILE}" 2>/dev/null || true
+            done
+            git commit -m "Bump version to ${TARGET_VERSION}" || wsh_exit 88 "Failed to commit version changes"
+            git tag "${TARGET_VERSION}" || wsh_exit 89 "Failed to create tag '${TARGET_VERSION}'"
+
+            wsh_echo "Created tag '${TARGET_VERSION}'"
+        fi
+    elif [ "${DO_TAG}" = "YES" ]
+    then
+        wsh_echo "Skipping tag: version already at '${TARGET_VERSION}'"
+    fi
+
+    popd > /dev/null
+}
+
+execute_version_number()
+{
+    # Parse policies from WSH_COMMAND_POLICY (comma-separated)
+    local BUMP_POLICY="set"
+    local DO_TAG=NO
+
+    IFS=',' read -ra POLICIES <<< "${WSH_COMMAND_POLICY}"
+    for POLICY in "${POLICIES[@]}"
+    do
+        case "${POLICY}" in
+            bump_major|bump_minor|bump_patch|set)
+                BUMP_POLICY="${POLICY}"
+                ;;
+            tag)
+                DO_TAG=YES
+                ;;
+            default)
+                ;;
+            *)
+                wsh_exit 84 "Unsupported version_number policy '${POLICY}'"
+                ;;
+        esac
+    done
+
+    # For 'set' policy, the version is the first positional argument
+    local TARGET_VERSION=""
+    WSH_NAME_PATTERNS=()
+    if [ "${BUMP_POLICY}" = "set" ]
+    then
+        TARGET_VERSION="$1"
+        if [ -z "${TARGET_VERSION}" ]
+        then
+            wsh_exit 85 "The 'set' policy requires a version argument: version_number <VERSION>"
+        fi
+        if ! [[ "${TARGET_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+        then
+            wsh_exit 80 "Invalid version format '${TARGET_VERSION}' (expected x.y.z where x, y, z are non-negative integers)"
+        fi
+        WSH_NAME_PATTERNS=("${@:2}")
+    else
+        WSH_NAME_PATTERNS=("${@:1}")
+    fi
+
+    # strip trailing slashes
+    WSH_NAME_PATTERNS=("${WSH_NAME_PATTERNS[@]%/}")
+
+    if [ "${WSH_UNMANAGED}" = "YES" ]
+    then
+        if [ ${#WSH_NAME_PATTERNS[@]} -eq 0 ]
+        then
+            wsh_exit 90 "At least one directory is required with --unmanaged"
+        fi
+        for DIR in "${WSH_NAME_PATTERNS[@]}"
+        do
+            if [ ! -d "${DIR}" ]
+            then
+                wsh_exit 90 "Directory '${DIR}' does not exist"
+            fi
+            wsh_echo "Processing '${DIR}'"
+            version_number_process_dir "$(realpath "${DIR}")/" "${BUMP_POLICY}" "${DO_TAG}" "${TARGET_VERSION}"
+        done
+        return
+    fi
+
+    check_workspace "version_number"
+
+    local MATCHED=NO
+    for SOURCE_TYPE in ${WSH_SOURCE_TYPES}
+    do
+        while read -r REPO_NAME REPO_URL REPO_VERSION
+        do
+            local REPO_DIR="${WSH_WORKSPACE_ROOT%/}/${REPO_NAME}"
+            if [ ! -d "${REPO_DIR}" ]
+            then
+                wsh_exit 90 "Repository directory '${REPO_DIR}' does not exist"
+            fi
+            REPO_DIR="$(realpath "${REPO_DIR}")/"
+            wsh_echo "Processing '${REPO_NAME}'"
+            version_number_process_dir "${REPO_DIR}" "${BUMP_POLICY}" "${DO_TAG}" "${TARGET_VERSION}"
+            MATCHED=YES
+        done < <(wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}"))
+    done
+
+    if [ ${#WSH_NAME_PATTERNS[@]} -gt 0 ] && [ "${MATCHED}" = "NO" ]
+    then
+        wsh_exit 90 "No repository matched pattern(s): ${WSH_NAME_PATTERNS[*]}"
+    fi
+}
+
 discover_lists()
 {
     DISCOVER_PATH=$(realpath "$1");
@@ -1310,7 +1598,8 @@ WSH_QUIET=NO
 WSH_WORKSPACE_TYPE=repos
 WSH_ENV_SUBST="cat"
 WSH_PREFER_VERSION=""
-WSH_SED=""
+WSH_SED=()
+WSH_VERSION_FILES=("CMakeLists.txt" "package.xml" "pyproject.toml" "vcpkg.json")
 
 while [[ $# -gt 0 ]]
 do
@@ -1339,7 +1628,7 @@ do
         -U|--unmanaged)      WSH_UNMANAGED="YES";                        shift;;
         -q|--quiet)          WSH_QUIET="YES";                            shift;;
         -e|--env-subst)      WSH_ENV_SUBST="envsubst";                   shift;;
-        -s|--sed)            WSH_SED="$2";                               shift; shift;;
+        -s|--sed)            WSH_SED+=("$2");                           shift; shift;;
 
         -l|--list)
             test "${WSH_REPOLIST_SOURCE}" != "-L" || wsh_exit 7 "Arguments -l and -L are incompatible.";
@@ -1406,6 +1695,10 @@ do
                 backup
                 "${WSH_WORKSPACE_TYPE}_${WSH_YAML_TOOL}_$1" "${PKG_ID}" < "${WSH_BACKUP_FILE}" > "${WSH_REPOLIST}"
             done
+            exit;;
+
+        version_number)
+            execute_version_number "${@:2}"
             exit;;
 
         set_version_by_url|set_version_by_name|set_version_to_hash|set_version_to_branch|pin)
