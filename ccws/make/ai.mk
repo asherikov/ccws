@@ -14,22 +14,17 @@ ai_common_setup: ssh_keygen_if_none
 	mkdir -p "${CCWS_CACHE}/apt/cache"
 	mkdir -p "${CCWS_CACHE}/apt/lists"
 	#
-	mkdir -p "${CCWS_SOURCE_DIR}/.ccws/${CCWS_AI}"
+	mkdir -p "${CCWS_AI_SRC_OUTER}/.ccws/${CCWS_AI}"
 	mkdir -p "${CCWS_ARTIFACTS_DIR_BASE}/${CCWS_AI}/log"
 	# build dir is usable only from container anyway
 	mkdir -p "${CCWS_CACHE}/${CCWS_AI}/build"
 
 qwen:
-	mkdir -p "${CCWS_SOURCE_DIR}/.ccws/qwen"
-	echo "*" > "${CCWS_SOURCE_DIR}/.ccws/qwen/.qwenignore"
-	docker run --rm -ti \
-		-v "${CCWS_SOURCE_DIR}:/ccws_src" \
-		-v "${CCWS_SOURCE_DIR}/.ccws/qwen:/root/.qwen/" \
-		ghcr.io/qwenlm/qwen-code /bin/bash -c "cd /ccws_src; qwen"
+	test -z "${DIR}" || ${MAKE} qwen_ccws CCWS_AI_SRC_OUTER=${DIR} CCWS_AI_SRC_INNER=${CCWS_AI_SRC_INNER}/`basename ${DIR}`
+	test -n "${DIR}" || ${MAKE} qwen_ccws
 
-qwen_dir:
-	mkdir -p ${DIR}/.ccws/qwen
-	${MAKE} qwen_ccws CCWS_AI_SRC_OUTER=${DIR} CCWS_AI_SRC_INNER=${CCWS_AI_SRC_INNER}/`basename ${DIR}`
+shoggoth:
+	${MAKE} ${CCWS_AI} CCWS_AI_CONTAINER=slave.s.local/slave_noble
 
 qwen_ccws:
 	${MAKE} ai_common_setup CCWS_AI=qwen
@@ -69,14 +64,3 @@ qwen_ccws:
 		; kill $${SSH_AGENT_PID}
 	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"
 	# asherikov/ccws_qwen:noble
-
-shoggoth:
-	rm -rf "${CCWS_CACHE}/shoggoth/src"
-	mkdir -p "${CCWS_CACHE}/shoggoth/src"
-	${MAKE} ${CCWS_AI}_ccws \
-		CCWS_SOURCE_DIR="${CCWS_CACHE}/shoggoth/src" \
-		CCWS_AI_CONTAINER=slave.s.local/slave_noble
-
-shoggoth_dir:
-	${MAKE} ${CCWS_AI}_dir \
-		CCWS_AI_CONTAINER=slave.s.local/slave_noble
