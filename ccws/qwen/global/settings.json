@@ -9,6 +9,8 @@
     "showCitations": false,
     "shellOutputMaxLines": 10,
     "enableFollowupSuggestions": false,
+    "useTerminalBuffer": false,
+    "mouseTracking": false,
     "accessibility": {
       "enableLoadingPhrases": false
     }
@@ -36,12 +38,7 @@
   },
   "model": {
     "enableOpenAILogging": false,
-    "openAILoggingDir": "/ccws/workspace/artifacts/qwen/log",
-    "summarizeToolOutput": {
-      "run_shell_command": {
-        "tokenBudget": 100
-      }
-    }
+    "openAILoggingDir": "workspace/artifacts/qwen/log"
   },
   "context": {
     "fileName": [
