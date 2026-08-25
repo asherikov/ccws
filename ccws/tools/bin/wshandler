@@ -140,9 +140,7 @@ help()
     wsh_echo "        set         # set version directly, requires <VERSION> argument"
     wsh_echo "      # optional:"
     wsh_echo "        tag         # commit changes and create a git tag after updating files"
-    wsh_echo ""
-    wsh_echo "  Generic commands:"
-    wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git '<COMMAND>'  # execute command in each repository"
+    wsh_echo "    [-j|--jobs <NUM_THREADS> {1}] foreach git [<PACKAGE_NAME> ...] '<COMMAND>'  # execute command in each repository"
     wsh_echo ""
     wsh_echo "  Branching commands:"
     wsh_echo "    branch show ['<GREP_PATTERN>']                    # show matching branches"
@@ -1161,7 +1159,15 @@ dir_run()
 
 execute_foreach()
 {
-    wsh_repo_tuples "$1" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "$2"
+    local SOURCE_TYPE="$1"; shift
+    local COMMAND="${*: -1}"
+    if [ $# -gt 1 ]
+    then
+        WSH_NAME_PATTERNS=("${@:1:$(($# - 1))}")
+    else
+        WSH_NAME_PATTERNS=()
+    fi
+    wsh_repo_tuples "${SOURCE_TYPE}" < <(${WSH_ENV_SUBST} < "${WSH_REPOLIST}") | cut -f 1 -d ' ' | "${WSH_XARGS[@]}" -I {} "${WSHANDLER[@]}" dir_run "{}" "${COMMAND}"
 }
 
 execute_branch()
