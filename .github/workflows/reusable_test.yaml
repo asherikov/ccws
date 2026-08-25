@@ -30,6 +30,10 @@ on:
                 required: false
                 default: '["static_checks", "scan_build", "reldebug", "addr_undef_sanitizers", "thread_sanitizer", "deb"]'
                 type: string
+            test_jobs:
+                required: false
+                default: 1
+                type: number
 
 
 defaults:
@@ -91,7 +95,7 @@ jobs:
                 make dep_install
             - run: |
                 make ${{ inputs.build_target }}
-                make wstest
+                make wstest JOBS=${{ inputs.test_jobs }}
 
     addr_undef_sanitizers:
         if: ${{ contains(fromJSON(inputs.profiles), 'addr_undef_sanitizers') }}
@@ -110,7 +114,7 @@ jobs:
                 make dep_install
             - run: |
                 make ${{ inputs.build_target }}
-                make wstest
+                make wstest JOBS=${{ inputs.test_jobs }}
 
     thread_sanitizer:
         if: ${{ contains(fromJSON(inputs.profiles), 'thread_sanitizer') }}
@@ -129,7 +133,7 @@ jobs:
                 make dep_install
             - run: |
                 make ${{ inputs.build_target }}
-                make wstest
+                make wstest JOBS=${{ inputs.test_jobs }}
 
     deb:
         if: ${{ contains(fromJSON(inputs.profiles), 'deb') }}
