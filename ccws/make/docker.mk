@@ -2,6 +2,7 @@ CCWS_DOCKER_BASE_IMAGE?=ros:noetic-ros-base
 CCWS_DOCKER_TAG?=$(shell cat "${CCWS_SOURCE_DIR}/.ccws/docker")
 CCWS_DOCKER_FILE?="${CCWS_SOURCE_DIR}/.ccws/Dockerfile"
 PLATFORM::=$(shell dpkg --print-architecture || echo amd64)
+export CCWS_DOCKER_DISTRO=noble
 
 export DOCKER_DEFAULT_PLATFORM=linux/${PLATFORM}
 export BUILDKIT_PROGRESS=plain

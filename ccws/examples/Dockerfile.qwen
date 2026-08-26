@@ -53,4 +53,4 @@ RUN \
 USER ccws
 
 # Default entrypoint when none specified
-CMD ["tmux", "-u", "new-session", "qwen"]
+CMD ["tmux", "-u", "new-session", "make wsstatus && tmux new-window -d && make BUILD_PROFILE=codebase_memory_mcp && qwen"]

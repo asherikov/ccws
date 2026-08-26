@@ -24,6 +24,7 @@ test:
 	# test various build profiles
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
@@ -31,6 +32,11 @@ test:
 	# clangd
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	# ---
+	# codebase_memory_mcp
+	${MAKE} bp_install_build BUILD_PROFILE=codebase_memory_mcp
+	${MAKE} BUILD_PROFILE=codebase_memory_mcp
+	${MAKE} bp_codebase_memory_mcp_kill
 	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind

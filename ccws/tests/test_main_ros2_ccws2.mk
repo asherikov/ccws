@@ -35,6 +35,11 @@ test:
 	${MAKE} bp_install_build BUILD_PROFILE=clangd,reldebug
 	${MAKE} BUILD_PROFILE=clangd,reldebug
 	# ---
+	# codebase_memory_mcp
+	${MAKE} bp_install_build BUILD_PROFILE=codebase_memory_mcp
+	${MAKE} BUILD_PROFILE=codebase_memory_mcp
+	${MAKE} bp_codebase_memory_mcp_kill
+	# ---
 	# check valgrind exec profile
 	${MAKE} ep_install EXEC_PROFILE=valgrind
 	${MAKE} wstest EXEC_PROFILE=valgrind
@@ -51,6 +56,10 @@ test:
 	${MAKE} graph
 	${MAKE} graph_reverse PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} cache_clean
+	# ---
+	# clang_format
+	${MAKE} bp_install_build BUILD_PROFILE=clang_format
+	${MAKE} BUILD_PROFILE=clang_format
 	# ---
 	${MAKE} wspurge
 	${MAKE} wsinit

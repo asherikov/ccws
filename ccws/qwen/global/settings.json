@@ -52,5 +52,12 @@
       "respectGitIgnore": false
     }
   },
+  "mcpServers": {
+    "codebase-memory-mcp": {
+      "command": "/ccws/ccws/tools/bin/codebase-memory-mcp",
+      "args": [],
+      "trust": true
+    }
+  },
   "$version": 4
 }
