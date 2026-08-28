@@ -12,7 +12,7 @@ test:
 	${MAKE} new PKG=test_pkg EMAIL=example@example.org AUTHOR=example
 	${MAKE} wsscrape_all
 	${MAKE} dep_to_repolist PKG=test_pkg
-	${MAKE} wsupdate_shallow
+	${MAKE} -f ccws/tests/fragments/wsupdate.mk
 	${MAKE} log_output TARGET=wsstatus
 	${MAKE} dep_install PKG=test_pkg
 	${MAKE} test_pkg BUILD_PROFILE=test_profile

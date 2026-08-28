@@ -27,6 +27,8 @@ wsscrape:
 wsscrape_all:
 	${CMD_WSHANDLER} -p add scrape
 
+CCWS_PREFER_VERSION_FLAG::=$(shell test -n "${CCWS_PREFER_VERSION}" && echo "--prefer-version ${CCWS_PREFER_VERSION}")
+
 # Update workspace & all packages
 wsupdate:
 	-git pull --rebase
@@ -34,17 +36,17 @@ wsupdate:
 
 wsupdate_shallow:
 	-git pull --rebase
-	${MAKE} wsupdate_pkgs_shallow
+	${MAKE} wsupdate_pkgs_shallow CCWS_PREFER_VERSION="${CCWS_PREFER_VERSION}"
 
 # Update workspace & all packages
 wsupdate_pkgs:
-	${CMD_WSHANDLER} -j ${JOBS} -k update
+	${CMD_WSHANDLER} -j ${JOBS} -k ${CCWS_PREFER_VERSION_FLAG} update
 
 wsupdate_pkgs_shallow:
-	${CMD_WSHANDLER} -j ${JOBS} -p shallow update
+	${CMD_WSHANDLER} -j ${JOBS} -p shallow ${CCWS_PREFER_VERSION_FLAG} update
 
 wsupdate_pkgs_shallow_rebase:
-	${CMD_WSHANDLER} -j ${JOBS} -p shallow,rebase update
+	${CMD_WSHANDLER} -j ${JOBS} -p shallow,rebase ${CCWS_PREFER_VERSION_FLAG} update
 
 
 add:
