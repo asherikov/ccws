@@ -19,7 +19,6 @@ RUN \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
 --mount=type=cache,target=/cache/pip,sharing=locked \
     apt update \
-    && apt upgrade -y \
     && ${APT_INSTALL} nodejs \
     && ${APT_INSTALL} \
         man-db \
@@ -31,7 +30,6 @@ RUN \
         ripgrep \
         procps \
         psmisc \
-        lsof \
         socat \
         rsync \
         lsof

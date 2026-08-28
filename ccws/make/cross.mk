@@ -78,7 +78,6 @@ cross_common_install_build:
 cross_common_install_build_focal:
 	sudo ${APT_INSTALL} qemu-user qemu-user-static binfmt-support
 	sudo service binfmt-support restart
-	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DIR}\""
 
 cross_common_install_build_jammy: cross_common_install_build_focal
 	# ubuntu 22
@@ -89,7 +88,6 @@ cross_common_install_build_noble: cross_common_install_build_focal
 cross_common_install_build_resolute:
 	sudo ${APT_INSTALL} qemu-user qemu-user-binfmt binfmt-support
 	sudo service binfmt-support restart
-	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DIR}\""
 
 cross_flash:
 	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_flash
@@ -106,6 +104,7 @@ cross_initialize:
 	${MAKE} bp_${CCWS_PRIMARY_BUILD_PROFILE}_initialize
 
 cross_install: cross_get
+	bash -c "${SETUP_SCRIPT}; mkdir -p \"\$${CCWS_SYSROOT_DIR}\""
 	${MAKE} cross_mount
 	${MAKE} cross_initialize
 	${MAKE} dep_install
