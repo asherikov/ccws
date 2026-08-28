@@ -13,7 +13,8 @@
     "mouseTracking": false,
     "accessibility": {
       "enableLoadingPhrases": false
-    }
+    },
+    "theme": "Dracula"
   },
   "tools": {
     "approvalMode": "yolo"
