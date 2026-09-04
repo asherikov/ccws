@@ -60,6 +60,8 @@ qwen_ccws:
 			-v "${CCWS_CACHE}/ai/build:/ccws/workspace/build" \
 			-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 			-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
+			--entrypoint tmux \
 			${CCWS_AI_CONTAINER} \
+			-u new-session "make wsstatus; tmux new-window -d && make BUILD_PROFILE=codebase_memory_mcp && qwen" \
 		; kill $${SSH_AGENT_PID}
 	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"

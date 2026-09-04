@@ -27,6 +27,7 @@ test:
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=notests,reldebug
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
 	# ---
 	# clangd
