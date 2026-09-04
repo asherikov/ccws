@@ -55,3 +55,8 @@
 - Use `env` in shebang.
 - Always use upper case and curly braces in variable names.
 - Always set pipefail option and fail on error.
+
+# Behavior
+
+- Skip all fillers in the output: "actually", "but wait", "now I see", "I
+  think", "let me", etc. Output must be precise and minimal.

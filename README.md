@@ -17,6 +17,9 @@
   - [Extending `CCWS`](#extending-ccws)
   - [Coding agents](#coding-agents)
 - [Known issues](#known-issues)
+  - [Croscompilation and binary packages](#croscompilation-and-binary-packages)
+  - [Sanitizers](#sanitizers)
+  - [Other](#other)
 - [Related software](#related-software)
 - [TODO](#todo)
   - [Bookmarks (not going to be
@@ -38,13 +41,14 @@ Introduction
 
 `CCWS` is a development environment for ROS, which integrates functionality of
 traditional `catkin` workspaces and CI pipelines in order to facilitate
-(cross-)compilation, testing, linting, documetation and binary package
-generation. It is intended to be used both as a CI/CD backbone and a working
-environment for developers. Note that `CCWS` is not intended to be a complete
-solution, but rather a basis for development of a vendor-specific workflow.
+(cross-)compilation, testing, linting, documetation, binary package generation,
+and agentic coding. It is intended to be used both as a CI/CD backbone and a
+working environment for developers. Note that `CCWS` is not meant to be a
+complete solution, but rather a basis for development of a vendor-specific
+workflow.
 
-`CCWS` is ROS version agnostic, and should work in most cases for both ROS1 and
-ROS2.
+`CCWS` is ROS version agnostic, and should work for both ROS1 and ROS2 in most
+cases.
 
 Features
 --------
@@ -77,6 +81,8 @@ Features
 
   - Binary debian package generation.
 
+  - Workspace indexing for coding agents
+
 - Package template which demonstrates how to use some of the features.
 
 - The number of parallel jobs can be selected based on available RAM instead of
@@ -98,6 +104,8 @@ profiles:
   `RelWithDebInfo`.
 - `release` -- default compiler, cmake build type is `Release`, tests are
   disabled.
+- `notests` -- wraps another build profile to disable test compilation, e.g.,
+  `BUILD_PROFILE=notests,reldebug`.
 - `clang` -- build with `clang` compiler.
 - `clang_format` -- formats source files using `clang-format`.
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
@@ -158,7 +166,6 @@ Dependencies can be installed using
 to install the following tools and profile specific dependencies:
 
 - `colcon`
-- `yq` -- <https://github.com/asherikov/wshandler> dependency
 - `cmake`
 - `ccache` -- can be disabled in cmake toolchains
 - `wget`
@@ -354,29 +361,40 @@ Extending `CCWS`
 Coding agents
 -------------
 
-Basic integration with <https://github.com/QwenLM/qwen-code> is provided, which
-can be used in two ways:
+Basic integration with <https://github.com/QwenLM/qwen-code> is provided. Use
+`make qwen` to run a custom build container, see `ccws/examples/Dockerfile.qwen`
+(`asherikov/ccws_qwen:noble` on docker hub), which includes both `CCWS` and
+`qwen-code` allowing the agent to use `CCWS` when executing commands. Source,
+build, install, and other directories are mounted as volumes.
 
-- `make qwen`: runs original `ghcr.io/qwenlm/qwen-code` docker container using
-  source space as the agent workspace.
+`qwen` configuration is stored in `.ccws/qwen` directory of the source space.
+See `ccws/make/ai.mk` for more details.
 
-- `make qwen_ccws`: runs custom build container, see
-  `ccws/examples/Dockerfile.qwen` (`asherikov/ccws_qwen:noble` on docker hub),
-  which includes both `CCWS` and `qwen-code` allowing the agent to use `CCWS`
-  when executing commands. Source, build, install, and other directories are
-  mounted as volumes.
-
-In both cases `qwen` configuration is stored in `.ccws/qwen` directory of the
-source space. See `ccws/make/ai.mk` for more details.
+`CCWS` repository also includes a Claude-compatible plugin with skill that
+describes how to use this environment. Installation of the skill is not needed
+when using `CCWS` `qwen` containers.
 
 Known issues
 ============
 
+Croscompilation and binary packages
+-----------------------------------
+
 - Segmentation fault during cross-compilation or debian package generation
-  indside docker containers (both require `proot`): presumably due to `seccomp`
+  inside docker containers (both require `proot`): presumably due to `seccomp`
   Linux feature, which can be disabled with `--security-opt seccomp:unconfined`
   docker parameter. Disabling `seccomp` for `proot` with `PROOT_NO_SECCOMP=1`
   seems to be unnecessary.
+
+- `proot` segfault while building on arm64 in Ubuntu 22, e.g., while building
+  debian packages. Newer version of `proot` has to be used, see
+  <https://github.com/proot-me/proot/issues/312>.
+
+- Crosscompilation may require installation of workspace dependencies on the
+  build host.
+
+Sanitizers
+----------
 
 - Programs compiled with sanitizers (`addr_undef_sanitizers` or
   `thread_sanitizer` build profiles) output `2: AddressSanitizer:DEADLYSIGNAL`
@@ -386,19 +404,15 @@ Known issues
   <https://github.com/google/sanitizers/issues/1614>. The issue can be resolved
   by setting `sudo sysctl vm.mmap_rnd_bits=28`.
 
+Other
+-----
+
 - Some of ROS2 core packages cannot be built with `CCWS` due to cmake misuse,
   e.g., see <https://github.com/ament/google_benchmark_vendor/issues/17>.
-
-- `proot` segfault while building on arm64 in Ubuntu 22, e.g., while building
-  debian packages. Newer version of `proot` has to be used, see
-  <https://github.com/proot-me/proot/issues/312>.
 
 - Workspace prefix is intentionally cropped from paths in debug info, you have
   to set path substitutions in gdb to resolve them correctly, i.e.,
   `set substitute-path / <path_to_workspace>`.
-
-- Crosscompilation may require installation of workspace dependencies on the
-  build host.
 
 Related software
 ================

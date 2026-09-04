@@ -11,13 +11,11 @@ ai_common_setup: ssh_keygen_if_none
 	mkdir -p "${CCWS_INSTALL_DIR_BASE}"
 	mkdir -p "${CCWS_ARTIFACTS_DIR_BASE}"
 	# shared apt cache
-	mkdir -p "${CCWS_CACHE}/apt/cache"
-	mkdir -p "${CCWS_CACHE}/apt/lists"
+	mkdir -p "${CCWS_CACHE}/${CCWS_DOCKER_DISTRO}/apt/cache"
+	mkdir -p "${CCWS_CACHE}/${CCWS_DOCKER_DISTRO}/apt/lists"
 	#
 	mkdir -p "${CCWS_AI_SRC_OUTER}/.ccws/${CCWS_AI}"
 	mkdir -p "${CCWS_ARTIFACTS_DIR_BASE}/${CCWS_AI}/log"
-	# build dir is usable only from container anyway
-	mkdir -p "${CCWS_CACHE}/${CCWS_AI}/build"
 
 qwen:
 	test -z "${DIR}" || ${MAKE} qwen_ccws CCWS_AI_SRC_OUTER=${DIR} CCWS_AI_SRC_INNER=${CCWS_AI_SRC_INNER}/`basename ${DIR}`
@@ -46,8 +44,8 @@ qwen_ccws:
 			-v /dev/dri:/dev/dri \
 			-v "$${SSH_AUTH_SOCK}:$${SSH_AUTH_SOCK}" \
 			-v "${CCWS_CACHE}:/cache" \
-			-v "${CCWS_CACHE}/apt/cache:/var/cache/apt" \
-			-v "${CCWS_CACHE}/apt/lists:/var/lib/apt/lists/" \
+			-v "${CCWS_CACHE}/${CCWS_DOCKER_DISTRO}/apt/cache:/var/cache/apt" \
+			-v "${CCWS_CACHE}/${CCWS_DOCKER_DISTRO}/apt/lists:/var/lib/apt/lists/" \
 			-v "${CCWS_DIR}/qwen/user:/home/ccws/.qwen/" \
 			-v "${CCWS_DIR}/qwen/global:/etc/qwen-code/" \
 			-v "${CCWS_ROOT}/agentic_coding_plugin/skills:/home/ccws/.qwen/skills" \
@@ -57,7 +55,6 @@ qwen_ccws:
 			-v ".gitignore:/ccws/.qwenignore:ro" \
 			-v "${CCWS_AI_SRC_OUTER}:${CCWS_AI_SRC_INNER}" \
 			-v "${CCWS_AI_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
-			-v "${CCWS_CACHE}/ai/build:/ccws/workspace/build" \
 			-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 			-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
 			--entrypoint tmux \
