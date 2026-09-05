@@ -7,8 +7,10 @@ ENV PIPX_INSTALL="python3 -m pipx install"
 ENV CCWS_CACHE=/cache/ccws
 
 ENV PIP_CACHE_DIR=${CCWS_CACHE}/pip
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/ccws/ccws/tools/bin:${PATH}"
+ENV npm_config_cache=/cache/npm
 
 # 1. docker-clean is removed since we mount cache volumes for storing apt data
 # 2. caches are mounted, keep downloaded packages
@@ -19,7 +21,7 @@ ENV PATH="/ccws/ccws/tools/bin:${PATH}"
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache/pip,sharing=locked \
+--mount=type=cache,target=/cache,sharing=locked \
     rm /etc/apt/apt.conf.d/docker-clean \
     && echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/01-ccws-qwen-keep-debs \
     && apt update \
@@ -35,12 +37,16 @@ RUN \
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache/pip,sharing=locked \
+--mount=type=cache,target=/cache,sharing=locked \
 --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && ./ccws/tools/bin/bootstrap.sh
 
-RUN --mount=target=/ccws_docker_context,ro \
+RUN \
+--mount=type=cache,target=/var/cache/apt,sharing=locked \
+--mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
+--mount=type=cache,target=/cache,sharing=locked \
+--mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
     && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
@@ -55,7 +61,7 @@ WORKDIR /ccws
 RUN \
 --mount=type=cache,target=/var/cache/apt,sharing=locked \
 --mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache/pip,sharing=locked \
+--mount=type=cache,target=/cache,sharing=locked \
     make install_all_profiles
 
 ENV WORKSPACE_DIR=/ccws/workspace
