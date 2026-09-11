@@ -14,15 +14,6 @@ jobs:
                   push: true
                   registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-            - uses: ./.github/actions/docker
-              with:
-                  distro: 'jammy'
-                  push: true
-                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-                  file: ccws/examples/Dockerfile.qwen
-                  tag: ccws_qwen
-                  base_image: 'asherikov/ccws:jammy'
 
     docker_noble:
         runs-on: ubuntu-latest
@@ -34,15 +25,6 @@ jobs:
                   push: true
                   registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-            - uses: ./.github/actions/docker
-              with:
-                  distro: 'noble'
-                  push: true
-                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-                  file: ccws/examples/Dockerfile.qwen
-                  tag: ccws_qwen
-                  base_image: 'asherikov/ccws:noble'
 
     docker_resolute:
         runs-on: ubuntu-latest
@@ -54,12 +36,3 @@ jobs:
                   push: true
                   registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
                   registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-            - uses: ./.github/actions/docker
-              with:
-                  distro: 'resolute'
-                  push: true
-                  registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
-                  file: ccws/examples/Dockerfile.qwen
-                  tag: ccws_qwen
-                  base_image: 'asherikov/ccws:resolute'

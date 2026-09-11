@@ -12,10 +12,9 @@
   - [Debian package generation](#debian-package-generation)
   - [Cross-compilation](#cross-compilation)
 - [Advanced usage](#advanced-usage)
-  - [`CCWS` docker image](#ccws-docker-image)
+  - [`CCWS` docker image & agentic coding](#ccws-docker-image--agentic-coding)
   - [`CCWS` in CI](#ccws-in-ci)
   - [Extending `CCWS`](#extending-ccws)
-  - [Coding agents](#coding-agents)
 - [Known issues](#known-issues)
   - [Croscompilation and binary packages](#croscompilation-and-binary-packages)
   - [Sanitizers](#sanitizers)
@@ -338,6 +337,28 @@ The image can be used in the following way:
 - `make wsinit REPOS="https://github.com/asherikov/qpmad.git"`
 - `...`
 
+The image also includes preinstalled agentic coding tools that are described in
+the following subsection.
+
+AI features / agentic coding
+----------------------------
+
+`CCWS` provides the following features to facilitate agentic coding:
+- repository includes a Claude-compatible plugin with a skill that describes
+  how to use this environment;
+- `codebase_memory_mcp` build profile provides source code indexing
+  functionality and a corresponding MCP server;
+- <https://github.com/QwenLM/qwen-code> cli environment is installed in the
+  ccws docker image by default.
+
+Agentic coding funtionality is intended to be used in a containerized
+environment, e.g., the default ccws docker image. The image launches qwen-code
+in a tmux session on startup. It is recommended to use `CCWS` helper target
+`make qwen` to run the container: source, build, install, and other directories
+are mounted as volumes automatically. `qwen` configuration is stored in
+`.ccws/qwen` directory of the source space. See `ccws/make/ai.mk` for more
+details. Installation of the skill is not needed when using `CCWS` containers.
+
 `CCWS` in CI
 ------------
 
@@ -357,22 +378,6 @@ Extending `CCWS`
   `ccws/profiles/build/vendor/<filename>.mk` file;
 - common `cmake` toolchain suffix can be added to
   `ccws/profiles/build/vendor/toolchain_suffix.cmake`.
-
-Coding agents
--------------
-
-Basic integration with <https://github.com/QwenLM/qwen-code> is provided. Use
-`make qwen` to run a custom build container, see `ccws/examples/Dockerfile.qwen`
-(`asherikov/ccws_qwen:noble` on docker hub), which includes both `CCWS` and
-`qwen-code` allowing the agent to use `CCWS` when executing commands. Source,
-build, install, and other directories are mounted as volumes.
-
-`qwen` configuration is stored in `.ccws/qwen` directory of the source space.
-See `ccws/make/ai.mk` for more details.
-
-`CCWS` repository also includes a Claude-compatible plugin with skill that
-describes how to use this environment. Installation of the skill is not needed
-when using `CCWS` `qwen` containers.
 
 Known issues
 ============
