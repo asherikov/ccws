@@ -24,8 +24,17 @@ install_ccws_deps:
 install_ros_key:
 	wget -qO- https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo tee /etc/apt/trusted.gpg.d/ros.asc
 
-install_ccws_build_deps: install_ccws_deps
+install_ccws_build_deps: install_ccws_deps install_ccws_build_cache
 	sudo ${APT_INSTALL} build-essential ccache proot gdb
+
+install_ccws_build_cache:
+	${MAKE} download CCWS_DOWNLOAD_DIR="buildcache" \
+		FILES="https://gitlab.com/bits-n-bites/buildcache/-/releases/permalink/latest/downloads/buildcache-linux-$(PLATFORM).tar.gz"; \
+	cd '${CCWS_CACHE}/buildcache/'; \
+		mkdir -p '${CCWS_TOOLS_DIR}/bin' '${CCWS_TOOLS_DIR}/share/buildcache'; \
+		tar -xzf 'buildcache-linux-${PLATFORM}.tar.gz' -C ./; \
+		install -m 755 buildcache/bin/buildcache '${CCWS_TOOLS_DIR}/bin/buildcache'; \
+		cp -R buildcache/share/lua-examples '${CCWS_TOOLS_DIR}/share/buildcache/'
 
 install_python3:
 	sudo ${APT_INSTALL} python3 python3-pip pipx python3-venv

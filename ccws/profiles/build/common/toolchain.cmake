@@ -1,10 +1,27 @@
 set(CMAKE_VERBOSE_MAKEFILE          ON  CACHE STRING "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS   ON  CACHE STRING "" FORCE)
 
-# ccache does not work for linking
-if(NOT DEFINED ENV{CCACHE_DISABLE})
-    set(CMAKE_C_COMPILER_LAUNCHER   ccache  CACHE STRING "" FORCE)
-    set(CMAKE_CXX_COMPILER_LAUNCHER ccache  CACHE STRING "" FORCE)
+# compiler launcher cache tool, selected via CCWS_BUILD_CACHE_TOOL, default ccache
+# both ccache and buildcache are forwarders only and do not handle linking
+set(CCWS_BUILD_CACHE_TOOL "$ENV{CCWS_BUILD_CACHE_TOOL}")
+
+set(CCWS_BUILD_CACHE_ENABLED TRUE)
+if(CCWS_BUILD_CACHE_TOOL STREQUAL "ccache" AND DEFINED ENV{CCACHE_DISABLE})
+    set(CCWS_BUILD_CACHE_ENABLED FALSE)
+elseif(CCWS_BUILD_CACHE_TOOL STREQUAL "buildcache" AND DEFINED ENV{BUILDCACHE_DISABLE})
+    set(CCWS_BUILD_CACHE_ENABLED FALSE)
+endif()
+
+if(CCWS_BUILD_CACHE_ENABLED)
+    set(CMAKE_C_COMPILER_LAUNCHER   "${CCWS_BUILD_CACHE_TOOL}" CACHE STRING "" FORCE)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCWS_BUILD_CACHE_TOOL}" CACHE STRING "" FORCE)
+    # ccache additionally supports Fortran, Objective-C, Objective-C++;
+    # buildcache only supports C and C++ among languages exposed by cmake.
+    if(CCWS_BUILD_CACHE_TOOL STREQUAL "ccache")
+        set(CMAKE_Fortran_COMPILER_LAUNCHER  "${CCWS_BUILD_CACHE_TOOL}" CACHE STRING "" FORCE)
+        set(CMAKE_OBJC_COMPILER_LAUNCHER     "${CCWS_BUILD_CACHE_TOOL}" CACHE STRING "" FORCE)
+        set(CMAKE_OBJCXX_COMPILER_LAUNCHER   "${CCWS_BUILD_CACHE_TOOL}" CACHE STRING "" FORCE)
+    endif()
 endif()
 
 # TODO deprecated

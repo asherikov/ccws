@@ -126,6 +126,9 @@ wswraptarget:
 ccache_stats:
 	bash -c "${SETUP_SCRIPT}; ccache --show-stats"
 
+buildcache_stats:
+	bash -c "${SETUP_SCRIPT}; buildcache --show-stats"
+
 
 ##
 ## Package targets

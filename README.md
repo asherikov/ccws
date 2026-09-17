@@ -167,6 +167,8 @@ to install the following tools and profile specific dependencies:
 - `colcon`
 - `cmake`
 - `ccache` -- can be disabled in cmake toolchains
+- `buildcache` -- alternative compiler cache to `ccache`, selected via
+  `CCWS_BUILD_CACHE_TOOL`. See [Build cache tool](#build-cache-tool) below.
 - `wget`
 
 Usage
@@ -222,6 +224,27 @@ Documentation
 
 - `make BUILD_PROFILE=doxygen`, `firefox artifacts/doxygen/index.html`
 - See example at <http://www.sherikov.net/sharf/>
+
+Build cache tool
+----------------
+
+`CCWS` configures the cmake `CMAKE_<LANG>_COMPILER_LAUNCHER` variables to wrap
+every supported language with a compiler cache:
+
+- `CCWS_BUILD_CACHE_TOOL=ccache` (the default) wraps `C`, `C++`, `Fortran`,
+  `Objective-C` and `Objective-C++` with `ccache`.
+- `CCWS_BUILD_CACHE_TOOL=buildcache`
+  <https://gitlab.com/bits-n-bites/buildcache> wraps `C` and `C++` with
+  `buildcache` -- the only languages buildcache exposes to cmake. The main
+  advantage of this tool is clang-tidy support which is absent in ccache (and
+  sccache).
+
+The selection is controlled by the environment variable `CCWS_BUILD_CACHE_TOOL`
+(default: `ccache`). The cache directory follows `CCWS_CACHE` for both tools
+(`$CCWS_CACHE/ccache` and `$CCWS_CACHE/buildcache`).
+
+Both tools honour the standard disable switch, so an individual run can be
+uncached with `CCACHE_DISABLE=1` or `BUILDCACHE_DISABLE=1`.
 
 Debian package generation
 -------------------------
@@ -475,10 +498,6 @@ TODO
 
 - Build performance
 
-  - Replace `ccache` with <https://gitlab.com/bits-n-bites/buildcache>.
-  - <https://github.com/ejfitzgerald/clang-tidy-cache> or
-    <https://gitlab.com/bits-n-bites/buildcache> can be used to cache
-    `clang-tidy` runs.
   - Cache cmake checks with
     <https://github.com/cristianadam/cmake-checks-cache>,
     <https://github.com/polysquare/cmake-forward-cache> might be useful too.
@@ -541,3 +560,4 @@ Bookmarks (not going to be supported)
 - <https://github.com/cheshirekow/cmake_format> seem to be abandoned, linter not
   really helpful -- mostly formatting stuff. Same applies to
   <https://github.com/cmake-lint/cmake-lint>.
+- <https://github.com/ejfitzgerald/clang-tidy-cache> A cache for clang-tidy.

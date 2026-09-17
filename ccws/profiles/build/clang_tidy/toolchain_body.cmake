@@ -10,6 +10,11 @@ set(CMAKE_C_COMPILER    clang-$ENV{CCWS_LLVM_VERSION}   CACHE STRING "" FORCE)
 
 set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY_EXECUTABLE};--config-file=$ENV{BUILD_PROFILES_DIR}/clang_tidy/clang_tidy_config.yaml;--header-filter=$ENV{CCWS_SOURCE_DIR}/.*")
 
+if("$ENV{CCWS_BUILD_CACHE_TOOL}" STREQUAL "buildcache")
+    find_program(CCWS_BUILDCACHE_EXECUTABLE NAMES buildcache REQUIRED)
+    set(CCWS_CLANG_TIDY "${CCWS_BUILDCACHE_EXECUTABLE};${CCWS_CLANG_TIDY}")
+endif()
+
 set(CCWS_CLANG_TIDY "${CCWS_CLANG_TIDY}" CACHE STRING "" FORCE)
 
 string(REPLACE  "-fstack-protector-strong"  ""  CCWS_CXX_FLAGS  "${CCWS_CXX_FLAGS}")

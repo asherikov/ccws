@@ -223,6 +223,15 @@ then
 fi
 
 ##########################################################################################
+# build cache tool
+#
+# Selects the compiler launcher cache tool used by cmake toolchains.
+# Supported values: ccache (default), buildcache.
+CCWS_BUILD_CACHE_TOOL=${CCWS_BUILD_CACHE_TOOL:-"ccache"}
+export CCWS_BUILD_CACHE_TOOL
+
+
+##########################################################################################
 # ccache
 #
 # keep ccache in the workspace, this is handy when workspace is mounted inside dockers
@@ -237,6 +246,19 @@ CCACHE_MAXSIZE=${CCACHE_MAXSIZE:-"8G"}
 #CCACHE_LOGFILE=${CCWS_BUILD_DIR}/ccache.log
 #export CCACHE_LOGFILE
 export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE CCACHE_NOHASHDIR
+
+
+##########################################################################################
+# buildcache
+#
+# keep buildcache in the workspace, same reasoning as for ccache above
+BUILDCACHE_DIR=${BUILDCACHE_DIR:-"${CCWS_CACHE}/buildcache"}
+BUILDCACHE_MAX_CACHE_SIZE=${BUILDCACHE_MAX_CACHE_SIZE:-"5368709120"}
+BUILDCACHE_LUA_PATH=${CCWS_TOOLS_DIR}/share/buildcache/
+# default to strict accuracy when an explicit value has not been provided
+# use SLOPPY if build paths vary (e.g., in CI)
+BUILDCACHE_ACCURACY=${BUILDCACHE_ACCURACY:-"STRICT"}
+export BUILDCACHE_DIR BUILDCACHE_BASEDIR BUILDCACHE_MAX_CACHE_SIZE BUILDCACHE_ACCURACY
 
 
 ##########################################################################################

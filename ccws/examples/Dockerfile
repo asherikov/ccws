@@ -49,7 +49,7 @@ RUN \
 --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
-    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash /ccws/ \
+    && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash agentic_coding_plugin /ccws/ \
     && cp /ccws/ccws/examples/tmux.conf /home/ccws/.tmux.conf \
     && ln -s /home/ccws/.tmux.conf /root/.tmux.conf \
     && chown -R ccws /ccws /home/ccws \
