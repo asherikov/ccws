@@ -131,6 +131,12 @@ make build PKG="package1" BUILD_PROFILE=release
 make build PKG="package1" JOBS=2
 ```
 
+**Cleaning build data:**
+```bash
+# remove all build data (cmake data, object files, etc), use if packages have to be built from scratch
+make wsclean
+```
+
 ### 3. Testing
 
 **Running tests:**

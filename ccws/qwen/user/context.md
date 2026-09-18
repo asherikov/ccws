@@ -49,6 +49,7 @@
 - Never edit files outside of explicitly specified scope, such as a directory,
   package, or repository in the source space without explicit user request or
   interactive approval.
+- Use C++ for new packages unless other language is explicity requested.
 
 ## Shell scripts
 
@@ -60,3 +61,7 @@
 
 - Skip all fillers in the output: "actually", "but wait", "now I see", "I
   think", "let me", etc. Output must be precise and minimal.
+- Do not expand working scope without user approval, e.g., if refactoring of a
+  specific package is requested other packages in the workspace should not be
+  affected, if requested packages cannot be found in the workspace do not
+  attempt online search.
