@@ -34,7 +34,6 @@ install_ccws_build_cache:
 		mkdir -p '${CCWS_TOOLS_DIR}/bin' '${CCWS_TOOLS_DIR}/share/buildcache'; \
 		tar -xzf 'buildcache-linux-${PLATFORM}.tar.gz' -C ./; \
 		install -m 755 buildcache/bin/buildcache '${CCWS_TOOLS_DIR}/bin/buildcache'; \
-		cp -R buildcache/share/lua-examples '${CCWS_TOOLS_DIR}/share/buildcache/'
 
 install_python3:
 	sudo ${APT_INSTALL} python3 python3-pip pipx python3-venv

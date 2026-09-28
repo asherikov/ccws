@@ -254,11 +254,11 @@ export CCACHE_DIR CCACHE_BASEDIR CCACHE_MAXSIZE CCACHE_NOHASHDIR
 # keep buildcache in the workspace, same reasoning as for ccache above
 BUILDCACHE_DIR=${BUILDCACHE_DIR:-"${CCWS_CACHE}/buildcache"}
 BUILDCACHE_MAX_CACHE_SIZE=${BUILDCACHE_MAX_CACHE_SIZE:-"5368709120"}
-BUILDCACHE_LUA_PATH=${CCWS_TOOLS_DIR}/share/buildcache/
+BUILDCACHE_LUA_PATH=${CCWS_TOOLS_DIR}/buildcache_wrapper
 # default to strict accuracy when an explicit value has not been provided
 # use SLOPPY if build paths vary (e.g., in CI)
 BUILDCACHE_ACCURACY=${BUILDCACHE_ACCURACY:-"STRICT"}
-export BUILDCACHE_DIR BUILDCACHE_BASEDIR BUILDCACHE_MAX_CACHE_SIZE BUILDCACHE_ACCURACY
+export BUILDCACHE_DIR BUILDCACHE_LUA_PATH BUILDCACHE_MAX_CACHE_SIZE BUILDCACHE_ACCURACY
 
 
 ##########################################################################################
