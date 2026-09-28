@@ -49,7 +49,11 @@
 - Never edit files outside of explicitly specified scope, such as a directory,
   package, or repository in the source space without explicit user request or
   interactive approval.
-- Use C++ for new packages unless other language is explicity requested.
+- Use C++ for new packages in ccws workspace unless other language is explicity
+  requested.
+- Scripts (makefiles, shell) should treat all errors as fatal and escalate
+  failures, should address tasks with minimal overhead: no user-friendly
+  output formatting, no fallbacks.
 
 ## Shell scripts
 
