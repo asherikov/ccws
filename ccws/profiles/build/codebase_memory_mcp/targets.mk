@@ -8,9 +8,8 @@ bp_codebase_memory_mcp_install_build: install_ccws_deps
 		mkdir -p '${CCWS_TOOLS_DIR}/bin'; \
 		install -m 755 \"\$${CBM_DLDIR}/codebase-memory-mcp\" \"\$${CCWS_TOOLS_DIR}/bin\""
 
-bp_codebase_memory_mcp_build:
-	bash -c "${SETUP_SCRIPT}; \
-		CBM_CACHE_DIR=\$${CCWS_BUILD_DIR} codebase-memory-mcp cli index_repository --repo-path '${CCWS_SOURCE_DIR}' &"
+bp_codebase_memory_mcp_build: bp_codebase_memory_mcp_kill
+	bash -c "${SETUP_SCRIPT}; codebase-memory-mcp cli index_repository --repo-path '${CCWS_SOURCE_DIR}' &"
 
 bp_codebase_memory_mcp_kill:
 	-pkill -f 'codebase-memory-mcp' || true

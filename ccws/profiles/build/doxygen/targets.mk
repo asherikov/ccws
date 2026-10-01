@@ -5,8 +5,9 @@ bp_doxygen_install_build: install_ccws_deps install_python3
 	# - Old versions of doxygen support only 2.x -- stick to it for compatibility
 	# - do not install to cache directory -- may not persist
 	# - do not use git submodule -- ccws .git may be stripped
-	git clone --branch 2.7.9 --recurse-submodules --shallow-submodules --depth 1 \
-		https://github.com/mathjax/MathJax.git ${BUILD_PROFILES_DIR}/doxygen/mathjax
+	test -d "${BUILD_PROFILES_DIR}/doxygen/mathjax" \
+		|| git clone --branch 2.7.9 --recurse-submodules --shallow-submodules --depth 1 \
+			https://github.com/mathjax/MathJax.git ${BUILD_PROFILES_DIR}/doxygen/mathjax
 
 doxclean:
 	bash -c "${SETUP_SCRIPT} \

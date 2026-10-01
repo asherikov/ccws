@@ -21,4 +21,7 @@ esac
 
 CBM_ARCHIVE="codebase-memory-mcp-linux-${CBM_ARCH}-portable.tar.gz"
 export CBM_ARCHIVE
+
+CBM_CACHE_DIR="${CCWS_BUILD_DIR}"
+export CBM_CACHE_DIR
 ##########################################################################################

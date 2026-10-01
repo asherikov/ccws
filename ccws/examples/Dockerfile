@@ -28,7 +28,7 @@ RUN \
     && ${APT_INSTALL} neovim git ssh python3 tmux sudo \
     && (usermod -l ccws `id -nu 1000` --home /home/ccws 2> /dev/null || useradd -u 1000 ccws) \
     && (mv /home/ubuntu /home/ccws 2> /dev/null || mkdir -p /home/ccws/) \
-    && usermod -aG sudo ccws \
+    && usermod --shell /bin/bash -aG sudo ccws \
     && (echo "ccws:ccws" | chpasswd) \
     && echo "ccws ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ccws \
     && (find /usr/lib/ -name EXTERNALLY-MANAGED | xargs --no-run-if-empty rm) \
@@ -75,57 +75,7 @@ ARG CLI_VERSION_ARG
 ENV SANDBOX="$SANDBOX_NAME"
 ENV CLI_VERSION=$CLI_VERSION_ARG
 
-
-# Import NodeSource GPG key and add repository for Node.js
-RUN \
---mount=type=cache,target=/var/cache/apt,sharing=locked \
---mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache,sharing=locked \
-    wget -qO - https://deb.nodesource.com/setup_22.x | sudo bash
-
-# Install dependencies
-RUN \
---mount=type=cache,target=/var/cache/apt,sharing=locked \
---mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache,sharing=locked \
-    apt update \
-    && ${APT_INSTALL} nodejs \
-    && ${APT_INSTALL} \
-        man-db \
-        curl \
-        dnsutils \
-        jq \
-        bc \
-        gh \
-        ripgrep \
-        procps \
-        psmisc \
-        socat \
-        rsync \
-        lsof
-
-# Set up npm global package folder
-RUN mkdir -p /usr/local/share/npm-global
-ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin
-
-RUN \
---mount=type=cache,target=/var/cache/apt,sharing=locked \
---mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache,sharing=locked \
-    npm install -g @qwen-code/qwen-code
-
-RUN \
---mount=type=cache,target=/var/cache/apt,sharing=locked \
---mount=type=cache,target=/var/lib/apt/lists/,sharing=locked \
---mount=type=cache,target=/cache,sharing=locked \
-    mkdir -p /home/ccws/.qwen/ \
-    && ln -s /home/ccws/.qwen /root/.qwen \
-    && mkdir -p /etc/qwen-code/ \
-    && cp /ccws/ccws/qwen/global/settings.json /etc/qwen-code/ \
-    && chown -R ccws /home/ccws/
-
 USER ccws
 
 # Default entrypoint when none specified
-CMD ["tmux", "-u", "new-session", "make wsstatus; tmux new-window -d && make BUILD_PROFILE=codebase_memory_mcp && qwen"]
+CMD ["tmux", "-u", "new-session", "tmux new-window -d && make BUILD_PROFILE=qwencode"]
