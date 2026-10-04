@@ -9,10 +9,12 @@
   - [Running](#running)
   - [Testing](#testing)
   - [Documentation](#documentation)
+  - [Build cache tool](#build-cache-tool)
   - [Debian package generation](#debian-package-generation)
   - [Cross-compilation](#cross-compilation)
 - [Advanced usage](#advanced-usage)
-  - [`CCWS` docker image & agentic coding](#ccws-docker-image--agentic-coding)
+  - [`CCWS` docker image](#ccws-docker-image)
+  - [AI features / agentic coding](#ai-features--agentic-coding)
   - [`CCWS` in CI](#ccws-in-ci)
   - [Extending `CCWS`](#extending-ccws)
 - [Known issues](#known-issues)
@@ -367,12 +369,13 @@ AI features / agentic coding
 ----------------------------
 
 `CCWS` provides the following features to facilitate agentic coding:
-- repository includes a Claude-compatible plugin with a skill that describes
-  how to use this environment;
+
+- repository includes a Claude-compatible plugin with a skill that describes how
+  to use this environment;
 - `codebase_memory_mcp` build profile provides source code indexing
   functionality and a corresponding MCP server;
-- <https://github.com/QwenLM/qwen-code> cli environment is installed in the
-  ccws docker image by default.
+- <https://github.com/QwenLM/qwen-code> cli environment is installed in the ccws
+  docker image by default.
 
 Agentic coding funtionality is intended to be used in a containerized
 environment, e.g., the default ccws docker image. The image launches qwen-code
