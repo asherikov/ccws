@@ -107,6 +107,9 @@ profiles:
   disabled.
 - `notests` -- wraps another build profile to disable test compilation, e.g.,
   `BUILD_PROFILE=notests,reldebug`.
+- `force_deprecation` -- wraps another build profile to enable warnings about
+  deprecated declarations, which are disabled by default, e.g.,
+  `BUILD_PROFILE=force_deprecation,reldebug`.
 - `clang` -- build with `clang` compiler.
 - `clang_format` -- formats source files using `clang-format`.
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for

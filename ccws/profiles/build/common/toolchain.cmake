@@ -72,7 +72,7 @@ if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
 endif ()
 set(CMAKE_CXX_STANDARD "$ENV{CCWS_CXX_STANDARD}")
 set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-strong" CACHE STRING "" FORCE)
-set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors" CACHE STRING "" FORCE)
+set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors -Wno-deprecated-declarations" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 
 # -flto
