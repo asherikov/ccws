@@ -1,15 +1,20 @@
 DEPLIST_DIR=${CCWS_BUILD_DIR}/.ccws/dependencies
 export DEPLIST_FILE=${DEPLIST_DIR}/deps_${PKG_ID}
-CCWS_ROSDEP_CACHE=${CCWS_CACHE}/profiles/${CCWS_PRIMARY_BUILD_PROFILE}
+# rosdep cache is shared between build profiles; cross compilation profiles
+# override this path since they resolve dependencies for a different OS version
+export CCWS_ROSDEP_CACHE?=${CCWS_CACHE}/rosdep
 CCWS_DEP_TYPE?=all
 
 
 dep_%:
 	${MAKE} wswraptarget TARGET="private_$@"
 
-private_dep_resolve: private_dep_list
+private_dep_rosdep_update:
 	mkdir -p '${CCWS_ROSDEP_CACHE}/rosdep'
-	test -d '${CCWS_ROSDEP_CACHE}/rosdep/sources.cache/' || env ROS_HOME='${CCWS_ROSDEP_CACHE}' rosdep update --os=ubuntu:${OS_DISTRO_HOST}
+	env ROS_HOME='${CCWS_ROSDEP_CACHE}' rosdep update --os=ubuntu:${OS_DISTRO_HOST}
+
+private_dep_resolve: private_dep_list
+	test -d '${CCWS_ROSDEP_CACHE}/rosdep/sources.cache/' || ${MAKE} private_dep_rosdep_update
 	${MAKE} private_dep_resolve_list
 	${MAKE} private_dep_resolve_deb
 	${MAKE} private_dep_resolve_pip

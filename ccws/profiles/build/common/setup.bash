@@ -216,6 +216,15 @@ fi
 CCWS_CACHE=${CCWS_CACHE:-"${WORKSPACE_DIR}/cache"}
 export CCWS_CACHE
 
+# cross compilation profiles resolve dependencies for a different OS version
+# and cannot share rosdep cache with native builds (trying to be safe, needs
+# verification)
+if [ -n "${CROSS_PROFILE}" ]
+then
+    CCWS_ROSDEP_CACHE="${CCWS_CACHE}/profiles/${CROSS_PROFILE}"
+    export CCWS_ROSDEP_CACHE
+fi
+
 if [ -z "${PIP_CACHE_DIR}" ]
 then
     PIP_CACHE_DIR=${CCWS_CACHE}/pip
