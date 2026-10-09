@@ -63,10 +63,15 @@ ctest_with_deps: assert_PKG_arg_must_be_specified
 # compatibility
 showtestresults: test_results
 
-test_results: assert_PKG_arg_must_be_specified
+test_results:
 	# shows fewer tests
-	echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_pkg PKG={}"
+	test -z '${PKG}' || echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_pkg PKG={}"
+	test -n '${PKG}' || ${MAKE} private_test_results_ws
 	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
+
+private_test_results_ws:
+	@mkdir -p ${CCWS_ARTIFACTS_DIR}
+	@bash -c "${SETUP_SCRIPT}; colcon --log-base /dev/null test-result --all --verbose --test-result-base ${CCWS_ARTIFACTS_DIR}"
 
 private_test_results_pkg: assert_PKG_arg_must_be_specified
 	@mkdir -p ${CCWS_ARTIFACTS_DIR}/${PKG}/

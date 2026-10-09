@@ -123,3 +123,4 @@ build_with_profile:
 	# test recursively
 	${MAKE} test_with_deps PKG=staticoma
 	${MAKE} ctest_with_deps PKG=staticoma
+	${MAKE} test_results

@@ -96,6 +96,9 @@ jobs:
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest JOBS=${{ inputs.test_jobs }}
+            - if: ${{ !cancelled() }}
+              # test_results fails when tests have failed, wstest above already gates the job
+              run: make test_results || true
 
     addr_undef_sanitizers:
         if: ${{ contains(fromJSON(inputs.profiles), 'addr_undef_sanitizers') }}
@@ -115,6 +118,9 @@ jobs:
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest JOBS=${{ inputs.test_jobs }}
+            - if: ${{ !cancelled() }}
+              # test_results fails when tests have failed, wstest above already gates the job
+              run: make test_results || true
 
     thread_sanitizer:
         if: ${{ contains(fromJSON(inputs.profiles), 'thread_sanitizer') }}
@@ -134,6 +140,9 @@ jobs:
             - run: |
                 make ${{ inputs.build_target }}
                 make wstest JOBS=${{ inputs.test_jobs }}
+            - if: ${{ !cancelled() }}
+              # test_results fails when tests have failed, wstest above already gates the job
+              run: make test_results || true
 
     deb:
         if: ${{ contains(fromJSON(inputs.profiles), 'deb') }}

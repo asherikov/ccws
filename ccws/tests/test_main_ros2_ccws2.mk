@@ -133,6 +133,7 @@ build_with_profile:
 	# test recursively
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
 	${MAKE} ctest_with_deps PKG=examples_rclcpp_minimal_subscriber
+	${MAKE} test_results
 	# test exceptions
 	cp -R ccws/examples/.ccws "${TEST_SOURCE_DIR}/"
 	${MAKE} test_with_deps PKG=examples_rclcpp_minimal_subscriber
