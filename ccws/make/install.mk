@@ -120,3 +120,4 @@ install_all_profiles:
 	${MAKE} bp_install_build BUILD_PROFILE=clang_format
 	${MAKE} bp_install_build BUILD_PROFILE=scspell
 	${MAKE} bp_install_build BUILD_PROFILE=qwencode
+	${MAKE} bp_install_build BUILD_PROFILE=coverage

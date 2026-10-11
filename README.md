@@ -108,8 +108,8 @@ profiles:
 - `notests` -- wraps another build profile to disable test compilation, e.g.,
   `BUILD_PROFILE=notests,reldebug`.
 - `deprecate` -- wraps another build profile to enable warnings about
-  deprecated declarations, which are disabled by default, e.g.,
-  `BUILD_PROFILE=deprecate,reldebug`.
+  deprecated declarations, which are disabled by default.
+- `coverage` -- wraps another build profile to enable coverage data collection.
 - `clang` -- build with `clang` compiler.
 - `clang_format` -- formats source files using `clang-format`.
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
@@ -486,7 +486,6 @@ TODO
     <https://github.com/sslab-gatech/RoboFuzz>,
     <https://github.com/AFLplusplus/AFLplusplus>,
     <https://github.com/google/clusterfuzzlite>.
-  - Add code coverage profile.
   - cmake 3.21: `--output-junit <file> = Output test results to JUnit XML file.`
 
 - Static checks

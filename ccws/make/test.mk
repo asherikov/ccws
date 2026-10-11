@@ -83,11 +83,14 @@ showtestresults: test_results
 test_results:
 	# shows fewer tests
 	test -z '${PKG}' || echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_pkg PKG={}"
-	test -n '${PKG}' || ${MAKE} private_test_results_ws
+	test -n '${PKG}' || bash -c "${SETUP_SCRIPT}; ${MAKE} private_test_results_ws"
 	#bash -c "${SETUP_SCRIPT}; catkin_test_results \$${CCWS_BUILD_DIR}/${PKG}"
 
 private_test_results_ws:
 	@mkdir -p ${CCWS_ARTIFACTS_DIR}
+	# coverage summary is enabled by `coverage` build profile, which sets CCWS_COVERAGE
+	@test -z "${CCWS_COVERAGE}" || ${MAKE} bp_coverage_process_ws
+	# submission has to happen before `colcon test-result`, which fails on failed tests
 	@test -z "${CDASH_URL}${CDASH_PROJECT}" || ${MAKE} wscdash_submit PKG=${PKG}
 	@bash -c "${SETUP_SCRIPT}; colcon --log-base /dev/null test-result --all --verbose --test-result-base ${CCWS_ARTIFACTS_DIR}"
 
@@ -95,6 +98,8 @@ private_test_results_pkg: assert_PKG_arg_must_be_specified
 	@mkdir -p ${CCWS_ARTIFACTS_DIR}/${PKG}/
 	@cp -R ${CCWS_BUILD_DIR}/${PKG}/Testing ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
 	@cp -R ${CCWS_BUILD_DIR}/${PKG}/test_results ${CCWS_ARTIFACTS_DIR}/${PKG}/ 2> /dev/null || true
+	# coverage summary is enabled by `coverage` build profile, which sets CCWS_COVERAGE
+	@test -z "${CCWS_COVERAGE}" || ${MAKE} bp_coverage_process_pkg PKG=${PKG}
 	# submission has to happen before `colcon test-result`, which fails on failed tests
 	@test -z "${CDASH_URL}${CDASH_PROJECT}" || ${MAKE} cdash_submit PKG=${PKG}
 	@colcon --log-base /dev/null test-result --all --test-result-base ${CCWS_BUILD_DIR}/${PKG}
@@ -113,6 +118,7 @@ assert_CDASH_must_be_configured:
 cdash_submit: assert_PKG_arg_must_be_specified assert_CDASH_must_be_configured
 	echo '${PKG}' | sed 's/ /\n/g' | ${CCWS_XARGS} ${CCWS_TOOLS_DIR}/bin/ccws_cdash_submit.sh "${CCWS_ARTIFACTS_DIR}/{}" "${CDASH_SITE}" "${CDASH_BUILD_NAME}-{}"
 
-# submits results of all packages that have artifacts for the current profile
+# submits results of all packages that have artifacts for the current profile,
+# the `coverage` directory holds workspace-wide reports, not package results
 wscdash_submit: assert_CDASH_must_be_configured
-	find "${CCWS_ARTIFACTS_DIR}" -mindepth 1 -maxdepth 1 -type d 2> /dev/null | sed -e 's=.*/==' | ${CCWS_XARGS} ${MAKE_QUIET} cdash_submit PKG={}
+	find "${CCWS_ARTIFACTS_DIR}" -mindepth 1 -maxdepth 1 -type d ! -name coverage 2> /dev/null | sed -e 's=.*/==' | ${CCWS_XARGS} ${MAKE_QUIET} cdash_submit PKG={}
