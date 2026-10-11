@@ -21,13 +21,23 @@ a space separated list of excluded path patterns (3rdparty code by default); it
 is defined in the profile setup script and can be overridden in the
 environment.
 
+When CDash is configured (`CDASH_URL` / `CDASH_PROJECT`), per-package results
+are also converted to CDash `Coverage.xml` (from the lcov data, by
+`ccws_lcov2cdash.py`) and submitted together with test results by
+`cdash_submit` / `wscdash_submit`, attaching coverage to the same CDash build;
+workspace-wide reports are not submitted to CDash to avoid duplicate entries.
+
 Notes:
 
 - Build type is inherited from the base profile. Optimization degrades line
   attribution in reports (inlining), which is usually acceptable; use a
   debug base profile if precise line coverage is required.
-- `-ffile-prefix-map` included by default prevents path resolution during
-  coverage results processing, this flag overriden in the toolchain.
+- The base toolchain crops workspace paths with `-ffile-prefix-map`;
+  instrumented packages get an identity mapping appended (gcc applies the
+  last matching entry), which keeps paths recorded in `.gcno` files
+  resolvable for `gcov` -- there is no way to remap them during result
+  processing (verified with gcov 13.3 / gcovr 8.6); packages that are not
+  instrumented keep path cropping.
 - `--coverage` is applied only to ccws aware packages (via `CCWS_CXX_FLAGS`
   and `CCWS_LINKER_FLAGS`); packages that do not include ccws cmake modules
   are not instrumented and are missing from reports.
