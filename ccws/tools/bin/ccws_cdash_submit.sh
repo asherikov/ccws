@@ -35,8 +35,8 @@ ARTIFACTS_DIR=${1:?CCWS: artifacts directory must be specified}
 CDASH_SITE=${2:?CCWS: CDash site must be specified}
 CDASH_BUILD=${3:?CCWS: CDash build name must be specified}
 
-: ${CDASH_URL:?CCWS: CDASH_URL must be specified}
-: ${CDASH_PROJECT:?CCWS: CDASH_PROJECT must be specified}
+: "${CDASH_URL:?CCWS: CDASH_URL must be specified}"
+: "${CDASH_PROJECT:?CCWS: CDASH_PROJECT must be specified}"
 CDASH_TOKEN=${CDASH_TOKEN:-}
 CDASH_DRY_RUN=${CDASH_DRY_RUN:-}
 

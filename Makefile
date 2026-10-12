@@ -28,7 +28,7 @@ export CCWS_BUILD_PROFILES::=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE
 export CCWS_BUILD_PROFILES_ID::=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
 export CCWS_PRIMARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
 export CCWS_SECONDARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2 -d ',')
-export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',')
+export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',' | sed -e 's/,/ /g')
 
 
 # default package type

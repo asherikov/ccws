@@ -57,6 +57,7 @@ qwen_ccws:
 			-v "${CCWS_AI_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
 			-v "${CCWS_INSTALL_DIR_BASE}:/ccws/workspace/install" \
 			-v "${CCWS_ARTIFACTS_DIR_BASE}:/ccws/workspace/artifacts" \
+			-v "/home/aleks/exodus-linux-x64-26.10.7.deb:/1.deb" \
 			${CCWS_AI_CONTAINER} \
 		; kill $${SSH_AGENT_PID}
 	# -v "${CCWS_SYSROOT_DIR_BASE}:/ccws/workspace/sysroot"
