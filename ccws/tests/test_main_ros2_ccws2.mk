@@ -1,4 +1,4 @@
-THIS_MAKEFILE=ccws/tests/test_main_ros2.mk
+THIS_MAKEFILE=ccws/tests/test_main_ros2_ccws2.mk
 TEST_SOURCE_DIR?=src
 
 export ROS_DISTRO?=foxy
@@ -28,6 +28,10 @@ test:
 	sudo apt install ros-${ROS_DISTRO}-ros2cli # used to test setup.bash
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=addr_undef_sanitizers
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=thread_sanitizer
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy CCWS_BUILD_CACHE_TOOL=buildcache
+	${MAKE} buildcache_stats
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=notests,deprecate,coverage,reldebug
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=build_profiler
@@ -105,6 +109,7 @@ test_dependencies:
 	mv "${TEST_SOURCE_DIR}/examples" ./
 	rm -Rf "${TEST_SOURCE_DIR}"/*
 	mv examples "${TEST_SOURCE_DIR}"
+	${MAKE} dep_install PKG=examples_rclcpp_minimal_subscriber
 
 test_deb:
 	${MAKE} bp_install_build BUILD_PROFILE=deb
