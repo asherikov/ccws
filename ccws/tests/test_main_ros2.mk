@@ -33,7 +33,8 @@ test:
 	${MAKE} buildcache_stats
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=clang_tidy
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=scan_build
-	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=notests,deprecate,reldebug
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=notests,deprecate,coverage,reldebug
+	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=build_profiler
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
 	# ---
 	# clangd

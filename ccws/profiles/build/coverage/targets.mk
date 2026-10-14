@@ -1,4 +1,4 @@
-bp_coverage_install_build:
+bp_coverage_install_build: install_python3
 	${PIPX_INSTALL} gcovr
 
 # textual summary is printed to stdout, machine readable results are stored in

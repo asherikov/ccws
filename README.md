@@ -105,11 +105,6 @@ profiles:
   `RelWithDebInfo`.
 - `release` -- default compiler, cmake build type is `Release`, tests are
   disabled.
-- `notests` -- wraps another build profile to disable test compilation, e.g.,
-  `BUILD_PROFILE=notests,reldebug`.
-- `deprecate` -- wraps another build profile to enable warnings about
-  deprecated declarations, which are disabled by default.
-- `coverage` -- wraps another build profile to enable coverage data collection.
 - `clang` -- build with `clang` compiler.
 - `clang_format` -- formats source files using `clang-format`.
 - `scan_build` -- compile with `clang` using `scan_build` and `clang-tidy` for
@@ -127,7 +122,16 @@ profiles:
 - `cross_arm64` -- cross-compilation for arm64 (using docker containers).
 - `clangd` -- collects compilation commands from another profile and generates
   clangd configuration file in the workspace root.
+- `build_profiler` -- compilation time analysis using `ClangBuildAnalyzer`
+  <https://github.com/aras-p/ClangBuildAnalyzer>, which relies on the
+  `-ftime-trace` feature of `clang`, see
+  `ccws/profiles/build/build_profiler/README.md`.
 - `deb` -- debian package generation (see below).
+- `notests` -- wraps another build profile to disable test compilation, e.g.,
+  `BUILD_PROFILE=notests,reldebug`.
+- `deprecate` -- wraps another build profile to enable warnings about
+  deprecated declarations, which are disabled by default.
+- `coverage` -- wraps another build profile to enable coverage data collection.
 
 Legacy:
 
@@ -506,9 +510,6 @@ TODO
   - Cache cmake checks with
     <https://github.com/cristianadam/cmake-checks-cache>,
     <https://github.com/polysquare/cmake-forward-cache> might be useful too.
-  - Build time analysis with clang
-    <https://github.com/aras-p/ClangBuildAnalyzer> and / or
-    <https://github.com/jrmadsen/compile-time-perf>.
   - Distributed compilation support with <https://github.com/distcc/distcc> can
     be useful.
 
