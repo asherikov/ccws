@@ -521,18 +521,6 @@ TODO
   - Potential replacement for `scan_build`
     <https://github.com/Ericsson/codechecker> with extra checks and caching.
 
-- Dynamic checks
-
-  - Execution profile with <https://github.com/yugr/libdebugme> to automatically
-    start debugger on a signal.
-  - <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
-    execution profile -- an overkill in general case though.
-
-- Build performance
-
-  - Distributed compilation support with <https://github.com/distcc/distcc> can
-    be useful.
-
 - Build
 
   - Reproducible builds <https://reproducible-builds.org/>.
@@ -553,6 +541,7 @@ TODO
 
 - Other
 
+  - Diagrams from code <https://github.com/bkryza/clang-uml>.
   - Advanced dependency graph generation
     <https://github.com/maspe36/colcon_gephi>.
   - Modern documentation generator <https://github.com/sourcey/sourcey>.
@@ -587,3 +576,12 @@ Bookmarks (not going to be supported)
   really helpful -- mostly formatting stuff. Same applies to
   <https://github.com/cmake-lint/cmake-lint>.
 - <https://github.com/ejfitzgerald/clang-tidy-cache> A cache for clang-tidy.
+- <https://github.com/mgehre/xunused> -- detection of unused code. No
+  precompiled binaries, may not work with new clang.
+- Execution profile with <https://github.com/yugr/libdebugme> to automatically
+  start debugger on a signal. Stale, requires compilation.
+- <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
+  execution profile -- an overkill in general case though. Stale, requires
+  compilation, sanitizers are currently preferred to valgrind.
+- Distributed compilation support with <https://github.com/distcc/distcc> can
+  be useful, but there are no use-cases so far.
