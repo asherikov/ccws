@@ -1,3 +1,70 @@
+###############################################################################
+# shared cmake checks cache
+#
+# System check results, compiler introspection results and package search
+# results of the packages which have already been built in this build
+# profile are harvested into a shared store and replayed into the current
+# package before any checks run, which skips the corresponding try_compile
+# and search probes. The store is kept in the build directory and is
+# invalidated by 'make wsclean' / 'make bp_clean'.
+# Set CCWS_CMAKE_CHECKS_CACHE_DISABLE to disable.
+###
+
+if(DEFINED ENV{CCWS_BUILD_DIR}
+   AND NOT DEFINED ENV{CCWS_CMAKE_CHECKS_CACHE_DISABLE}
+   AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/cmake/ccws_cmake_checks_harvest.cmake")
+    # the store file name is versioned: stores written by older harvesters
+    # replay compiler identification state, which corrupts identification
+    # of the packages configured later; the legacy store is discarded and
+    # rebuilt from the already built packages
+    set(CCWS_CHECKS_STORE "$ENV{CCWS_BUILD_DIR}/.ccws/cmake-checks/initial_cache.cmake")
+
+    # refresh the store from the packages built since the last harvest,
+    # sequential colcon builds make their results available in build order
+    file(TIMESTAMP "${CCWS_CHECKS_STORE}" _CCWS_STORE_TS "%s" UTC)
+    if(NOT _CCWS_STORE_TS)
+        set(_CCWS_STORE_TS "0")
+    endif()
+    file(GLOB _CCWS_CACHES "$ENV{CCWS_BUILD_DIR}/*/CMakeCache.txt")
+    foreach(_CCWS_CACHE IN LISTS _CCWS_CACHES)
+        get_filename_component(_CCWS_PACKAGE_DIR "${_CCWS_CACHE}" DIRECTORY)
+        if("${_CCWS_PACKAGE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+            continue()
+        endif()
+        file(TIMESTAMP "${_CCWS_CACHE}" _CCWS_CACHE_TS "%s" UTC)
+        if(_CCWS_CACHE_TS AND _CCWS_STORE_TS LESS "${_CCWS_CACHE_TS}")
+            execute_process(
+                COMMAND "${CMAKE_COMMAND}"
+                    -DHARVEST_BUILD_DIR=$ENV{CCWS_BUILD_DIR}
+                    -DHARVEST_STORE=${CCWS_CHECKS_STORE}
+                    -DHARVEST_EXCLUDE_DIR=${CMAKE_BINARY_DIR}
+                    -P ${CMAKE_CURRENT_LIST_DIR}/cmake/ccws_cmake_checks_harvest.cmake
+                RESULT_VARIABLE _CCWS_HARVEST_RESULT
+                OUTPUT_VARIABLE _CCWS_HARVEST_OUTPUT
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_VARIABLE _CCWS_HARVEST_ERROR)
+            if(DEFINED ENV{CCWS_CMAKE_CHECKS_CACHE_DEBUG})
+                message(STATUS "ccws checks cache: harvested ${_CCWS_CACHE} -> ${CCWS_CHECKS_STORE} (result ${_CCWS_HARVEST_RESULT}) ${_CCWS_HARVEST_OUTPUT} ${_CCWS_HARVEST_ERROR}")
+            endif()
+            if(NOT _CCWS_HARVEST_RESULT EQUAL 0)
+                message(WARNING "ccws: cmake checks cache harvest failed: ${_CCWS_HARVEST_ERROR}")
+            endif()
+            break()
+        endif()
+    endforeach()
+    unset(_CCWS_STORE_TS)
+    unset(_CCWS_CACHE)
+    unset(_CCWS_CACHES)
+    unset(_CCWS_CACHE_TS)
+    unset(_CCWS_PACKAGE_DIR)
+    unset(_CCWS_HARVEST_RESULT)
+    unset(_CCWS_HARVEST_OUTPUT)
+    unset(_CCWS_HARVEST_ERROR)
+
+    # replay shared results into this package
+    include("${CCWS_CHECKS_STORE}" OPTIONAL)
+endif()
+
 set(CMAKE_VERBOSE_MAKEFILE          ON  CACHE STRING "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS   ON  CACHE STRING "" FORCE)
 
@@ -35,8 +102,8 @@ set(CCWS_ENABLE_TESTING ON                     CACHE STRING "" FORCE)
 # debug level
 set(CCWS_DEBUG          "0"                    CACHE STRING "" FORCE)
 
-# skip some cmake checks
-# TODO https://github.com/cristianadam/cmake-checks-cache
+# skip some cmake checks, complemented by the shared checks cache, see the
+# top of this file
 set(CMAKE_C_COMPILER_WORKS      TRUE    CACHE BOOL "" FORCE)
 set(CMAKE_CXX_COMPILER_WORKS    TRUE    CACHE BOOL "" FORCE)
 

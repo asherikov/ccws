@@ -9,7 +9,7 @@
   - [Running](#running)
   - [Testing](#testing)
   - [Documentation](#documentation)
-  - [Build cache tool](#build-cache-tool)
+  - [Build caching](#build-caching)
   - [Debian package generation](#debian-package-generation)
   - [Cross-compilation](#cross-compilation)
 - [Advanced usage](#advanced-usage)
@@ -129,8 +129,8 @@ profiles:
 - `deb` -- debian package generation (see below).
 - `notests` -- wraps another build profile to disable test compilation, e.g.,
   `BUILD_PROFILE=notests,reldebug`.
-- `deprecate` -- wraps another build profile to enable warnings about
-  deprecated declarations, which are disabled by default.
+- `deprecate` -- wraps another build profile to enable warnings about deprecated
+  declarations, which are disabled by default.
 - `coverage` -- wraps another build profile to enable coverage data collection.
 
 Legacy:
@@ -234,8 +234,8 @@ Documentation
 - `make BUILD_PROFILE=doxygen`, `firefox artifacts/doxygen/index.html`
 - See example at <http://www.sherikov.net/sharf/>
 
-Build cache tool
-----------------
+Build caching
+-------------
 
 `CCWS` configures the cmake `CMAKE_<LANG>_COMPILER_LAUNCHER` variables to wrap
 every supported language with a compiler cache:
@@ -254,6 +254,15 @@ The selection is controlled by the environment variable `CCWS_BUILD_CACHE_TOOL`
 
 Both tools honour the standard disable switch, so an individual run can be
 uncached with `CCACHE_DISABLE=1` or `BUILDCACHE_DISABLE=1`.
+
+In addition to compiler cache `CCWS` implements a simple cmake caching inspired
+by <https://github.com/cristianadam/cmake-checks-cache> and
+<https://github.com/polysquare/cmake-forward-cache>: it is similar to cmake's
+own caching mechanism, but works across all packages in the workspace -- this
+allows packages to benefit from cmake checks performed earlier for other
+packages. The effect of this caching would be noticable on clean builds of
+workspaces with large number of packages. Can be disabled with
+`CCWS_CMAKE_CHECKS_CACHE_DISABLE` environment variable.
 
 Debian package generation
 -------------------------
@@ -507,9 +516,6 @@ TODO
 
 - Build performance
 
-  - Cache cmake checks with
-    <https://github.com/cristianadam/cmake-checks-cache>,
-    <https://github.com/polysquare/cmake-forward-cache> might be useful too.
   - Distributed compilation support with <https://github.com/distcc/distcc> can
     be useful.
 
