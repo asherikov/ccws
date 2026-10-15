@@ -33,9 +33,10 @@ test:
 	#${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=build_profiler # glibc too old
 	${MAKE} -f ${THIS_MAKEFILE} build_with_profile BUILD_PROFILE=reldebug
 	# ---
-	# clangd
+	# clangd + iwyu (both use reldebug compilation database)
 	${MAKE} bp_install_build BUILD_PROFILE=clangd
 	${MAKE} BUILD_PROFILE=clangd BASE_BUILD_PROFILE=reldebug
+	${MAKE} BUILD_PROFILE=iwyu,static_checks,reldebug || true
 	# ---
 	# codebase_memory_mcp
 	${MAKE} bp_install_build BUILD_PROFILE=codebase_memory_mcp

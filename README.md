@@ -122,16 +122,16 @@ profiles:
 - `cross_arm64` -- cross-compilation for arm64 (using docker containers).
 - `clangd` -- collects compilation commands from another profile and generates
   clangd configuration file in the workspace root.
-- `build_profiler` -- compilation time analysis using `ClangBuildAnalyzer`
-  <https://github.com/aras-p/ClangBuildAnalyzer>, which relies on the
-  `-ftime-trace` feature of `clang`, see
-  `ccws/profiles/build/build_profiler/README.md`.
 - `deb` -- debian package generation (see below).
 - `notests` -- wraps another build profile to disable test compilation, e.g.,
   `BUILD_PROFILE=notests,reldebug`.
 - `deprecate` -- wraps another build profile to enable warnings about deprecated
   declarations, which are disabled by default.
 - `coverage` -- wraps another build profile to enable coverage data collection.
+- `iwyu` -- include-what-you-use checks
+  (<https://github.com/include-what-you-use/include-what-you-use>).
+- `build_profiler` -- compilation time analysis using `ClangBuildAnalyzer`
+  <https://github.com/aras-p/ClangBuildAnalyzer>.
 
 Legacy:
 
@@ -234,8 +234,10 @@ Documentation
 - `make BUILD_PROFILE=doxygen`, `firefox artifacts/doxygen/index.html`
 - See example at <http://www.sherikov.net/sharf/>
 
-Build caching
--------------
+Build performance
+-----------------
+
+### Caching
 
 `CCWS` configures the cmake `CMAKE_<LANG>_COMPILER_LAUNCHER` variables to wrap
 every supported language with a compiler cache:
@@ -263,6 +265,19 @@ allows packages to benefit from cmake checks performed earlier for other
 packages. The effect of this caching would be noticable on clean builds of
 workspaces with large number of packages. Can be disabled with
 `CCWS_CMAKE_CHECKS_CACHE_DISABLE` environment variable.
+
+### Analysis
+
+Compilation bottlenecks can be identified using `build_profiler`
+(<https://github.com/aras-p/ClangBuildAnalyzer>) profile, which relies on the
+`-ftime-trace` feature of `clang`, see
+`ccws/profiles/build/build_profiler/README.md`.
+
+Additionally <https://github.com/include-what-you-use/include-what-you-use> can
+be used with `iwyu` profile to optimize header inclusions. `iwyu` relies on
+compilation database collected by another profile, which has to be built first.
+It also inherits exceptions from other chained profiles, so it can be used as
+this `BUILD_PROFILE=iwyu,static_checks,reldebug`.
 
 Debian package generation
 -------------------------
@@ -503,7 +518,6 @@ TODO
 
 - Static checks
 
-  - <https://github.com/include-what-you-use/include-what-you-use>
   - Potential replacement for `scan_build`
     <https://github.com/Ericsson/codechecker> with extra checks and caching.
 
