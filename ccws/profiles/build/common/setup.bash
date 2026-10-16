@@ -42,6 +42,28 @@ then
 fi
 export CCWS_TRIPLE_ARCH
 
+if [ -z "${CCWS_TRIPLE_SYS}" ];
+then
+    CCWS_TRIPLE_SYS=linux
+fi
+export CCWS_TRIPLE_SYS
+
+if [ -z "${CCWS_TRIPLE_ABI}" ];
+then
+    # Authoritative target triple from the C compiler; encodes libc and (for arm)
+    # hard/soft float in one stable string. ${CC:-cc} respects an explicit $CC
+    # override. Avoids /proc/cpuinfo parsing and libc introspection.
+    DM=$(${CC:-cc} -dumpmachine 2>/dev/null)
+
+    case "${DM}" in
+        *-linux-gnueabihf)  CCWS_TRIPLE_ABI=gnueabihf;;
+        *-linux-gnueabi)    CCWS_TRIPLE_ABI=gnueabi;;
+        *-linux-musl)       CCWS_TRIPLE_ABI=musl;;
+        *-linux-gnu)        CCWS_TRIPLE_ABI=gnu;;
+        *)                  CCWS_TRIPLE_ABI=gnu;;
+    esac
+fi
+export CCWS_TRIPLE_ABI
 
 CCWS_TRIPLE=${CCWS_TRIPLE_ARCH}-${CCWS_TRIPLE_SYS}-${CCWS_TRIPLE_ABI}
 export CCWS_TRIPLE CCWS_TRIPLE_ARCH CCWS_TRIPLE_SYS CCWS_TRIPLE_ABI

@@ -5,6 +5,7 @@ set -e
 set -o pipefail
 
 
+
 ##########################################################################################
 CCWS_PRIMARY_BUILD_PROFILE=${CCWS_PRIMARY_BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
 CCWS_SECONDARY_BUILD_PROFILE=${1:-"${CCWS_SECONDARY_BUILD_PROFILE}"}
@@ -57,8 +58,58 @@ CCWS_DEBIAN_POSTINST_DIR="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/postinst_dir"
 CCWS_DEBIAN_PREINST_DIR="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/preinst_dir"
 CCWS_DEBIAN_POSTRM_DIR="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/postrm_dir"
 CCWS_DEBIAN_PRERM_DIR="${CCWS_INSTALL_DIR_BUILD_ROOT}/DEBIAN/prerm_dir"
+
+# binary subpackage generation switch, see the 'deb parameters' section for
+# the description of the subpackages
+CCWS_DEB_SUBPACKAGES="${CCWS_DEB_SUBPACKAGES:-OFF}"
+
+# build metadata ('ccws' directory) is shipped in the main package, or in
+# the 'dev' subpackage when subpackages are generated
 CCWS_DEB_INFO_DIR="${CCWS_INSTALL_DIR_BUILD}/ccws/"
+if [ "${CCWS_DEB_SUBPACKAGES}" = "ON" ]
+then
+    CCWS_DEB_INFO_DIR="${CCWS_INSTALL_DIR}/${CCWS_PKG_FULL_NAME}-dev${CCWS_INSTALL_DIR_HOST}/ccws/"
+fi
 export CCWS_DEB_INFO_DIR CCWS_DEBIAN_DIR CCWS_DEBIAN_POSTINST_DIR CCWS_DEBIAN_PREINST_DIR CCWS_DEBIAN_POSTRM_DIR CCWS_DEBIAN_PRERM_DIR
+
+
+##########################################################################################
+# deb parameters
+#
+
+CCWS_DEB_DEP_TYPE="${CCWS_DEB_DEP_TYPE:-run}"
+
+# dependency list with 'build' dependencies for the 'dev' subpackage, kept
+# separate from ${DEPLIST_FILE} which holds the dependencies of the main
+# package
+DEPLIST_FILE_DEV_DEPS="${DEPLIST_FILE}_build"
+
+# binary subpackage generation switch (ON / OFF), see above; the subpackages
+# cannot be selected individually -- when ON all of them are generated at
+# once:
+#   dev -- development files: headers, static libraries, CMake package
+#          configurations, pkg-config files
+#   dbg -- debug symbols: extracted from binaries and libraries, which are
+#          stripped in the main package; symbols are installed into
+#          '/usr/lib/debug/' and are located by gdb automatically
+#   doc -- documentation files: documentation ('doc', 'man') directories and
+#          markdown files
+
+# staging root and output file of 'dpkg-deb', overridden for subpackages
+CCWS_DEB_ROOT="${CCWS_DEB_ROOT:-${CCWS_INSTALL_DIR_BUILD_ROOT}}"
+CCWS_DEB_OUTPUT="${CCWS_DEB_OUTPUT:-${CCWS_ARTIFACTS_DIR}/${CCWS_PKG_FULL_NAME}.deb}"
+
+CCWS_DEB_SUBPACKAGE_DESCRIPTION_dev="development files"
+CCWS_DEB_SUBPACKAGE_DESCRIPTION_dbg="debug symbols"
+CCWS_DEB_SUBPACKAGE_DESCRIPTION_doc="documentation files"
+# documentation packages are architecture independent
+CCWS_DEB_SUBPACKAGE_ARCH_dev="${CCWS_DEB_ARCH}"
+CCWS_DEB_SUBPACKAGE_ARCH_dbg="${CCWS_DEB_ARCH}"
+CCWS_DEB_SUBPACKAGE_ARCH_doc="all"
+
+export CCWS_DEB_DEP_TYPE CCWS_DEB_SUBPACKAGES CCWS_DEB_ROOT CCWS_DEB_OUTPUT DEPLIST_FILE_DEV_DEPS
+export CCWS_DEB_SUBPACKAGE_DESCRIPTION_dev CCWS_DEB_SUBPACKAGE_DESCRIPTION_dbg CCWS_DEB_SUBPACKAGE_DESCRIPTION_doc
+export CCWS_DEB_SUBPACKAGE_ARCH_dev CCWS_DEB_SUBPACKAGE_ARCH_dbg CCWS_DEB_SUBPACKAGE_ARCH_doc
 
 
 if [ -z "${CCWS_SYSROOT_MOUNTPOINT}" ]
