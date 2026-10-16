@@ -33,6 +33,7 @@ qwen_ccws:
 		&& docker run --rm -ti \
 			--ipc host \
 			--net host \
+			--security-opt seccomp:unconfined \
 			`test ! -d "${SHOGGOTH_CFG_DIR}" || echo "--env-file=${SHOGGOTH_CFG_DIR}/env"` \
 			-e "CCWS_CACHE=/cache" \
 			-e "DISPLAY=${DISPLAY}" \

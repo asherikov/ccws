@@ -9,7 +9,7 @@
   - [Running](#running)
   - [Testing](#testing)
   - [Documentation](#documentation)
-  - [Build caching](#build-caching)
+  - [Build performance](#build-performance)
   - [Debian package generation](#debian-package-generation)
   - [Cross-compilation](#cross-compilation)
 - [Advanced usage](#advanced-usage)
@@ -18,7 +18,8 @@
   - [`CCWS` in CI](#ccws-in-ci)
   - [Extending `CCWS`](#extending-ccws)
 - [Known issues](#known-issues)
-  - [Croscompilation and binary packages](#croscompilation-and-binary-packages)
+  - [Crosscompilation and binary
+    packages](#crosscompilation-and-binary-packages)
   - [Sanitizers](#sanitizers)
   - [Other](#other)
 - [Related software](#related-software)
@@ -334,6 +335,30 @@ compilation in order to get all paths right in `catkin` `cmake` files and
 properly install system files. `CCWS` avoids this using `proot` similarly to
 cross-compilation profiles.
 
+By default (`CCWS_DEB_SUBPACKAGES=OFF`) a single binary package is generated.
+When `CCWS_DEB_SUBPACKAGES=ON` a stripped main package is generated and several
+additional packages:
+
+- `dev` -- development files: headers, static libraries, `cmake` package
+  configurations, pkg-config files. Runtime files (unversioned shared libraries
+  in particular) remain in the main package.
+- `dbg` -- debug symbols, which are extracted from binaries and libraries and
+  installed into `/usr/lib/debug/<installation path>`, build ids are not used,
+  see <https://linuxvox.com/blog/where-to-place-find-debug-library-on-linux/>
+  for reference. Binaries in the main package are stripped and linked to the
+  symbols, `gdb` locates them automatically.
+- `doc` -- documentation files: documentation (`doc`, `man`) directories and
+  markdown files.
+
+Example: `make <pkg> BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON`.
+Subpackages follow the naming of the main package with a type-specific suffix.
+Dependencies are split accordingly: the main package depends on the run
+dependencies of the workspace packages, `dev` additionally depends on their
+build dependencies, `dbg` depends on the main package (`= version`), `doc` has
+no dependencies. The `ccws` build metadata directory is shipped in the `dev`
+subpackage. Subpackages that end up empty (e.g. `doc` for workspaces without
+documentation files) are skipped automatically.
+
 Cross-compilation
 -----------------
 
@@ -439,8 +464,8 @@ Extending `CCWS`
 Known issues
 ============
 
-Croscompilation and binary packages
------------------------------------
+Crosscompilation and binary packages
+------------------------------------
 
 - Segmentation fault during cross-compilation or debian package generation
   inside docker containers (both require `proot`): presumably due to `seccomp`
@@ -525,14 +550,6 @@ TODO
 
   - Reproducible builds <https://reproducible-builds.org/>.
 
-- Packaging
-
-  - Investigate generation of debug and development packages, in particular
-    stripping of static libraries and headers.
-    <https://linuxvox.com/blog/where-to-place-find-debug-library-on-linux/>
-  - <https://github.com/jordansissel/fpm> -- generic binary package generator,
-    potential replacement for `dpkg-deb`.
-
 - Containers and images
 
   - System images as OCI artifacts <https://oras.land/docs/>.
@@ -583,5 +600,8 @@ Bookmarks (not going to be supported)
 - <https://github.com/yugr/valgrind-preload> as an alternative to `valgrind`
   execution profile -- an overkill in general case though. Stale, requires
   compilation, sanitizers are currently preferred to valgrind.
-- Distributed compilation support with <https://github.com/distcc/distcc> can
-  be useful, but there are no use-cases so far.
+- Distributed compilation support with <https://github.com/distcc/distcc> can be
+  useful, but there are no use-cases so far.
+- <https://github.com/jordansissel/fpm> -- generic binary package generator,
+  potential replacement for `dpkg-deb`. Not as flexible as the current approach,
+  e.g., in generation of subpackages.

@@ -98,6 +98,9 @@ test_deb:
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep staticoma | cut -f 1 |  xargs sudo apt purge --yes
+	${MAKE} staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug CCWS_DEB_SUBPACKAGES=ON
+	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug CCWS_DEB_SUBPACKAGES=ON
+	ls artifacts/*/*-dev.deb artifacts/*/*-dbg.deb
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean
