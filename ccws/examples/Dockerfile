@@ -50,8 +50,8 @@ RUN \
     cd /ccws_docker_context \
     && mkdir -p /ccws/workspace \
     && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash agentic_coding_plugin /ccws/ \
-    && cp /ccws/ccws/examples/tmux.conf /home/ccws/.tmux.conf \
-    && ln -s /home/ccws/.tmux.conf /root/.tmux.conf \
+    && cp -r /ccws/ccws/examples/skel/* /home/ccws/ \
+    && cp -r /ccws/ccws/examples/skel/* /root/ \
     && chown -R ccws /ccws /home/ccws \
     && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts \
     && ssh-keyscan gitlab.com >> /etc/ssh/ssh_known_hosts

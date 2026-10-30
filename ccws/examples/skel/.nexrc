@@ -1,0 +1,7 @@
+set tabstop=4
+set hardtabs=4
+set leftright
+set ignorecase
+set report=1
+set showmode
+set verbose

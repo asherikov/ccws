@@ -50,9 +50,9 @@ qwen_ccws:
 			-v "${CCWS_DIR}/profiles/build/qwencode/user:/ccws/ccws/profiles/build/qwencode/user" \
 			-v "${CCWS_DIR}/profiles/build/qwencode/global:/ccws/ccws/profiles/build/qwencode/global" \
 			-v "${CCWS_ROOT}/agentic_coding_plugin/skills:/ccws/ccws/profiles/build/qwencode/user/skills" \
-			-v "${CCWS_DIR}/examples/tmux.conf:/home/ccws/.tmux.conf" \
-			-v "${HOME}/.config/nvim/init.vim:/home/ccws/.config/nvim/init.vim" \
-			-v "${HOME}/.config/nvim/init.vim:/root/.config/nvim/init.vim" \
+			-v "${CCWS_DIR}/examples/skel/tmux.conf:/home/ccws/.tmux.conf" \
+			-v "${CCWS_DIR}/examples/skel/.config/nvim/init.vim:/home/ccws/.config/nvim/init.vim" \
+			-v "${CCWS_DIR}/examples/skel/.config/nvim/init.vim:/root/.config/nvim/init.vim" \
 			-v ".gitignore:/ccws/.qwenignore:ro" \
 			-v "${CCWS_AI_SRC_OUTER}:${CCWS_AI_SRC_INNER}" \
 			-v "${CCWS_AI_SRC_OUTER}/.ccws/qwen:/ccws/.qwen/" \
