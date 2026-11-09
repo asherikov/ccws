@@ -52,6 +52,8 @@ jobs:
         env:
             BUILD_PROFILE: static_checks
         steps:
+            - run: sudo mkdir -p "${CCWS_CACHE}"
+            - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
             - run: |
                 make checkout_src \
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
@@ -67,6 +69,8 @@ jobs:
         env:
             BUILD_PROFILE: scan_build
         steps:
+            - run: sudo mkdir -p "${CCWS_CACHE}"
+            - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
             - run: |
                 make checkout_src \
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
@@ -85,6 +89,8 @@ jobs:
         env:
             BUILD_PROFILE: reldebug
         steps:
+            - run: sudo mkdir -p "${CCWS_CACHE}"
+            - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
             - run: |
                 make checkout_src \
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
@@ -107,6 +113,8 @@ jobs:
         env:
             BUILD_PROFILE: addr_undef_sanitizers
         steps:
+            - run: sudo mkdir -p "${CCWS_CACHE}"
+            - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
             - run: |
                 make checkout_src \
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
@@ -129,6 +137,8 @@ jobs:
         env:
             BUILD_PROFILE: thread_sanitizer
         steps:
+            - run: sudo mkdir -p "${CCWS_CACHE}"
+            - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
             - run: |
                 make checkout_src \
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \

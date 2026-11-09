@@ -53,7 +53,9 @@ jobs:
                     --volume ./src:/ccws/workspace/src \
                     asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
-                        make checkout_src \
+                        sudo mkdir -p "\${CCWS_CACHE}" \
+                        && sudo chown -R ccws "/ccws/workspace/" "\${CCWS_CACHE}" \
+                        && make checkout_src \
                             SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                             SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                             PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
@@ -67,7 +69,9 @@ jobs:
                     --env CCACHE_DISABLE=true \
                     asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
-                        apt update \
+                        sudo mkdir -p "\${CCWS_CACHE}" \
+                        && sudo chown -R ccws "/ccws/workspace/" "\${CCWS_CACHE}" \
+                        && sudo apt update \
                         && make dep_install BUILD_PROFILE=reldebug \
                         && make cross_install IMAGE=ubuntu:${{ inputs.distro }} \
                         && make cross_mount \
@@ -81,7 +85,9 @@ jobs:
                     --env CCACHE_DISABLE=true \
                     asherikov/ccws:${{ inputs.distro }} \
                     sh -c " \
-                        apt update \
+                        sudo mkdir -p "\${CCWS_CACHE}" \
+                        && sudo chown -R ccws "/ccws/workspace/" "\${CCWS_CACHE}" \
+                        && sudo apt update \
                         && make dep_install \
                         && make ${{ inputs.build_target }} BUILD_PROFILE=deb,${{ inputs.profile }} JOBS=2"
             - if: ${{ inputs.cloudsmith_repo != '' }}

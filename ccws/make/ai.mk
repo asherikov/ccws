@@ -28,12 +28,14 @@ qwen_ccws:
 	${MAKE} ai_common_setup CCWS_AI=qwen
 	#--user `id -u`:`id -g` # interferes with sudo
 	#--ipc host # no constraints on shared memory
+	# no-aaaa # disable ipv6, not accessible from ipv4 networks
 	eval `ssh-agent` \
 		&& ssh-add "${CCWS_SSH_KEY}" \
 		&& docker run --rm -ti \
 			--ipc host \
 			--net host \
 			--security-opt seccomp:unconfined \
+			--dns-opt='no-aaaa' \
 			`test ! -d "${SHOGGOTH_CFG_DIR}" || echo "--env-file=${SHOGGOTH_CFG_DIR}/env"` \
 			-e "CCWS_CACHE=/cache" \
 			-e "DISPLAY=${DISPLAY}" \

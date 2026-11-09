@@ -48,11 +48,11 @@ RUN \
 --mount=type=cache,target=/cache,sharing=locked \
 --mount=target=/ccws_docker_context,ro \
     cd /ccws_docker_context \
-    && mkdir -p /ccws/workspace \
+    && mkdir -p /ccws/workspace/src "${CCWS_CACHE}" \
     && cp -r .clang-format .git .github .gitignore LICENSE Makefile README.md ccws setup.bash agentic_coding_plugin /ccws/ \
     && cp -r /ccws/ccws/examples/skel/* /home/ccws/ \
     && cp -r /ccws/ccws/examples/skel/* /root/ \
-    && chown -R ccws /ccws /home/ccws \
+    && chown -R ccws /ccws /home/ccws "${CCWS_CACHE}" \
     && ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts \
     && ssh-keyscan gitlab.com >> /etc/ssh/ssh_known_hosts
 
