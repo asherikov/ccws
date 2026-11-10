@@ -69,7 +69,7 @@ cross_umount:
 
 # to be used in docker
 cross_umount_all:
-	sudo umount -a || true
+	-sudo umount -a
 	losetup | grep `pwd` | cut -f 1 -d " " | ${CCWS_XARGS} sudo losetup -d {}
 
 cross_common_install_build:

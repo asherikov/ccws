@@ -16,6 +16,7 @@ bp_qwencode_install_build: bp_codebase_memory_mcp_install_build
 		lsof
 	bash -c "${SETUP_SCRIPT}; npm install -g @qwen-code/qwen-code"
 
-bp_qwencode_build: wsstatus
+bp_qwencode_build:
+	-${MAKE} wsstatus
 	${MAKE} BUILD_PROFILE=codebase_memory_mcp
 	qwen

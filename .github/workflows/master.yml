@@ -14,7 +14,7 @@ env:
 jobs:
     focal:
         container: ros:noetic-ros-base-focal
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-22.04
 
         # gcc -> 10: https://github.com/orgs/community/discussions/63391
         steps:
