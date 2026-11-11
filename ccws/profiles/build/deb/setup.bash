@@ -8,11 +8,11 @@ set -o pipefail
 
 ##########################################################################################
 CCWS_PRIMARY_BUILD_PROFILE=${CCWS_PRIMARY_BUILD_PROFILE:-"$(basename "$(dirname "${BASH_SOURCE[0]}")")"}
-CCWS_SECONDARY_BUILD_PROFILE=${1:-"${CCWS_SECONDARY_BUILD_PROFILE}"}
-if [ -z "${CCWS_SECONDARY_BUILD_PROFILE}" ]
+CCWS_DEB_BASE_PROFILE=${1}
+export CCWS_DEB_BASE_PROFILE
+if [ -z "${CCWS_DEB_BASE_PROFILE}" ]
 then
     echo "Build profile cannot be chosen automatically for 'deb' mixin, make sure that secondary profile is set."
-    return 0
 fi
 
 ##########################################################################################
@@ -45,11 +45,8 @@ CCWS_INSTALL_DIR_BUILD="${CCWS_INSTALL_DIR_BUILD_ROOT}/${CCWS_INSTALL_DIR_HOST}"
 export CCWS_INSTALL_DIR_BUILD_ROOT CCWS_INSTALL_DIR_HOST
 
 
-CMAKE_TOOLCHAIN_FILE=${BUILD_PROFILES_DIR}/${CCWS_SECONDARY_BUILD_PROFILE}/toolchain.cmake
-
-
 ##########################################################################################
-source "$(dirname "${BASH_SOURCE[0]}")/../${CCWS_SECONDARY_BUILD_PROFILE}/setup.bash" "${@:2}" ""
+source "$(dirname "${BASH_SOURCE[0]}")/../${CCWS_DEB_BASE_PROFILE}/setup.bash" "${@:2}" ""
 
 
 ##########################################################################################

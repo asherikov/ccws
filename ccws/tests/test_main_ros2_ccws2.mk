@@ -118,8 +118,8 @@ test_deb:
 	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug
 	sudo dpkg -i artifacts/*/*.deb
 	dpkg --get-selections | grep minimal-subscriber | cut -f 1 |  xargs sudo apt purge --yes
-	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug CCWS_DEB_SUBPACKAGES=ON
-	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb BASE_BUILD_PROFILE=reldebug CCWS_DEB_SUBPACKAGES=ON
+	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
+	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
 	ls artifacts/*/*-dev.deb artifacts/*/*-dbg.deb
 
 test_cmake_toolchain:

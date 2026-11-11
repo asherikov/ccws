@@ -11,7 +11,7 @@ private_deb_compile:
 	echo ${CCWS_EXTRA_INSTALL_DIRS} | sed -e "s/ /\n/g" | xargs -I {} mkdir -p ${CCWS_INSTALL_DIR_BUILD_ROOT}/{}
 	mkdir -p "${CCWS_DEBIAN_POSTINST_DIR}" "${CCWS_DEBIAN_PREINST_DIR}" "${CCWS_DEBIAN_POSTRM_DIR}" "${CCWS_DEBIAN_PRERM_DIR}"
 	# trim first profile (must be deb) and proceed with the rest
-	${MAKE} bp_${CCWS_SECONDARY_BUILD_PROFILE}_build CCWS_BUILD_PROFILES=${CCWS_BUILD_PROFILES_TAIL}
+	${MAKE} BUILD_PROFILE=${CCWS_BUILD_PROFILES_TAIL}
 	echo "CCWS_EXTRA_SOURCE_SCRIPTS=\"${CCWS_EXTRA_SOURCE_SCRIPTS}\""               > "${CCWS_SOURCE_SCRIPT}"
 	echo "CCWS_PACKAGE_VERSION=\"${VERSION}:\$${CCWS_PACKAGE_VERSION}\""            >> "${CCWS_SOURCE_SCRIPT}"
 	cat "${EXEC_PROFILES_DIR}/common/setup.bash" | grep -v "^#!"                    >> "${CCWS_SOURCE_SCRIPT}"

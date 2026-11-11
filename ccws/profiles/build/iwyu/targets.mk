@@ -1,10 +1,10 @@
-bp_iwyu_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFILE_must_exist
+bp_iwyu_build: assert_multiple_valid_profiles_must_be_provided bp_copy_compile_commands_tail
 	rm -Rf "${CCWS_BUILD_DIR}/"
 	mkdir -p "${CCWS_BUILD_DIR}/"
 	bash -c "${SETUP_SCRIPT}; \
-		test -f '${CCWS_BUILD_DIR_BASE}/${CCWS_BUILD_PROFILES_LAST}/compile_commands.json'; \
-		python3 '${CCWS_PRIMARY_BUILD_PROFILE_DIR}/ccws_filter_compile_commands.py' \
-			'${CCWS_BUILD_DIR_BASE}/${CCWS_BUILD_PROFILES_LAST}/compile_commands.json' \
+		mv '${CCWS_BUILD_DIR}/compile_commands.json' '${CCWS_BUILD_DIR}/compile_commands_raw.json' \
+		&& python3 '${CCWS_PRIMARY_BUILD_PROFILE_DIR}/ccws_filter_compile_commands.py' \
+			'${CCWS_BUILD_DIR}/compile_commands_raw.json' \
 			'${CCWS_BUILD_DIR}/compile_commands.json' \
 			\"\$${CCWS_STATIC_DIR_EXCEPTIONS}\""
 	bash -c "${SETUP_SCRIPT}; \

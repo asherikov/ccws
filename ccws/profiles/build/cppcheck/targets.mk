@@ -1,9 +1,9 @@
-bp_cppcheck_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFILE_must_exist
+bp_cppcheck_build: assert_multiple_valid_profiles_must_be_provided
 	rm -Rf "${CCWS_BUILD_DIR}/"
 	mkdir -p "${CCWS_BUILD_DIR}/"
+	${MAKE} bp_copy_compile_commands_tail
 	bash -c "${SETUP_SCRIPT}; \
 		echo '${SETUP_SCRIPT}'; \
-		echo \"<<\$${CCWS_STATIC_DIR_EXCEPTIONS}>>>\"; \
 		echo $${CCWS_STATIC_DIR_EXCEPTIONS} > '${CCWS_BUILD_DIR}/suppressions'"
 	sed -i -e 's/:/\n/g' '${CCWS_BUILD_DIR}/suppressions'
 	sed -i -e '/^$$/d' '${CCWS_BUILD_DIR}/suppressions'
@@ -22,7 +22,7 @@ bp_cppcheck_build: assert_BUILD_PROFILES_must_exist assert_SECONDARY_BUILD_PROFI
 			-i /usr \
 			\$${CCWS_CPPCHECK_EXCEPTIONS} \
 			--suppressions-list='${CCWS_BUILD_DIR}/suppressions' \
-			--project='${CCWS_BUILD_DIR_BASE}/${CCWS_SECONDARY_BUILD_PROFILE}/compile_commands.json' \
+			--project='${CCWS_BUILD_DIR}/compile_commands.json' \
 			3>&1 1>&2 2>&3 \
 			| tee --append '${CCWS_BUILD_DIR}/cppcheck.err' "
 	test ! -s '${CCWS_BUILD_DIR}/cppcheck.err' || exit 1

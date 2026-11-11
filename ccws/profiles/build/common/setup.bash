@@ -217,12 +217,30 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD
 ##########################################################################################
 # cmake
 #
-CCWS_CXX_STANDARD=17
+case "${OS_DISTRO_HOST}" in
+    focal|jammy|noble)
+        CCWS_CXX_STANDARD=17;;
+    resolute)
+        CCWS_CXX_STANDARD=20;;
+    *)
+        CCWS_CXX_STANDARD=17;;
+esac
 export CCWS_CXX_STANDARD
 
-# since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
-CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE:-"${CCWS_PRIMARY_BUILD_PROFILE_DIR}/toolchain.cmake"}
-export CMAKE_TOOLCHAIN_FILE
+if [ -z "${CMAKE_TOOLCHAIN_FILE}" ]
+then
+    for PROFILE in $(echo "${CCWS_BUILD_PROFILES}" | tr "," "\n")
+    do
+        TOOLCHAIN_FILE=${BUILD_PROFILES_DIR}/${PROFILE}/toolchain.cmake
+        if [ -f "${TOOLCHAIN_FILE}" ]
+        then
+            # since 3.21: https://cmake.org/cmake/help/latest/envvar/CMAKE_TOOLCHAIN_FILE.html
+            CMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}
+            export CMAKE_TOOLCHAIN_FILE
+            break
+        fi
+    done
+fi
 
 # since 3.12: https://cmake.org/cmake/help/latest/envvar/CMAKE_BUILD_PARALLEL_LEVEL.html
 if [ -n "${JOBS}" ]

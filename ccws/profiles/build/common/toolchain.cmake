@@ -91,8 +91,6 @@ if(CCWS_BUILD_CACHE_ENABLED)
     endif()
 endif()
 
-# TODO deprecated
-set(CCWS_BUILD_PROFILE  "$ENV{CCWS_PRIMARY_BUILD_PROFILE}" CACHE STRING "" FORCE)
 string(REPLACE "," ";" CCWS_BUILD_PROFILES_LIST "$ENV{CCWS_BUILD_PROFILES}")
 set(CCWS_BUILD_PROFILES "${CCWS_BUILD_PROFILES_LIST}" CACHE STRING "" FORCE)
 
@@ -138,7 +136,7 @@ if(${FIND_RESULT} EQUAL -1) # prevent command line growth on rebuild
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CCWS_COMMON_FLAGS}" CACHE STRING "" FORCE)
 endif ()
 set(CMAKE_CXX_STANDARD "$ENV{CCWS_CXX_STANDARD}")
-set(CCWS_CXX_FLAGS_COMMON "-std=c++$ENV{CCWS_CXX_STANDARD} -fstack-protector-strong" CACHE STRING "" FORCE)
+set(CCWS_CXX_FLAGS_COMMON "-fstack-protector-strong" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS_WARNINGS "-Wall -Wextra -Wshadow -Werror -Werror=return-type -Werror=pedantic -pedantic-errors -Wno-deprecated-declarations" CACHE STRING "" FORCE)
 set(CCWS_CXX_FLAGS "${CCWS_CXX_FLAGS_COMMON} ${CCWS_CXX_FLAGS_WARNINGS}" CACHE STRING "" FORCE)
 

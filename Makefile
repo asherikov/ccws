@@ -21,13 +21,10 @@ export ROS_DISTRO
 
 # build profiles (comma separated)
 BUILD_PROFILE?=reldebug
-# TODO DEPRECATED[use BUILD_PROFILE] used in build profile mixins and profile creation targets
-BASE_BUILD_PROFILE?=
 
-export CCWS_BUILD_PROFILES::=$(shell echo "${BUILD_PROFILE},${BASE_BUILD_PROFILE}" | sed -e 's/,,//g' -e 's/,$$//g')
+export CCWS_BUILD_PROFILES::=$(shell echo "${BUILD_PROFILE}" | sed -e 's/,$$//g')
 export CCWS_BUILD_PROFILES_ID::=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
 export CCWS_PRIMARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
-export CCWS_SECONDARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2 -d ',')
 export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',' | sed -e 's/,/ /g')
 
 
@@ -57,7 +54,6 @@ export CCWS_SYSROOT_DIR_BASE=${WORKSPACE_DIR}/sysroot/
 export CCWS_BUILD_DIR=${CCWS_BUILD_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 export CCWS_INSTALL_DIR=${CCWS_INSTALL_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 export CCWS_ARTIFACTS_DIR?=${CCWS_ARTIFACTS_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
-#export CCWS_SYSROOT_DIR=${CCWS_SYSROOT_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 
 export CCWS_TOOLS_DIR?=${CCWS_DIR}/tools
 export PATH::=${CCWS_TOOLS_DIR}/bin:${PATH}

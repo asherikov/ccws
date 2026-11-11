@@ -110,6 +110,11 @@ cross_install: cross_get
 	${MAKE} dep_install
 	${MAKE} cross_umount
 
+cross_dep_install:
+	${MAKE} cross_mount
+	${MAKE} dep_install
+	${MAKE} cross_umount
+
 cross_pack:
 	${MAKE} cross_umount
 	${MAKE} wswraptarget TARGET=private_bp_${CCWS_PRIMARY_BUILD_PROFILE}_pack
