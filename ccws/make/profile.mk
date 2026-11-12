@@ -6,7 +6,7 @@ assert_multiple_valid_profiles_must_be_provided: assert_BUILD_PROFILES_must_exis
 
 bp_new:
 	test ! -d "${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}"
-	cp -R "${CCWS_DIR}/profiles/template_build" "${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}"
+	cp -R "${CCWS_DIR}/examples/profile_build" "${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}"
 	${MAKE_QUIET} bp_new_substitute PLACEHOLDER=BUILD_PROFILE VALUE="${CCWS_PRIMARY_BUILD_PROFILE}"
 	${MAKE_QUIET} bp_new_substitute PLACEHOLDER=PARENT_BUILD_PROFILE VALUE="$${CCWS_BUILD_PROFILES_TAIL:-common}"
 
@@ -16,7 +16,7 @@ bp_new_substitute:
 
 ep_new:
 	test ! -d "${EXEC_PROFILES_DIR}/${EXEC_PROFILE}"
-	cp -R "${CCWS_DIR}/profies/template_exec" "${EXEC_PROFILES_DIR}/${EXEC_PROFILE}"
+	cp -R "${CCWS_DIR}/examples/profile_exec" "${EXEC_PROFILES_DIR}/${EXEC_PROFILE}"
 	find "${EXEC_PROFILES_DIR}/${EXEC_PROFILE}" -type f | xargs sed -i "s/@@EXEC_PROFILE@@/${EXEC_PROFILE}/g"
 
 bp_copy_compile_commands_tail:
