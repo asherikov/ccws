@@ -1,5 +1,5 @@
 # minor & annoying
-# -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments
+# -llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-ambiguous-smartptr-reset-call
 # do not enforce auto
 # -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type
 # do not enforce capitalization of literal suffix, e.g., x = 1u -> x = 1U.
@@ -101,7 +101,7 @@
 # not uncommon and no motivation
 # -misc-multiple-inheritance
 Checks: '*,
--llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,
+-llvm-include-order,-google-readability-todo,-readability-static-accessed-through-instance,-google-default-arguments,-readability-identifier-length,-readability-ambiguous-smartptr-reset-call,
 -modernize-use-trailing-return-type,-hicpp-use-auto,-modernize-use-auto,-modernize-use-trailing-return-type,
 -readability-uppercase-literal-suffix,-hicpp-uppercase-literal-suffix,
 -fuchsia-default-arguments,-fuchsia-default-arguments-calls,-fuchsia-default-arguments-declarations,
