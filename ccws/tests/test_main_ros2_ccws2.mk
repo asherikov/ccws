@@ -121,6 +121,7 @@ test_deb:
 	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
 	${MAKE} deb_lint PKG=examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
 	ls artifacts/*/*-dev.deb artifacts/*/*-dbg.deb
+	${MAKE} examples_rclcpp_minimal_subscriber BUILD_PROFILE=deb,notests,reldebug
 
 test_cmake_toolchain:
 	# workspace cmake toolchain

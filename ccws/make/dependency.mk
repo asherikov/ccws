@@ -1,5 +1,5 @@
-DEPLIST_DIR=${CCWS_BUILD_DIR}/.ccws/dependencies
-export DEPLIST_FILE=${DEPLIST_DIR}/deps_${PKG_ID}
+DEPLIST_DIR::=${CCWS_BUILD_DIR}/.ccws/dependencies
+export DEPLIST_FILE::=${DEPLIST_DIR}/deps_${PKG_ID}
 # rosdep cache is shared between build profiles; cross compilation profiles
 # override this path since they resolve dependencies for a different OS version
 export CCWS_ROSDEP_CACHE?=${CCWS_CACHE}/rosdep

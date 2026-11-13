@@ -101,6 +101,7 @@ test_deb:
 	${MAKE} staticoma BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
 	${MAKE} deb_lint PKG=staticoma BUILD_PROFILE=deb,reldebug CCWS_DEB_SUBPACKAGES=ON
 	ls artifacts/*/*-dev.deb artifacts/*/*-dbg.deb
+	${MAKE} staticoma BUILD_PROFILE=deb,notests,reldebug
 	# ---
 	# drop downloaded ROS packages, we are going to install binaries
 	${MAKE} wsclean

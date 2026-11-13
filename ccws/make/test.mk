@@ -1,6 +1,6 @@
 TEST_REGEX?=.*
-TEST_PKG_LIST=${CCWS_BUILD_DIR}/ccws.tests.packages
-TEST_PKG_LIST_EXCEPT=${CCWS_BUILD_DIR}/ccws.tests.exceptions.packages
+TEST_PKG_LIST::=${CCWS_BUILD_DIR}/ccws.tests.packages
+TEST_PKG_LIST_EXCEPT::=${CCWS_BUILD_DIR}/ccws.tests.exceptions.packages
 
 # CDash submission of test results, see ccws/tools/bin/ccws_cdash_submit.sh
 # (post-hoc: submits whatever test targets have left in the artifacts directory;

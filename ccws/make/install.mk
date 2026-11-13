@@ -2,8 +2,8 @@ APT_INSTALL?=env DEBIAN_FRONTEND=noninteractive apt --yes --no-install-recommend
 PIP3_INSTALL?=python3 -m pip install
 PIPX_INSTALL?=python3 -m pipx install
 PIPX_UNINSTALL?=python3 -m pipx uninstall
-export PIPX_BIN_DIR=${CCWS_TOOLS_DIR}/bin
-export PIPX_HOME=${CCWS_TOOLS_DIR}/pipx
+export PIPX_BIN_DIR::=${CCWS_TOOLS_DIR}/bin
+export PIPX_HOME::=${CCWS_TOOLS_DIR}/pipx
 
 
 install_ccws_deps:

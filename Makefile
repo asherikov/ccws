@@ -2,7 +2,7 @@ GNUMAKEFLAGS+= --no-print-directory
 export GNUMAKEFLAGS
 
 export CCWS_ROOT::=$(shell pwd)
-export CCWS_DIR=${CCWS_ROOT}/ccws
+export CCWS_DIR::=${CCWS_ROOT}/ccws
 
 -include ${CCWS_DIR}/make/config.mk
 
@@ -25,7 +25,7 @@ BUILD_PROFILE?=reldebug
 export CCWS_BUILD_PROFILES::=$(shell echo "${BUILD_PROFILE}" | sed -e 's/,$$//g')
 export CCWS_BUILD_PROFILES_ID::=$(shell echo "${CCWS_BUILD_PROFILES}" | sed -e 's/,/_/g')
 export CCWS_PRIMARY_BUILD_PROFILE::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -f 1 -d ',')
-export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',' | sed -e 's/,/ /g')
+export CCWS_BUILD_PROFILES_TAIL::=$(shell echo ${CCWS_BUILD_PROFILES} | cut -s -f 2- -d ',')
 
 
 # default package type
@@ -46,13 +46,13 @@ XDG_CACHE_HOME?=${HOME}/.cache
 export CCWS_CACHE?=${XDG_CACHE_HOME}/ccws
 export CCWS_SOURCE_DIR?=${WORKSPACE_SRC}
 
-export CCWS_BUILD_DIR_BASE=${WORKSPACE_DIR}/build/
-export CCWS_INSTALL_DIR_BASE=${WORKSPACE_DIR}/install/
-export CCWS_ARTIFACTS_DIR_BASE=${WORKSPACE_DIR}/artifacts/
-export CCWS_SYSROOT_DIR_BASE=${WORKSPACE_DIR}/sysroot/
+export CCWS_BUILD_DIR_BASE::=${WORKSPACE_DIR}/build/
+export CCWS_INSTALL_DIR_BASE::=${WORKSPACE_DIR}/install/
+export CCWS_ARTIFACTS_DIR_BASE::=${WORKSPACE_DIR}/artifacts/
+export CCWS_SYSROOT_DIR_BASE::=${WORKSPACE_DIR}/sysroot/
 
-export CCWS_BUILD_DIR=${CCWS_BUILD_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
-export CCWS_INSTALL_DIR=${CCWS_INSTALL_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
+export CCWS_BUILD_DIR::=${CCWS_BUILD_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
+export CCWS_INSTALL_DIR::=${CCWS_INSTALL_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 export CCWS_ARTIFACTS_DIR?=${CCWS_ARTIFACTS_DIR_BASE}/${CCWS_BUILD_PROFILES_ID}
 
 export CCWS_TOOLS_DIR?=${CCWS_DIR}/tools
@@ -72,15 +72,15 @@ export PKG_ID::=$(shell echo "${PKG}" | md5sum | cut -f 1 -d ' ')
 
 
 # helpers
-export BUILD_PROFILES_DIR=${CCWS_DIR}/profiles/build/
-export EXEC_PROFILES_DIR=${CCWS_DIR}/profiles/exec/
-MAKE_QUIET=${MAKE} --quiet --no-print-directory
-SETUP_SCRIPT?=source ${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}/setup.bash ${CCWS_BUILD_PROFILES_TAIL}
-CMD_PKG_NAME_LIST=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${CCWS_SOURCE_DIR}
-CMD_PKG_LIST=colcon --log-base /dev/null list --topological-order --base-paths ${CCWS_SOURCE_DIR}
-CMD_PKG_GRAPH=colcon graph --base-paths ${CCWS_SOURCE_DIR} --dot --dot-cluster
-CMD_WSHANDLER=wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
-CCWS_XARGS=xargs --no-run-if-empty -I {}
+export BUILD_PROFILES_DIR::=${CCWS_DIR}/profiles/build/
+export EXEC_PROFILES_DIR::=${CCWS_DIR}/profiles/exec/
+MAKE_QUIET::=${MAKE} --quiet --no-print-directory
+SETUP_SCRIPT?=$(shell echo "source '${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_PROFILE}/setup.bash' `echo ${CCWS_BUILD_PROFILES_TAIL} | sed -e 's/,/ /g'`")
+CMD_PKG_NAME_LIST::=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${CCWS_SOURCE_DIR}
+CMD_PKG_LIST::=colcon --log-base /dev/null list --topological-order --base-paths ${CCWS_SOURCE_DIR}
+CMD_PKG_GRAPH::=colcon graph --base-paths ${CCWS_SOURCE_DIR} --dot --dot-cluster
+CMD_WSHANDLER::=wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
+CCWS_XARGS::=xargs --no-run-if-empty -I {}
 
 
 ##

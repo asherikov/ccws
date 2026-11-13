@@ -217,15 +217,19 @@ export CCWS_PKG_FULL_NAME CCWS_INSTALL_DIR_HOST CCWS_INSTALL_DIR_BUILD
 ##########################################################################################
 # cmake
 #
-case "${OS_DISTRO_HOST}" in
-    focal|jammy|noble)
-        CCWS_CXX_STANDARD=17;;
-    resolute)
-        CCWS_CXX_STANDARD=20;;
-    *)
-        CCWS_CXX_STANDARD=17;;
-esac
-export CCWS_CXX_STANDARD
+
+if [ -z "${CCWS_CXX_STANDARD}" ]
+then
+    case "${OS_DISTRO_HOST}" in
+        focal|jammy|noble)
+            CCWS_CXX_STANDARD=17;;
+        resolute)
+            CCWS_CXX_STANDARD=20;;
+        *)
+            CCWS_CXX_STANDARD=17;;
+    esac
+    export CCWS_CXX_STANDARD
+fi
 
 if [ -z "${CMAKE_TOOLCHAIN_FILE}" ]
 then
