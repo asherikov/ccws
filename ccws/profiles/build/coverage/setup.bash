@@ -10,6 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${CCWS_COVERAGE_BASE_PROFILE}/setup.ba
 
 # enables coverage reports in test targets, see make/test.mk
 CCWS_COVERAGE=on
+export CCWS_COVERAGE
 # path patterns excluded from coverage reports
 CCWS_COVERAGE_EXCLUDE=${CCWS_COVERAGE_EXCLUDE:-3rdparty}
 export CCWS_COVERAGE_EXCLUDE

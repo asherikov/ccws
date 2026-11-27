@@ -34,6 +34,10 @@ on:
                 required: false
                 default: 1
                 type: number
+            wshandler_args:
+                required: false
+                default: ''
+                type: string
 
 
 defaults:
@@ -59,7 +63,8 @@ jobs:
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                     SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                     PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
-                    PKG_VERSION=${{ inputs.package_version }}
+                    PKG_VERSION=${{ inputs.package_version }} \
+                    WSHANDLER_ARGS="${{ inputs.wshandler_args }}"
             - run: make
 
     scan_build:
@@ -76,7 +81,8 @@ jobs:
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                     SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                     PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
-                    PKG_VERSION=${{ inputs.package_version }}
+                    PKG_VERSION=${{ inputs.package_version }} \
+                    WSHANDLER_ARGS="${{ inputs.wshandler_args }}"
                 sudo apt update
                 make dep_install
             - run: |
@@ -87,7 +93,7 @@ jobs:
         container: asherikov/ccws:${{ inputs.distro }}
         runs-on: ubuntu-latest
         env:
-            BUILD_PROFILE: reldebug
+            BUILD_PROFILE: coverage,reldebug
         steps:
             - run: sudo mkdir -p "${CCWS_CACHE}"
             - run: sudo chown -R ccws "${GITHUB_WORKSPACE}" "${CCWS_CACHE}"
@@ -96,7 +102,8 @@ jobs:
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                     SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                     PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
-                    PKG_VERSION=${{ inputs.package_version }}
+                    PKG_VERSION=${{ inputs.package_version }} \
+                    WSHANDLER_ARGS="${{ inputs.wshandler_args }}"
                 sudo apt update
                 make dep_install
             - run: |
@@ -120,7 +127,8 @@ jobs:
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                     SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                     PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
-                    PKG_VERSION=${{ inputs.package_version }}
+                    PKG_VERSION=${{ inputs.package_version }} \
+                    WSHANDLER_ARGS="${{ inputs.wshandler_args }}"
                 sudo apt update
                 make dep_install
             - run: |
@@ -144,7 +152,8 @@ jobs:
                     SOURCE_SPACE_REPO=${{ github.server_url }}/${{ inputs.workspace_github_repo }}.git \
                     SOURCE_SPACE_VERSION=${{ inputs.workspace_version }} \
                     PKG_REPO=${{ github.server_url }}/${{ inputs.package_github_repo }}.git \
-                    PKG_VERSION=${{ inputs.package_version }}
+                    PKG_VERSION=${{ inputs.package_version }} \
+                    WSHANDLER_ARGS="${{ inputs.wshandler_args }}"
                 sudo apt update
                 make dep_install
             - run: |

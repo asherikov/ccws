@@ -37,6 +37,7 @@ export VENDOR?=ccws
 # default new package license
 export LICENSE?=Apache 2.0
 export REPO_LIST_FORMAT?=repos
+export WSHANDLER_ARGS?=
 
 # Cache directory
 # 1. keep cache in ccws root directory, old behavior, restore using config.mk if necessary
@@ -79,7 +80,7 @@ SETUP_SCRIPT?=$(shell echo "source '${BUILD_PROFILES_DIR}/${CCWS_PRIMARY_BUILD_P
 CMD_PKG_NAME_LIST::=colcon --log-base /dev/null list --topological-order --names-only --base-paths ${CCWS_SOURCE_DIR}
 CMD_PKG_LIST::=colcon --log-base /dev/null list --topological-order --base-paths ${CCWS_SOURCE_DIR}
 CMD_PKG_GRAPH::=colcon graph --base-paths ${CCWS_SOURCE_DIR} --dot --dot-cluster
-CMD_WSHANDLER::=wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler
+CMD_WSHANDLER::=wshandler -r ${CCWS_SOURCE_DIR} -t ${REPO_LIST_FORMAT} -c ${CCWS_CACHE}/wshandler ${WSHANDLER_ARGS}
 CCWS_XARGS::=xargs --no-run-if-empty -I {}
 
 
