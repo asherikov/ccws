@@ -49,3 +49,6 @@ export ASAN_OPTIONS
 #
 # LD_PRELOAD should not be set here, but rather in an execution profile, e.g.,
 # see `address_sanitizer`.
+
+CCWS_TEST_WRAPPER="setarch $(uname -m) -R"
+export CCWS_TEST_WRAPPER

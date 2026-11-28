@@ -15,3 +15,6 @@ source "$(dirname "${BASH_SOURCE[0]}")/../${1:-"common"}/setup.bash" "${@:2}" ""
 TSAN_OPTIONS=second_deadlock_stack=1:suppressions=${BUILD_PROFILES_DIR}/thread_sanitizer/thread.supp:history_size=7:halt_on_error=1
 export TSAN_OPTIONS
 
+CCWS_TEST_WRAPPER="setarch $(uname -m) -R"
+export CCWS_TEST_WRAPPER
+

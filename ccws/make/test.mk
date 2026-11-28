@@ -1,4 +1,6 @@
 TEST_REGEX?=.*
+CCWS_TEST_WRAPPER?=
+export CCWS_TEST_WRAPPER
 TEST_PKG_LIST::=${CCWS_BUILD_DIR}/ccws.tests.packages
 TEST_PKG_LIST_EXCEPT::=${CCWS_BUILD_DIR}/ccws.tests.exceptions.packages
 
@@ -47,7 +49,7 @@ wsctest:
 test: assert_PKG_arg_must_be_specified
 	test ! -d '${CCWS_BUILD_DIR}/${PKG}' \
 		|| (bash -c "time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
-		colcon \
+		$${CCWS_TEST_WRAPPER} colcon \
 		--log-base \$${CCWS_LOG_DIR} \
 		test \
 		--event-handlers console_direct+ \
@@ -67,7 +69,7 @@ ctest: assert_PKG_arg_must_be_specified
 		"time ( source ${CCWS_ROOT}/setup.bash ${CCWS_BUILD_PROFILES} test ${EXEC_PROFILE}; \
 		mkdir -p \"\$${CCWS_ARTIFACTS_DIR}\"; \
 		cd \"\$${CCWS_BUILD_DIR}/{}\"; \
-		time ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_{}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
+		time $${CCWS_TEST_WRAPPER} ctest --schedule-random --output-on-failure --output-log \"\$${CCWS_ARTIFACTS_DIR}/ctest_{}.log\" -j ${JOBS} --tests-regex '${TEST_REGEX}')" \
 		&& ${MAKE} showtestresults || ${MAKE} showtestresults
 
 test_with_deps: assert_PKG_arg_must_be_specified
